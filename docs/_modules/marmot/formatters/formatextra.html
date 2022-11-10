@@ -184,10 +184,12 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
+
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
 <span class="kn">import</span> <span class="nn">marmot.utils.mconfig</span> <span class="k">as</span> <span class="nn">mconfig</span>
 <span class="kn">from</span> <span class="nn">marmot.formatters.formatbase</span> <span class="kn">import</span> <span class="n">Process</span>
+<span class="kn">from</span> <span class="nn">marmot.utils.error_handler</span> <span class="kn">import</span> <span class="n">PropertyNotFound</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;formatter.&quot;</span> <span class="o">+</span> <span class="vm">__name__</span><span class="p">)</span>
 
@@ -231,9 +233,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">EXTRA_MARMOT_PROPERTIES</span><span class="p">:</span>
             <span class="n">extra_properties</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">extra_prop_functions</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">EXTRA_MARMOT_PROPERTIES</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-            <span class="p">)</span>
+            <span class="n">extra_prop_functions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">EXTRA_MARMOT_PROPERTIES</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">prop_function_tup</span> <span class="ow">in</span> <span class="n">extra_prop_functions</span><span class="p">:</span>
                 <span class="n">prop_name</span><span class="p">,</span> <span class="n">prop_function</span> <span class="o">=</span> <span class="n">prop_function_tup</span>
                 <span class="n">extra_properties</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">prop_name</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop_function</span><span class="p">)))</span>
@@ -271,9 +271,7 @@
         <span class="s2">&quot;region_Unserved_Energy&quot;</span><span class="p">:</span> <span class="p">[</span>
             <span class="p">(</span><span class="s2">&quot;region_Cost_Unserved_Energy&quot;</span><span class="p">,</span> <span class="s2">&quot;cost_unserved_energy&quot;</span><span class="p">)</span>
         <span class="p">],</span>
-        <span class="s2">&quot;zone_Unserved_Energy&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s2">&quot;zone_Cost_Unserved_Energy&quot;</span><span class="p">,</span> <span class="s2">&quot;cost_unserved_energy&quot;</span><span class="p">)</span>
-        <span class="p">],</span>
+        <span class="s2">&quot;zone_Unserved_Energy&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;zone_Cost_Unserved_Energy&quot;</span><span class="p">,</span> <span class="s2">&quot;cost_unserved_energy&quot;</span><span class="p">)],</span>
         <span class="s2">&quot;region_Load&quot;</span><span class="p">:</span> <span class="p">[</span>
             <span class="p">(</span><span class="s2">&quot;region_Load_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">),</span>
             <span class="p">(</span><span class="s2">&quot;region_Demand&quot;</span><span class="p">,</span> <span class="s2">&quot;demand&quot;</span><span class="p">),</span>
@@ -282,9 +280,7 @@
             <span class="p">(</span><span class="s2">&quot;zone_Load_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">),</span>
             <span class="p">(</span><span class="s2">&quot;zone_Demand&quot;</span><span class="p">,</span> <span class="s2">&quot;demand&quot;</span><span class="p">),</span>
         <span class="p">],</span>
-        <span class="s2">&quot;generator_Pump_Load&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s2">&quot;generator_Pump_Load_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">)</span>
-        <span class="p">],</span>
+        <span class="s2">&quot;generator_Pump_Load&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;generator_Pump_Load_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">)],</span>
         <span class="s2">&quot;reserves_generators_Provision&quot;</span><span class="p">:</span> <span class="p">[</span>
             <span class="p">(</span><span class="s2">&quot;reserves_generators_Provision_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">)</span>
         <span class="p">],</span>
@@ -295,7 +291,6 @@
         <span class="s2">&quot;zone_Demand&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;zone_Demand_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">)],</span>
     <span class="p">}</span>
     <span class="sd">&quot;&quot;&quot;Dictionary of Extra custom properties that are created based off existing properties.&quot;&quot;&quot;</span>
-
 
 <div class="viewcode-block" id="ExtraPLEXOSProperties.generator_curtailment"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraPLEXOSProperties.html#marmot.formatters.formatextra.ExtraPLEXOSProperties.generator_curtailment">[docs]</a>    <span class="k">def</span> <span class="nf">generator_curtailment</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">timescale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;interval&quot;</span>
@@ -312,11 +307,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data_chunks</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">files_list</span><span class="p">:</span>
-            <span class="n">processed_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_processed_data</span><span class="p">(</span>
-                <span class="s2">&quot;generator&quot;</span><span class="p">,</span> <span class="s2">&quot;Available Capacity&quot;</span><span class="p">,</span> <span class="n">timescale</span><span class="p">,</span> <span class="n">file</span>
-            <span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">processed_data</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">processed_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_processed_data</span><span class="p">(</span>
+                    <span class="s2">&quot;generator&quot;</span><span class="p">,</span> <span class="s2">&quot;Available Capacity&quot;</span><span class="p">,</span> <span class="n">timescale</span><span class="p">,</span> <span class="n">file</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="n">PropertyNotFound</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                     <span class="s2">&quot;generator_Available_Capacity &amp; &quot;</span>
                     <span class="s2">&quot;generator_Generation are required &quot;</span>
@@ -329,9 +325,7 @@
         <span class="n">avail_gen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">combine_models</span><span class="p">(</span><span class="n">data_chunks</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">avail_gen</span> <span class="o">-</span> <span class="n">df</span></div>
 
-<div class="viewcode-block" id="ExtraPLEXOSProperties.demand"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraPLEXOSProperties.html#marmot.formatters.formatextra.ExtraPLEXOSProperties.demand">[docs]</a>    <span class="k">def</span> <span class="nf">demand</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">timescale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;interval&quot;</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="ExtraPLEXOSProperties.demand"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraPLEXOSProperties.html#marmot.formatters.formatextra.ExtraPLEXOSProperties.demand">[docs]</a>    <span class="k">def</span> <span class="nf">demand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">timescale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;interval&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Creates a region_Demand / zone_Demand property for PLEXOS result sets</span>
 
 <span class="sd">        PLEXOS includes generator_Pumped_Load in total load</span>
@@ -346,21 +340,48 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            pd.DataFrame: region_Demand / zone_Demand df</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">data_chunks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">pump_load_chunks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">batt_load_chunks</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">files_list</span><span class="p">:</span>
-            <span class="n">processed_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_processed_data</span><span class="p">(</span>
-                <span class="s2">&quot;generator&quot;</span><span class="p">,</span> <span class="s2">&quot;Pump Load&quot;</span><span class="p">,</span> <span class="n">timescale</span><span class="p">,</span> <span class="n">file</span>
-            <span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">pump_load_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_processed_data</span><span class="p">(</span>
+                    <span class="s2">&quot;generator&quot;</span><span class="p">,</span> <span class="s2">&quot;Pump Load&quot;</span><span class="p">,</span> <span class="n">timescale</span><span class="p">,</span> <span class="n">file</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="n">PropertyNotFound</span><span class="p">:</span>
+                <span class="n">pump_load_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">batt_load_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_processed_data</span><span class="p">(</span>
+                    <span class="s2">&quot;batterie&quot;</span><span class="p">,</span> <span class="s2">&quot;Load&quot;</span><span class="p">,</span> <span class="n">timescale</span><span class="p">,</span> <span class="n">file</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="n">PropertyNotFound</span><span class="p">:</span>
+                <span class="n">batt_load_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
 
-            <span class="k">if</span> <span class="n">processed_data</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Total Demand will equal Total Load&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">pump_load_data</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">batt_load_data</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s2">&quot;Total Demand will equal Total Load, No Storage objects found in results&quot;</span>
+                <span class="p">)</span>
                 <span class="k">return</span> <span class="n">df</span>
 
-            <span class="n">data_chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">processed_data</span><span class="p">)</span>
+            <span class="n">pump_load_chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pump_load_data</span><span class="p">)</span>
+            <span class="n">batt_load_chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">batt_load_data</span><span class="p">)</span>
 
-        <span class="n">pump_load</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">combine_models</span><span class="p">(</span><span class="n">data_chunks</span><span class="p">)</span>
-        <span class="n">pump_load</span> <span class="o">=</span> <span class="n">pump_load</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">df</span> <span class="o">-</span> <span class="n">pump_load</span></div>
+        <span class="k">if</span> <span class="n">pump_load_data</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">pump_load</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">combine_models</span><span class="p">(</span><span class="n">pump_load_chunks</span><span class="p">)</span>
+            <span class="n">pump_load</span> <span class="o">=</span> <span class="n">pump_load</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="n">dfpump</span> <span class="o">=</span> <span class="n">df</span> <span class="o">-</span> <span class="n">pump_load</span>
+            <span class="n">dfpump</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dfpump</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dfpump</span> <span class="o">=</span> <span class="n">df</span>
+
+        <span class="k">if</span> <span class="n">batt_load_data</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">batt_load</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">combine_models</span><span class="p">(</span><span class="n">batt_load_chunks</span><span class="p">)</span>
+            <span class="n">batt_load</span> <span class="o">=</span> <span class="n">batt_load</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="n">dfbattpump</span> <span class="o">=</span> <span class="n">dfpump</span> <span class="o">-</span> <span class="n">batt_load</span>
+            <span class="n">dfbattpump</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dfbattpump</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">dfpump</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dfbattpump</span> <span class="o">=</span> <span class="n">dfpump</span>
+
+        <span class="k">return</span> <span class="n">dfbattpump</span></div>
 
 <div class="viewcode-block" id="ExtraPLEXOSProperties.cost_unserved_energy"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraPLEXOSProperties.html#marmot.formatters.formatextra.ExtraPLEXOSProperties.cost_unserved_energy">[docs]</a>    <span class="k">def</span> <span class="nf">cost_unserved_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="o">**</span><span class="n">_</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Creates a region_Cost_Unserved_Energy property for PLEXOS result sets</span>
@@ -387,9 +408,7 @@
             <span class="p">),</span>
             <span class="p">(</span><span class="s2">&quot;generator_FOM_Cost&quot;</span><span class="p">,</span> <span class="s2">&quot;generator_fom_cost&quot;</span><span class="p">),</span>
         <span class="p">],</span>
-        <span class="s2">&quot;reserves_generators_Provision&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s2">&quot;reserve_Provision&quot;</span><span class="p">,</span> <span class="s2">&quot;reserve_provision&quot;</span><span class="p">)</span>
-        <span class="p">],</span>
+        <span class="s2">&quot;reserves_generators_Provision&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;reserve_Provision&quot;</span><span class="p">,</span> <span class="s2">&quot;reserve_provision&quot;</span><span class="p">)],</span>
         <span class="s2">&quot;region_Demand&quot;</span><span class="p">:</span> <span class="p">[</span>
             <span class="p">(</span><span class="s2">&quot;region_Demand_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">),</span>
             <span class="p">(</span><span class="s2">&quot;region_Load&quot;</span><span class="p">,</span> <span class="s2">&quot;region_total_load&quot;</span><span class="p">),</span>
@@ -397,14 +416,10 @@
         <span class="s2">&quot;generator_Curtailment&quot;</span><span class="p">:</span> <span class="p">[</span>
             <span class="p">(</span><span class="s2">&quot;generator_Curtailment_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">)</span>
         <span class="p">],</span>
-        <span class="s2">&quot;generator_Pump_Load&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s2">&quot;generator_Pump_Load_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">)</span>
-        <span class="p">],</span>
+        <span class="s2">&quot;generator_Pump_Load&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;generator_Pump_Load_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">)],</span>
         <span class="s2">&quot;region_Load&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;region_Load_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">)],</span>
-
     <span class="p">}</span>
     <span class="sd">&quot;&quot;&quot;Dictionary of Extra custom properties that are created based off existing properties.&quot;&quot;&quot;</span>
-
 
 <div class="viewcode-block" id="ExtraReEDSProperties.region_total_load"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraReEDSProperties.html#marmot.formatters.formatextra.ExtraReEDSProperties.region_total_load">[docs]</a>    <span class="k">def</span> <span class="nf">region_total_load</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">timescale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;year&quot;</span>
@@ -424,11 +439,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data_chunks</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">files_list</span><span class="p">:</span>
-            <span class="n">processed_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_processed_data</span><span class="p">(</span>
-                <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;stor_in&quot;</span><span class="p">,</span> <span class="s2">&quot;interval&quot;</span><span class="p">,</span> <span class="n">file</span>
-            <span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">processed_data</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">processed_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_processed_data</span><span class="p">(</span>
+                    <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;stor_in&quot;</span><span class="p">,</span> <span class="s2">&quot;interval&quot;</span><span class="p">,</span> <span class="n">file</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="n">PropertyNotFound</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;region_Load will equal region_Demand&quot;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">df</span>
 
@@ -439,7 +455,11 @@
             <span class="n">pump_load</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">annualize_property</span><span class="p">(</span><span class="n">pump_load</span><span class="p">)</span>
 
         <span class="n">all_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">pump_load</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
-        <span class="p">[</span><span class="n">all_col</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;sub-tech&quot;</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">,</span> <span class="s2">&quot;season&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">all_col</span><span class="p">]</span>
+        <span class="p">[</span>
+            <span class="n">all_col</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;sub-tech&quot;</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">,</span> <span class="s2">&quot;season&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">all_col</span>
+        <span class="p">]</span>
         <span class="n">pump_load</span> <span class="o">=</span> <span class="n">pump_load</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">all_col</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
         <span class="n">load</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">pump_load</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">all_col</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;outer&quot;</span><span class="p">)</span>
@@ -528,11 +548,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data_chunks</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">files_list</span><span class="p">:</span>
-            <span class="n">processed_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_processed_data</span><span class="p">(</span>
-                <span class="s2">&quot;generator&quot;</span><span class="p">,</span> <span class="s2">&quot;stor_charge&quot;</span><span class="p">,</span> <span class="s2">&quot;interval&quot;</span><span class="p">,</span> <span class="n">file</span>
-            <span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">processed_data</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">processed_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_processed_data</span><span class="p">(</span>
+                    <span class="s2">&quot;generator&quot;</span><span class="p">,</span> <span class="s2">&quot;stor_charge&quot;</span><span class="p">,</span> <span class="s2">&quot;interval&quot;</span><span class="p">,</span> <span class="n">file</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="n">PropertyNotFound</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;region_Load will equal region_Demand&quot;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">df</span>
 
@@ -543,7 +564,11 @@
             <span class="n">pump_load</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">annualize_property</span><span class="p">(</span><span class="n">pump_load</span><span class="p">)</span>
 
         <span class="n">all_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">pump_load</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
-        <span class="p">[</span><span class="n">all_col</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;gen_name&quot;</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">,</span> <span class="s2">&quot;season&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">all_col</span><span class="p">]</span>
+        <span class="p">[</span>
+            <span class="n">all_col</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;gen_name&quot;</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">,</span> <span class="s2">&quot;season&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">all_col</span>
+        <span class="p">]</span>
         <span class="n">pump_load</span> <span class="o">=</span> <span class="n">pump_load</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">all_col</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
         <span class="n">load</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">pump_load</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">all_col</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;outer&quot;</span><span class="p">)</span>
@@ -559,12 +584,14 @@
     <span class="n">EXTRA_MARMOT_PROPERTIES</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;generator_Generation&quot;</span><span class="p">:</span> <span class="p">[</span>
             <span class="p">(</span><span class="s2">&quot;generator_Curtailment&quot;</span><span class="p">,</span> <span class="s2">&quot;generator_curtailment&quot;</span><span class="p">),</span>
-            <span class="p">(</span><span class="s2">&quot;generator_Generation_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">)],</span>
+            <span class="p">(</span><span class="s2">&quot;generator_Generation_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">),</span>
+        <span class="p">],</span>
         <span class="s2">&quot;generator_Curtailment&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s2">&quot;generator_Curtailment_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">)],</span>
-        <span class="s2">&quot;region_Demand&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;region_Load&quot;</span><span class="p">,</span> <span class="s2">&quot;region_total_load&quot;</span><span class="p">)]}</span>
+            <span class="p">(</span><span class="s2">&quot;generator_Curtailment_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">)</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;region_Demand&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;region_Load&quot;</span><span class="p">,</span> <span class="s2">&quot;region_total_load&quot;</span><span class="p">)],</span>
+    <span class="p">}</span>
     <span class="sd">&quot;&quot;&quot;Dictionary of Extra custom properties that are created based off existing properties.&quot;&quot;&quot;</span>
-
 
 <div class="viewcode-block" id="ExtraSIIProperties.generator_curtailment"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraSIIProperties.html#marmot.formatters.formatextra.ExtraSIIProperties.generator_curtailment">[docs]</a>    <span class="k">def</span> <span class="nf">generator_curtailment</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">timescale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;interval&quot;</span>
@@ -582,11 +609,12 @@
 
         <span class="n">data_chunks</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">files_list</span><span class="p">:</span>
-            <span class="n">processed_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_processed_data</span><span class="p">(</span>
-                <span class="s2">&quot;generator&quot;</span><span class="p">,</span> <span class="s2">&quot;generation_availability&quot;</span><span class="p">,</span> <span class="n">timescale</span><span class="p">,</span> <span class="n">file</span>
-            <span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">processed_data</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">processed_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_processed_data</span><span class="p">(</span>
+                    <span class="s2">&quot;generator&quot;</span><span class="p">,</span> <span class="s2">&quot;generation_availability&quot;</span><span class="p">,</span> <span class="n">timescale</span><span class="p">,</span> <span class="n">file</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="n">PropertyNotFound</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                     <span class="s2">&quot;generation_availability &amp; &quot;</span>
                     <span class="s2">&quot;generation_actual are required &quot;</span>
@@ -599,10 +627,10 @@
         <span class="n">avail_gen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">combine_models</span><span class="p">(</span><span class="n">data_chunks</span><span class="p">)</span>
 
         <span class="c1"># Only use gens unique to avail_gen and filter generator_Generation df</span>
-        <span class="n">unique_gens</span> <span class="o">=</span> <span class="n">avail_gen</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s1">&#39;gen_name&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
-        <span class="n">map_gens</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">unique_gens</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;gen_name&#39;</span><span class="p">)</span>
+        <span class="n">unique_gens</span> <span class="o">=</span> <span class="n">avail_gen</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">&quot;gen_name&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+        <span class="n">map_gens</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">unique_gens</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;gen_name&quot;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">avail_gen</span> <span class="o">-</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">map_gens</span><span class="p">,:]</span></div>
+        <span class="k">return</span> <span class="n">avail_gen</span> <span class="o">-</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">map_gens</span><span class="p">,</span> <span class="p">:]</span></div>
 
 <div class="viewcode-block" id="ExtraSIIProperties.region_total_load"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraSIIProperties.html#marmot.formatters.formatextra.ExtraSIIProperties.region_total_load">[docs]</a>    <span class="k">def</span> <span class="nf">region_total_load</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">timescale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;interval&quot;</span>
@@ -622,11 +650,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data_chunks</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">files_list</span><span class="p">:</span>
-            <span class="n">processed_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_processed_data</span><span class="p">(</span>
-                <span class="s2">&quot;generator&quot;</span><span class="p">,</span> <span class="s2">&quot;pump&quot;</span><span class="p">,</span> <span class="n">timescale</span><span class="p">,</span> <span class="n">file</span>
-            <span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">processed_data</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">processed_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_processed_data</span><span class="p">(</span>
+                    <span class="s2">&quot;generator&quot;</span><span class="p">,</span> <span class="s2">&quot;pump&quot;</span><span class="p">,</span> <span class="n">timescale</span><span class="p">,</span> <span class="n">file</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="n">PropertyNotFound</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;region_Load will equal region_Demand&quot;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">df</span>
 

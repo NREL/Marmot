@@ -185,12 +185,13 @@
 <span class="sd">instead edit the values directly in the config.yml file once created. </span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">yaml</span>
-<span class="kn">import</span> <span class="nn">traceback</span>
-<span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">yaml</span>
+
 <span class="kn">from</span> <span class="nn">marmot.utils.definitions</span> <span class="kn">import</span> <span class="n">ROOT_DIR</span>
+<span class="kn">from</span> <span class="nn">marmot.utils.error_handler</span> <span class="kn">import</span> <span class="n">ConfigFileReadError</span>
 
 <span class="n">CONFIGFILE_NAME</span> <span class="o">=</span> <span class="s2">&quot;config.yml&quot;</span>
 <span class="n">configfile_path</span> <span class="o">=</span> <span class="n">ROOT_DIR</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">CONFIGFILE_NAME</span><span class="p">)</span>
@@ -228,7 +229,7 @@
 <span class="sd">        - ydimension: 4</span>
 
 <span class="sd">    - **axes_options:**</span>
-<span class="sd">        *Allows adjustment of the minimum and maximum tick marks on datetime x-axes and </span>
+<span class="sd">        *Allows adjustment of the minimum and maximum tick marks on datetime x-axes and</span>
 <span class="sd">        the number of decimal points to include on the y-axes. Also controls visibility of</span>
 <span class="sd">        figure spines and legend settings and position*</span>
 
@@ -251,7 +252,7 @@
 <span class="sd">    - **axes_label_options:**</span>
 <span class="sd">        *Controls whether x-axes labels are rotated from their default horizontal (0 degrees),</span>
 <span class="sd">        and at what number of labels to begin rotating to the specified rotation_angle.</span>
-<span class="sd">        By default, labels will begin rotating at 7 labels to an angle of 45 degrees from </span>
+<span class="sd">        By default, labels will begin rotating at 7 labels to an angle of 45 degrees from</span>
 <span class="sd">        0 degrees*</span>
 
 <span class="sd">        - rotate_x_labels: true</span>
@@ -259,15 +260,15 @@
 <span class="sd">        - rotation_angle: 45</span>
 
 <span class="sd">    - **plot_data:**</span>
-<span class="sd">        *Controls certain plot data settings. </span>
-<span class="sd">        `curtailment_property` source of Curtailment data. The code defaults to </span>
+<span class="sd">        *Controls certain plot data settings.</span>
+<span class="sd">        `curtailment_property` source of Curtailment data. The code defaults to</span>
 <span class="sd">        Marmot&#39;s calculated Curtailment property.</span>
-<span class="sd">        `plot_title_as_region` If True a the region/zone name will be added as a title to the </span>
+<span class="sd">        `plot_title_as_region` If True a the region/zone name will be added as a title to the</span>
 <span class="sd">        figure</span>
-<span class="sd">        `include_barplot_load_storage_charging_line` specifies whether to include the line </span>
-<span class="sd">        representing pumped load in total generation bar plots. </span>
-<span class="sd">        `include_timeseries_load_storage_charging_line` specifies whether to include the line </span>
-<span class="sd">        representing pumped load in timeseries generation plots </span>
+<span class="sd">        `include_barplot_load_storage_charging_line` specifies whether to include the line</span>
+<span class="sd">        representing pumped load in total generation bar plots.</span>
+<span class="sd">        `include_timeseries_load_storage_charging_line` specifies whether to include the line</span>
+<span class="sd">        representing pumped load in timeseries generation plots</span>
 <span class="sd">        `*_net_imports` settings controls whether net imports should be included in the figures*</span>
 
 <span class="sd">        - curtailment_property: Curtailment</span>
@@ -288,13 +289,13 @@
 <span class="sd">        .. versionadded:: 0.10.0</span>
 
 <span class="sd">    - **formatter_settings:**</span>
-<span class="sd">        *Formatter specific settings, VOLL value, </span>
-<span class="sd">        `skip_existing_properties` Toggles whether existing properties are skipped or </span>
-<span class="sd">        overwritten if they already contained in a previous processed_h5 file, the default is </span>
+<span class="sd">        *Formatter specific settings, VOLL value,</span>
+<span class="sd">        `skip_existing_properties` Toggles whether existing properties are skipped or</span>
+<span class="sd">        overwritten if they already contained in a previous processed_h5 file, the default is</span>
 <span class="sd">        to skip.</span>
-<span class="sd">        `append_plexos_block_name` Toggles whether to append PLEXOS block name to formatted </span>
+<span class="sd">        `append_plexos_block_name` Toggles whether to append PLEXOS block name to formatted</span>
 <span class="sd">        results e.g ST, MT, LT, PASA. Defaults to False.</span>
-<span class="sd">        `exclude_pumping_from_reeds_storage_gen` toggles whether to exclude pumping </span>
+<span class="sd">        `exclude_pumping_from_reeds_storage_gen` toggles whether to exclude pumping</span>
 <span class="sd">        (negative gen) from ReEDS storage generation. Defaults to True*</span>
 
 <span class="sd">        - VoLL: 10000</span>
@@ -316,11 +317,11 @@
 <span class="sd">        *Handles auto shifting of leap day, if required by your model. The default is false*</span>
 
 <span class="sd">    - **auto_convert_units:** true</span>
-<span class="sd">        *If True automatically converts Energy and Capacity units so that no number </span>
+<span class="sd">        *If True automatically converts Energy and Capacity units so that no number</span>
 <span class="sd">        exceeds 1000. All base units are in MW, and units can be converted to GW, TW and kW*</span>
 
 <span class="sd">    - **read_csv_properties:** false</span>
-<span class="sd">        *If True the Marmot plotter will attempt to read the required plot property from a </span>
+<span class="sd">        *If True the Marmot plotter will attempt to read the required plot property from a</span>
 <span class="sd">        csv file if it cannot be found in the formatted h5 file.</span>
 <span class="sd">        Format of data must adhere to the standard </span>
 <span class="sd">        Marmot formats for each data class, e.g generator, line etc.*</span>
@@ -437,8 +438,8 @@
 <span class="sd">            Defaults to None.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Union[dict, str, int, bool]: Returns the requested level or value from </span>
-<span class="sd">        the config file. Return type varies based on level accessed.</span>
+<span class="sd">        Union[dict, str, int, bool]: Returns the requested level or value from</span>
+<span class="sd">        the config file. Return type varies based on levesl accessed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">configfile_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ymlfile</span><span class="p">:</span>
         <span class="n">cfg</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">ymlfile</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
@@ -449,14 +450,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">value</span> <span class="o">=</span> <span class="n">cfg</span><span class="p">[</span><span class="n">top_level</span><span class="p">][</span><span class="n">second_level</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">value</span>
-    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-        <span class="nb">print</span><span class="p">(</span>
-            <span class="s2">&quot;Config file read Error: New config settings have been added which &quot;</span>
-            <span class="s2">&quot;require the config.yml to be re-created. &quot;</span>
-            <span class="s2">&quot;To continue delete config.yml located in the top directory level of Marmot&quot;</span>
-        <span class="p">)</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span></div>
+    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigFileReadError</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
 
 <div class="viewcode-block" id="edit_value"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.utils.mconfig.edit_value.html#marmot.utils.mconfig.edit_value">[docs]</a><span class="k">def</span> <span class="nf">edit_value</span><span class="p">(</span><span class="n">new_value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">top_level</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">second_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>

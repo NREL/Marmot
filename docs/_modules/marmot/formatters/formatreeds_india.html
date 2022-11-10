@@ -185,11 +185,12 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 
-<span class="kn">from</span> <span class="nn">marmot.formatters.formatreeds</span> <span class="kn">import</span> <span class="n">ProcessReEDS</span>
+<span class="kn">from</span> <span class="nn">marmot.formatters.formatbase</span> <span class="kn">import</span> <span class="n">ReEDSPropertyColumnsBase</span>
 <span class="kn">from</span> <span class="nn">marmot.formatters.formatextra</span> <span class="kn">import</span> <span class="n">ExtraReEDSIndiaProperties</span>
+<span class="kn">from</span> <span class="nn">marmot.formatters.formatreeds</span> <span class="kn">import</span> <span class="n">ProcessReEDS</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;formatter.&quot;</span> <span class="o">+</span> <span class="vm">__name__</span><span class="p">)</span>
 
@@ -228,20 +229,20 @@
 
 
 <div class="viewcode-block" id="ReEDSIndiaPropertyColumns"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatreeds_india.ReEDSIndiaPropertyColumns.html#marmot.formatters.formatreeds_india.ReEDSIndiaPropertyColumns">[docs]</a><span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">ReEDSIndiaPropertyColumns</span><span class="p">():</span>
+<span class="k">class</span> <span class="nc">ReEDSIndiaPropertyColumns</span><span class="p">(</span><span class="n">ReEDSPropertyColumnsBase</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;ReEDS India property column names&quot;&quot;&quot;</span>
 
     <span class="n">gen_out</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
         <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">]</span>
     <span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;ReEDS India &#39;gen_out&#39; property columns (Marmot generator_Generation property)&quot;&quot;&quot;</span>
-    <span class="n">resgen</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
-        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">]</span>
-    <span class="p">)</span>
+    <span class="n">resgen</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">])</span>
     <span class="sd">&quot;&quot;&quot;ReEDS India &#39;resgen&#39; property columns (Marmot generator_Generation_Annual property)&quot;&quot;&quot;</span>
     <span class="n">rescap</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">])</span>
     <span class="sd">&quot;&quot;&quot;ReEDS India &#39;rescap&#39; property columns (Marmot generator_Installed_Capacity property)&quot;&quot;&quot;</span>
-    <span class="n">curt_out</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span><span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">])</span>
+    <span class="n">curt_out</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;ReEDS India &#39;curt_out&#39; property columns (Marmot generator_Curtailment property)&quot;&quot;&quot;</span>
     <span class="n">load_mw</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">])</span>
     <span class="sd">&quot;&quot;&quot;ReEDS India &#39;load_mw&#39; property columns (Marmot region_Demand property)&quot;&quot;&quot;</span>
@@ -254,7 +255,11 @@
             <span class="s2">&quot;h&quot;</span><span class="p">,</span>
             <span class="s2">&quot;year&quot;</span><span class="p">,</span>
             <span class="s2">&quot;category&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;Value&quot;</span><span class="p">,</span><span class="s2">&quot;marginal&quot;</span><span class="p">,</span> <span class="s2">&quot;lower&quot;</span><span class="p">,</span> <span class="s2">&quot;upper&quot;</span><span class="p">,</span> <span class="s2">&quot;scale&quot;</span>
+            <span class="s2">&quot;Value&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;marginal&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;lower&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;upper&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;scale&quot;</span><span class="p">,</span>
         <span class="p">]</span>
     <span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;ReEDS India &#39;FLOW&#39; property columns (Marmot line_Flow property)&quot;&quot;&quot;</span>
@@ -264,7 +269,11 @@
             <span class="s2">&quot;region_to&quot;</span><span class="p">,</span>
             <span class="s2">&quot;category&quot;</span><span class="p">,</span>
             <span class="s2">&quot;year&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;Value&quot;</span><span class="p">,</span><span class="s2">&quot;marginal&quot;</span><span class="p">,</span> <span class="s2">&quot;lower&quot;</span><span class="p">,</span> <span class="s2">&quot;upper&quot;</span><span class="p">,</span> <span class="s2">&quot;scale&quot;</span>
+            <span class="s2">&quot;Value&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;marginal&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;lower&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;upper&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;scale&quot;</span><span class="p">,</span>
         <span class="p">]</span>
     <span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;ReEDS India &#39;CAPTRAN&#39; property columns (Marmot line_Import_Limit property)&quot;&quot;&quot;</span>
@@ -273,7 +282,19 @@
     <span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;ReEDS India &#39;stor_charge&#39; property columns (Marmot generator_Pumped_Load property)&quot;&quot;&quot;</span>
     <span class="n">OPRES</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
-        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;parent&quot;</span><span class="p">,</span> <span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;sub-tech&quot;</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">,</span> <span class="s2">&quot;marginal&quot;</span><span class="p">,</span> <span class="s2">&quot;lower&quot;</span><span class="p">,</span> <span class="s2">&quot;upper&quot;</span><span class="p">,</span> <span class="s2">&quot;scale&quot;</span><span class="p">]</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">&quot;parent&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;tech&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;sub-tech&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;region&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;h&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;year&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Value&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;marginal&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;lower&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;upper&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;scale&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
     <span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;ReEDS India &#39;OPRES&#39; property columns (Marmot reserves_generators_Provision property)&quot;&quot;&quot;</span></div>
 </pre></div>

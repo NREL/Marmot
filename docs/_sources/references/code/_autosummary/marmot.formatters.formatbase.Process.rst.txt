@@ -27,7 +27,6 @@ marmot.formatters.formatbase.Process
         ~Process.combine_models
         ~Process.get_processed_data
         ~Process.output_metadata
-        ~Process.report_prop_error
    
    
 

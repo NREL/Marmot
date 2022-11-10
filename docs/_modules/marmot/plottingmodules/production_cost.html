@@ -187,43 +187,75 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="kn">import</span> <span class="nn">marmot.utils.mconfig</span> <span class="k">as</span> <span class="nn">mconfig</span>
-<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_library</span> <span class="kn">import</span> <span class="n">PlotLibrary</span>
-<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_data_helper</span> <span class="kn">import</span> <span class="n">MPlotDataHelper</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_data_helper</span> <span class="kn">import</span> <span class="n">PlotDataStoreAndProcessor</span>
 <span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_exceptions</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">MissingInputData</span><span class="p">,</span>
     <span class="n">MissingZoneData</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_library</span> <span class="kn">import</span> <span class="n">PlotLibrary</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.styles</span> <span class="kn">import</span> <span class="n">GeneratorColorDict</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.timeseries_modifiers</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">set_timestamp_date_range</span><span class="p">,</span>
+<span class="p">)</span>
 
-<span class="n">plot_data_settings</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;plot_data&quot;</span><span class="p">)</span>
+<span class="n">plot_data_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;plot_data&quot;</span><span class="p">)</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;plotter.&quot;</span> <span class="o">+</span> <span class="vm">__name__</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="SystemCosts"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.production_cost.SystemCosts.html#marmot.plottingmodules.production_cost.SystemCosts">[docs]</a><span class="k">class</span> <span class="nc">SystemCosts</span><span class="p">(</span><span class="n">MPlotDataHelper</span><span class="p">):</span>
+<div class="viewcode-block" id="SystemCosts"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.production_cost.SystemCosts.html#marmot.plottingmodules.production_cost.SystemCosts">[docs]</a><span class="k">class</span> <span class="nc">SystemCosts</span><span class="p">(</span><span class="n">PlotDataStoreAndProcessor</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;System operating cost plots.</span>
 
 <span class="sd">    The production_cost.py module contains methods that are</span>
 <span class="sd">    related related to the cost of operating the power system.</span>
 
-<span class="sd">    SystemCosts inherits from the MPlotDataHelper class to assist</span>
+<span class="sd">    SystemCosts inherits from the PlotDataStoreAndProcessor class to assist</span>
 <span class="sd">    in creating figures.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">Zones</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">Scenarios</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">AGG_BY</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">ordered_gen</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">marmot_solutions_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="n">marmot_color_dict</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">custom_xticklabels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
-<span class="sd">            *args</span>
-<span class="sd">                Minimum required parameters passed to the MPlotDataHelper </span>
-<span class="sd">                class.</span>
-<span class="sd">            **kwargs</span>
-<span class="sd">                These parameters will be passed to the MPlotDataHelper </span>
-<span class="sd">                class.</span>
+<span class="sd">            Zones (List[str]): List of regions/zones to plot.</span>
+<span class="sd">            Scenarios (List[str]): List of scenarios to plot.</span>
+<span class="sd">            AGG_BY (str): Informs region type to aggregate by when creating plots.</span>
+<span class="sd">            ordered_gen (List[str]): Ordered list of generator technologies to plot,</span>
+<span class="sd">                order defines the generator technology position in stacked bar and area plots.</span>
+<span class="sd">            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.</span>
+<span class="sd">            marmot_color_dict (dict, optional): Dictionary of colors to use for</span>
+<span class="sd">                generation technologies.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            custom_xticklabels (List[str], optional): List of custom x labels to</span>
+<span class="sd">                apply to barplots. Values will overwite existing ones.</span>
+<span class="sd">                Defaults to None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Instantiation of MPlotHelperFunctions</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1"># Instantiation of PlotDataStoreAndProcessor</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">AGG_BY</span><span class="p">,</span> <span class="n">ordered_gen</span><span class="p">,</span> <span class="n">marmot_solutions_folder</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Zones</span> <span class="o">=</span> <span class="n">Zones</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span> <span class="o">=</span> <span class="n">Scenarios</span>
+        <span class="k">if</span> <span class="n">marmot_color_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span> <span class="o">=</span> <span class="n">GeneratorColorDict</span><span class="o">.</span><span class="n">set_random_colors</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">color_dict</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span> <span class="o">=</span> <span class="n">marmot_color_dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">custom_xticklabels</span> <span class="o">=</span> <span class="n">custom_xticklabels</span>
 
 <div class="viewcode-block" id="SystemCosts.prod_cost"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.production_cost.SystemCosts.html#marmot.plottingmodules.production_cost.SystemCosts.prod_cost">[docs]</a>    <span class="k">def</span> <span class="nf">prod_cost</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -247,8 +279,8 @@
 <span class="sd">            custom_data_file_path (Path, optional): Path to custom data file to concat extra</span>
 <span class="sd">                data. Index and column format should be consistent with output data csv.</span>
 <span class="sd">            scenario_groupby (str, optional): Specifies whether to group data by Scenario</span>
-<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified </span>
-<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when </span>
+<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified</span>
+<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when</span>
 <span class="sd">                plotting data which covers multiple years such as ReEDS.</span>
 <span class="sd">                Defaults to Scenario.</span>
 
@@ -259,8 +291,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">outputs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and </span>
-        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required, </span>
+        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and</span>
+        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required,</span>
         <span class="c1"># scenarios must be a list.</span>
         <span class="n">properties</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;generator_Total_Generation_Cost&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
@@ -269,7 +301,7 @@
             <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;generator_Installed_Capacity&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
         <span class="p">]</span>
 
-        <span class="c1"># Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary</span>
+        <span class="c1"># Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary</span>
         <span class="c1"># with all required properties, returns a 1 if required data is missing</span>
         <span class="n">check_input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_formatted_data</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
 
@@ -413,8 +445,8 @@
 <span class="sd">            custom_data_file_path (Path, optional): Path to custom data file to concat extra</span>
 <span class="sd">                data. Index and column format should be consistent with output data csv.</span>
 <span class="sd">            scenario_groupby (str, optional): Specifies whether to group data by Scenario</span>
-<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified </span>
-<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when </span>
+<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified</span>
+<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when</span>
 <span class="sd">                plotting data which covers multiple years such as ReEDS.</span>
 <span class="sd">                Defaults to Scenario.</span>
 
@@ -430,15 +462,15 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">agg</span> <span class="o">=</span> <span class="s2">&quot;region&quot;</span>
 
-        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and </span>
-        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required, </span>
+        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and</span>
+        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required,</span>
         <span class="c1"># scenarios must be a list.</span>
         <span class="n">properties</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;generator_Total_Generation_Cost&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
             <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">agg</span><span class="si">}</span><span class="s2">_Cost_Unserved_Energy&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
         <span class="p">]</span>
 
-        <span class="c1"># Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary</span>
+        <span class="c1"># Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary</span>
         <span class="c1"># with all required properties, returns a 1 if required data is missing</span>
         <span class="n">check_input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_formatted_data</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
 
@@ -479,7 +511,7 @@
                 <span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">start_date_range</span><span class="p">):</span>
-                    <span class="n">gen_cost</span><span class="p">,</span> <span class="n">cost_unserved_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_timestamp_date_range</span><span class="p">(</span>
+                    <span class="n">gen_cost</span><span class="p">,</span> <span class="n">cost_unserved_energy</span> <span class="o">=</span> <span class="n">set_timestamp_date_range</span><span class="p">(</span>
                         <span class="p">[</span><span class="n">gen_cost</span><span class="p">,</span> <span class="n">cost_unserved_energy</span><span class="p">],</span>
                         <span class="n">start_date_range</span><span class="p">,</span>
                         <span class="n">end_date_range</span><span class="p">,</span>
@@ -601,8 +633,8 @@
 <span class="sd">            custom_data_file_path (Path, optional): Path to custom data file to concat extra</span>
 <span class="sd">                data. Index and column format should be consistent with output data csv.</span>
 <span class="sd">            scenario_groupby (str, optional): Specifies whether to group data by Scenario</span>
-<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified </span>
-<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when </span>
+<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified</span>
+<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when</span>
 <span class="sd">                plotting data which covers multiple years such as ReEDS.</span>
 <span class="sd">                Defaults to Scenario.</span>
 
@@ -613,8 +645,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">outputs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and </span>
-        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required, </span>
+        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and</span>
+        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required,</span>
         <span class="c1"># scenarios must be a list.</span>
         <span class="n">properties</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;generator_FOM_Cost&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
@@ -625,7 +657,7 @@
             <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;generator_Emissions_Cost&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
         <span class="p">]</span>
 
-        <span class="c1"># Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary</span>
+        <span class="c1"># Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary</span>
         <span class="c1"># with all required properties, returns a 1 if required data is missing</span>
         <span class="n">check_input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_formatted_data</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
 
@@ -644,10 +676,7 @@
                 <span class="k">for</span> <span class="n">prop_name</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
                     <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">prop_name</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">scenario</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-                        <span class="n">date_index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span>
-                            <span class="n">start</span><span class="o">=</span><span class="s2">&quot;2010-01-01&quot;</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;timestamp&quot;</span>
-                        <span class="p">)</span>
-                        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="n">date_index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">])</span>
+                        <span class="k">continue</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="k">try</span><span class="p">:</span>
                             <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">zone_input</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span>
@@ -674,7 +703,7 @@
                 <span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">start_date_range</span><span class="p">):</span>
-                    <span class="n">detailed_gen_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_timestamp_date_range</span><span class="p">(</span>
+                    <span class="n">detailed_gen_cost</span> <span class="o">=</span> <span class="n">set_timestamp_date_range</span><span class="p">(</span>
                         <span class="n">detailed_gen_cost</span><span class="p">,</span> <span class="n">start_date_range</span><span class="p">,</span> <span class="n">end_date_range</span>
                     <span class="p">)</span>
                     <span class="k">if</span> <span class="n">detailed_gen_cost</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -796,8 +825,8 @@
 <span class="sd">            custom_data_file_path (Path, optional): Path to custom data file to concat extra</span>
 <span class="sd">                data. Index and column format should be consistent with output data csv.</span>
 <span class="sd">            scenario_groupby (str, optional): Specifies whether to group data by Scenario</span>
-<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified </span>
-<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when </span>
+<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified</span>
+<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when</span>
 <span class="sd">                plotting data which covers multiple years such as ReEDS.</span>
 <span class="sd">                Defaults to Scenario.</span>
 
@@ -809,12 +838,12 @@
         <span class="c1"># Create Dictionary to hold Datframes for each scenario</span>
         <span class="n">outputs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and </span>
-        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required, </span>
+        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and</span>
+        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required,</span>
         <span class="c1"># scenarios must be a list.</span>
         <span class="n">properties</span> <span class="o">=</span> <span class="p">[(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;generator_Total_Generation_Cost&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">)]</span>
 
-        <span class="c1"># Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary</span>
+        <span class="c1"># Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary</span>
         <span class="c1"># with all required properties, returns a 1 if required data is missing</span>
         <span class="n">check_input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_formatted_data</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
 
@@ -841,7 +870,7 @@
                 <span class="n">gen_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_process_gen_inputs</span><span class="p">(</span><span class="n">gen_cost</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">start_date_range</span><span class="p">):</span>
-                    <span class="n">gen_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_timestamp_date_range</span><span class="p">(</span>
+                    <span class="n">gen_cost</span> <span class="o">=</span> <span class="n">set_timestamp_date_range</span><span class="p">(</span>
                         <span class="n">gen_cost</span><span class="p">,</span> <span class="n">start_date_range</span><span class="p">,</span> <span class="n">end_date_range</span>
                     <span class="p">)</span>
                     <span class="k">if</span> <span class="n">gen_cost</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -854,7 +883,7 @@
                     <span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
                 <span class="p">)</span>
 
-            <span class="c1"># Checks if gen_cost_out_chunks contains data, </span>
+            <span class="c1"># Checks if gen_cost_out_chunks contains data,</span>
             <span class="c1"># if not skips zone and does not return a plot</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">gen_cost_out_chunks</span><span class="p">:</span>
                 <span class="n">outputs</span><span class="p">[</span><span class="n">zone_input</span><span class="p">]</span> <span class="o">=</span> <span class="n">MissingZoneData</span><span class="p">()</span>
@@ -870,7 +899,7 @@
                 <span class="p">:,</span> <span class="p">(</span><span class="n">total_systems_cost_out</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
             <span class="p">]</span>
 
-            <span class="c1"># Checks if total_systems_cost_out contains data, </span>
+            <span class="c1"># Checks if total_systems_cost_out contains data,</span>
             <span class="c1"># if not skips zone and does not return a plot</span>
             <span class="k">if</span> <span class="n">total_systems_cost_out</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
                 <span class="n">outputs</span><span class="p">[</span><span class="n">zone_input</span><span class="p">]</span> <span class="o">=</span> <span class="n">MissingZoneData</span><span class="p">()</span>
@@ -894,7 +923,7 @@
 
             <span class="n">mplt</span><span class="o">.</span><span class="n">barplot</span><span class="p">(</span>
                 <span class="n">total_systems_cost_out</span><span class="p">,</span>
-                <span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span><span class="p">,</span>
                 <span class="n">stacked</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">custom_tick_labels</span><span class="o">=</span><span class="n">tick_labels</span><span class="p">,</span>
             <span class="p">)</span>
@@ -931,8 +960,8 @@
 <span class="sd">            end_date_range (str, optional): Defines a end date at which to represent data to.</span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            scenario_groupby (str, optional): Specifies whether to group data by Scenario</span>
-<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified </span>
-<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when </span>
+<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified</span>
+<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when</span>
 <span class="sd">                plotting data which covers multiple years such as ReEDS.</span>
 <span class="sd">                Defaults to Scenario.</span>
 
@@ -948,15 +977,15 @@
 
         <span class="n">outputs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and </span>
-        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required, </span>
+        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and</span>
+        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required,</span>
         <span class="c1"># scenarios must be a list.</span>
         <span class="n">properties</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;generator_Total_Generation_Cost&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
             <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">agg</span><span class="si">}</span><span class="s2">_Cost_Unserved_Energy&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
         <span class="p">]</span>
 
-        <span class="c1"># Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary</span>
+        <span class="c1"># Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary</span>
         <span class="c1"># with all required properties, returns a 1 if required data is missing</span>
         <span class="n">check_input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_formatted_data</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
 
@@ -997,7 +1026,7 @@
                 <span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">start_date_range</span><span class="p">):</span>
-                    <span class="n">gen_cost</span><span class="p">,</span> <span class="n">cost_unserved_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_timestamp_date_range</span><span class="p">(</span>
+                    <span class="n">gen_cost</span><span class="p">,</span> <span class="n">cost_unserved_energy</span> <span class="o">=</span> <span class="n">set_timestamp_date_range</span><span class="p">(</span>
                         <span class="p">[</span><span class="n">gen_cost</span><span class="p">,</span> <span class="n">cost_unserved_energy</span><span class="p">],</span>
                         <span class="n">start_date_range</span><span class="p">,</span>
                         <span class="n">end_date_range</span><span class="p">,</span>
@@ -1086,8 +1115,8 @@
 <span class="sd">            end_date_range (str, optional): Defines a end date at which to represent data to.</span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            scenario_groupby (str, optional): Specifies whether to group data by Scenario</span>
-<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified </span>
-<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when </span>
+<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified</span>
+<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when</span>
 <span class="sd">                plotting data which covers multiple years such as ReEDS.</span>
 <span class="sd">                Defaults to Scenario.</span>
 
@@ -1099,12 +1128,12 @@
         <span class="c1"># Create Dictionary to hold Datframes for each scenario</span>
         <span class="n">outputs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and </span>
-        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required, </span>
+        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and</span>
+        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required,</span>
         <span class="c1"># scenarios must be a list.</span>
         <span class="n">properties</span> <span class="o">=</span> <span class="p">[(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;generator_Total_Generation_Cost&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">)]</span>
 
-        <span class="c1"># Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary</span>
+        <span class="c1"># Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary</span>
         <span class="c1"># with all required properties, returns a 1 if required data is missing</span>
         <span class="n">check_input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_formatted_data</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
         <span class="c1"># Checks if all data required by plot is available, if 1 in list required data is missing</span>
@@ -1129,7 +1158,7 @@
                 <span class="n">gen_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_process_gen_inputs</span><span class="p">(</span><span class="n">gen_cost</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">start_date_range</span><span class="p">):</span>
-                    <span class="n">gen_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_timestamp_date_range</span><span class="p">(</span>
+                    <span class="n">gen_cost</span> <span class="o">=</span> <span class="n">set_timestamp_date_range</span><span class="p">(</span>
                         <span class="n">gen_cost</span><span class="p">,</span> <span class="n">start_date_range</span><span class="p">,</span> <span class="n">end_date_range</span>
                     <span class="p">)</span>
                     <span class="k">if</span> <span class="n">gen_cost</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -1142,7 +1171,7 @@
                     <span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
                 <span class="p">)</span>
 
-            <span class="c1"># Checks if gen_cost_out_chunks contains data, </span>
+            <span class="c1"># Checks if gen_cost_out_chunks contains data,</span>
             <span class="c1"># if not skips zone and does not return a plot</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">gen_cost_out_chunks</span><span class="p">:</span>
                 <span class="n">outputs</span><span class="p">[</span><span class="n">zone_input</span><span class="p">]</span> <span class="o">=</span> <span class="n">MissingZoneData</span><span class="p">()</span>
@@ -1169,7 +1198,7 @@
                 <span class="k">continue</span>
             <span class="n">total_systems_cost_out</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">scen_base</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Drop base entry</span>
 
-            <span class="c1"># Checks if total_systems_cost_out contains data, </span>
+            <span class="c1"># Checks if total_systems_cost_out contains data,</span>
             <span class="c1"># if not skips zone and does not return a plot</span>
             <span class="k">if</span> <span class="n">total_systems_cost_out</span><span class="o">.</span><span class="n">empty</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
                 <span class="n">outputs</span><span class="p">[</span><span class="n">zone_input</span><span class="p">]</span> <span class="o">=</span> <span class="n">MissingZoneData</span><span class="p">()</span>
@@ -1182,7 +1211,7 @@
             <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">mplt</span><span class="o">.</span><span class="n">get_figure</span><span class="p">()</span>
 
             <span class="n">mplt</span><span class="o">.</span><span class="n">barplot</span><span class="p">(</span>
-                <span class="n">total_systems_cost_out</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span><span class="p">,</span> <span class="n">stacked</span><span class="o">=</span><span class="kc">True</span>
+                <span class="n">total_systems_cost_out</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span><span class="p">,</span> <span class="n">stacked</span><span class="o">=</span><span class="kc">True</span>
             <span class="p">)</span>
 
             <span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -1208,7 +1237,7 @@
         <span class="n">scenario_groupby</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Scenario&quot;</span><span class="p">,</span>
         <span class="o">**</span><span class="n">_</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Creates stacked barplots of Total Generation Cost by by cost type </span>
+        <span class="sd">&quot;&quot;&quot;Creates stacked barplots of Total Generation Cost by by cost type</span>
 <span class="sd">        (fuel, emission, start cost etc.) relative to a base scenario.</span>
 
 <span class="sd">        Barplots show the change in total total generation cost relative to a base scenario.</span>
@@ -1221,8 +1250,8 @@
 <span class="sd">            end_date_range (str, optional): Defines a end date at which to represent data to.</span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            scenario_groupby (str, optional): Specifies whether to group data by Scenario</span>
-<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified </span>
-<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when </span>
+<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified</span>
+<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when</span>
 <span class="sd">                plotting data which covers multiple years such as ReEDS.</span>
 <span class="sd">                Defaults to Scenario.</span>
 
@@ -1233,8 +1262,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">outputs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and </span>
-        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required, </span>
+        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and</span>
+        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required,</span>
         <span class="c1"># scenarios must be a list.</span>
         <span class="n">properties</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;generator_FOM_Cost&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
@@ -1245,7 +1274,7 @@
             <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;generator_Emissions_Cost&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
         <span class="p">]</span>
 
-        <span class="c1"># Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary</span>
+        <span class="c1"># Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary</span>
         <span class="c1"># with all required properties, returns a 1 if required data is missing</span>
         <span class="n">check_input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_formatted_data</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
 
@@ -1264,10 +1293,7 @@
                 <span class="k">for</span> <span class="n">prop_name</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
                     <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">prop_name</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">scenario</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-                        <span class="n">date_index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span>
-                            <span class="n">start</span><span class="o">=</span><span class="s2">&quot;2010-01-01&quot;</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;timestamp&quot;</span>
-                        <span class="p">)</span>
-                        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="n">date_index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">])</span>
+                        <span class="k">continue</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="k">try</span><span class="p">:</span>
                             <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">zone_input</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span>
@@ -1294,7 +1320,7 @@
                 <span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">start_date_range</span><span class="p">):</span>
-                    <span class="n">detailed_gen_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_timestamp_date_range</span><span class="p">(</span>
+                    <span class="n">detailed_gen_cost</span> <span class="o">=</span> <span class="n">set_timestamp_date_range</span><span class="p">(</span>
                         <span class="n">detailed_gen_cost</span><span class="p">,</span> <span class="n">start_date_range</span><span class="p">,</span> <span class="n">end_date_range</span>
                     <span class="p">)</span>
                     <span class="k">if</span> <span class="n">detailed_gen_cost</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -1307,7 +1333,7 @@
                     <span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
                 <span class="p">)</span>
 
-            <span class="c1"># Checks if gen_cost_out_chunks contains data, if not skips zone and does </span>
+            <span class="c1"># Checks if gen_cost_out_chunks contains data, if not skips zone and does</span>
             <span class="c1"># not return a plot</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">gen_cost_out_chunks</span><span class="p">:</span>
                 <span class="n">outputs</span><span class="p">[</span><span class="n">zone_input</span><span class="p">]</span> <span class="o">=</span> <span class="n">MissingZoneData</span><span class="p">()</span>
@@ -1340,7 +1366,7 @@
                 <span class="p">:,</span> <span class="p">(</span><span class="n">detailed_gen_cost_out</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
             <span class="p">]</span>
 
-            <span class="c1"># Checks if detailed_gen_cost_out contains data, </span>
+            <span class="c1"># Checks if detailed_gen_cost_out contains data,</span>
             <span class="c1"># if not skips zone and does not return a plot</span>
             <span class="k">if</span> <span class="n">detailed_gen_cost_out</span><span class="o">.</span><span class="n">empty</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
                 <span class="n">outputs</span><span class="p">[</span><span class="n">zone_input</span><span class="p">]</span> <span class="o">=</span> <span class="n">MissingZoneData</span><span class="p">()</span>

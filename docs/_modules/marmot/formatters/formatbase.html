@@ -183,11 +183,14 @@
 <span class="sd">@author: Daniel Levie</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">marmot.utils.error_handler</span> <span class="kn">import</span> <span class="n">ReEDSColumnLengthError</span><span class="p">,</span> <span class="n">ReEDSYearTypeConvertError</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;formatter.&quot;</span> <span class="o">+</span> <span class="vm">__name__</span><span class="p">)</span>
 
@@ -244,8 +247,8 @@
         <span class="n">input_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
         <span class="n">output_file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
         <span class="o">*</span><span class="n">_</span><span class="p">,</span>
-        <span class="n">Region_Mapping</span> <span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(),</span>
-        <span class="n">emit_names</span> <span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(),</span>
+        <span class="n">Region_Mapping</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(),</span>
+        <span class="n">emit_names</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(),</span>
         <span class="o">**</span><span class="n">__</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -299,12 +302,14 @@
                 <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">names</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
             <span class="c1"># List of all files in input folder in alpha numeric order</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_input_data_paths</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;\D&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">)))</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_input_data_paths</span> 
-    
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_input_data_paths</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+                <span class="n">files</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;\D&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_input_data_paths</span>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">data_collection</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Dictionary model names to full filename path </span>
+        <span class="sd">&quot;&quot;&quot;Dictionary model names to full filename path</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            dict: data_collection {filename: fullpath}</span>
@@ -339,26 +344,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;No default implementation of this functionality&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Process.report_prop_error"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatbase.Process.html#marmot.formatters.formatbase.Process.report_prop_error">[docs]</a>    <span class="k">def</span> <span class="nf">report_prop_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">property</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prop_class</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Outputs a warning message when the get_processed_data method</span>
-<span class="sd">        cannot find the specified property in the simulation model solution files.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            property (str): property e.g Max Capacity, Generation etc.</span>
-<span class="sd">            prop_class (str): property class e.g Region, Generator, Zone etc.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            pd.DataFrame: Empty DataFrame.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;CAN NOT FIND &quot;</span><span class="si">{</span><span class="n">prop_class</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="nb">property</span><span class="si">}</span><span class="s1">&quot;. &#39;</span> <span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="nb">property</span><span class="si">}</span><span class="s1">&quot; DOES NOT EXIST&#39;</span>
-        <span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;SKIPPING PROPERTY</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">df</span></div>
-
-<div class="viewcode-block" id="Process.combine_models"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatbase.Process.html#marmot.formatters.formatbase.Process.combine_models">[docs]</a>    <span class="k">def</span> <span class="nf">combine_models</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> 
-        <span class="n">drop_duplicates</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="Process.combine_models"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatbase.Process.html#marmot.formatters.formatbase.Process.combine_models">[docs]</a>    <span class="k">def</span> <span class="nf">combine_models</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">model_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">drop_duplicates</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Combine temporally disaggregated model results.</span>
 
 <span class="sd">        Will drop duplicate index entries by default.</span>
@@ -380,6 +368,37 @@
             <span class="k">if</span> <span class="p">(</span><span class="n">origsize</span> <span class="o">-</span> <span class="n">df</span><span class="o">.</span><span class="n">size</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Drop duplicates removed </span><span class="si">{</span><span class="n">origsize</span><span class="o">-</span><span class="n">df</span><span class="o">.</span><span class="n">size</span><span class="si">}</span><span class="s2"> rows&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">df</span></div></div>
+
+
+<span class="k">class</span> <span class="nc">ReEDSPropertyColumnsBase</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Contains methods common to all ReEDSPropertyColumns classes&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">assign_column_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">prop</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Assign column names to ReEDS DataFrame</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): unprocessed ReEDS DataFrame</span>
+<span class="sd">            prop (str): Property name e.g gen_out, cap_out etc.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ReEDSColumnLengthError: Raised when there is a length mismatch</span>
+<span class="sd">                between ReEDS df and ReEDSPropertyColumns</span>
+<span class="sd">            ReEDSYearTypeConvertError: Raised when ReEDS df.year column cannot</span>
+<span class="sd">                be convetred to type int</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: DataFrame with column names defined.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">prop_columns</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">prop_columns</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ReEDSColumnLengthError</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">prop_columns</span><span class="p">,</span> <span class="n">prop</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">prop_columns</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">year</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">year</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ReEDSYearTypeConvertError</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">prop</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span>
 </pre></div>
 
               </article>

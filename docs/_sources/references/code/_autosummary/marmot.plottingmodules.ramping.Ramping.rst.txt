@@ -26,6 +26,7 @@ marmot.plottingmodules.ramping.Ramping
    
         ~Ramping.capacity_started
         ~Ramping.count_ramps
+        ~Ramping.count_starts_single_gen
    
    
 

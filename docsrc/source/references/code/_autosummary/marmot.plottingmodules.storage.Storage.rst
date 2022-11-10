@@ -24,6 +24,7 @@ marmot.plottingmodules.storage.Storage
 
    .. autosummary::
    
+        ~Storage.ind_bat
         ~Storage.storage_volume
    
    

@@ -32,6 +32,7 @@ marmot.metamanagers.read\_metadata.MetaData
         ~MetaData.lines
         ~MetaData.node_region
         ~MetaData.node_zone
+        ~MetaData.region_batteries
         ~MetaData.region_exporting_lines
         ~MetaData.region_generator_category
         ~MetaData.region_generators

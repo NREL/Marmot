@@ -192,13 +192,14 @@
 <span class="c1"># Import Python Libraries</span>
 <span class="c1"># ========================================================================================</span>
 
-<span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">marmot.utils.mconfig</span> <span class="k">as</span> <span class="nn">mconfig</span>
@@ -207,9 +208,8 @@
 
     <span class="nb">print</span><span class="p">(</span><span class="n">INCORRECT_ENTRY_POINT</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
     <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
-<span class="kn">from</span> <span class="nn">marmot.utils.loggersetup</span> <span class="kn">import</span> <span class="n">SetupLogger</span>
-<span class="kn">from</span> <span class="nn">marmot.utils.definitions</span> <span class="kn">import</span> <span class="n">INPUT_DIR</span><span class="p">,</span> <span class="n">Module_CLASS_MAPPING</span>
 <span class="kn">from</span> <span class="nn">marmot.metamanagers.read_metadata</span> <span class="kn">import</span> <span class="n">MetaData</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_data_helper</span> <span class="kn">import</span> <span class="n">GenCategories</span>
 <span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_exceptions</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">DataSavedInModule</span><span class="p">,</span>
     <span class="n">InputSheetError</span><span class="p">,</span>
@@ -219,6 +219,13 @@
     <span class="n">UnderDevelopment</span><span class="p">,</span>
     <span class="n">UnsupportedAggregation</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.styles</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ColorList</span><span class="p">,</span>
+    <span class="n">GeneratorColorDict</span><span class="p">,</span>
+    <span class="n">PlotMarkers</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">marmot.utils.definitions</span> <span class="kn">import</span> <span class="n">INPUT_DIR</span><span class="p">,</span> <span class="n">Module_CLASS_MAPPING</span>
+<span class="kn">from</span> <span class="nn">marmot.utils.loggersetup</span> <span class="kn">import</span> <span class="n">SetupLogger</span>
 
 <span class="c1"># A bug in pandas requires this to be included, otherwise df.to_string truncates</span>
 <span class="c1"># long strings.</span>
@@ -294,7 +301,7 @@
 <span class="sd">                ordered_gen_categories.csv. If left None all techs will be plotted</span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            **kwargs</span>
-<span class="sd">                These parameters will be passed to the </span>
+<span class="sd">                These parameters will be passed to the</span>
 <span class="sd">                marmot.utils.loggersetup.SetupLogger class.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;plotter&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># Instantiation of SetupLogger</span>
@@ -485,41 +492,22 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen_categories</span><span class="p">[</span><span class="s2">&quot;Ordered_Gen&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
             <span class="p">)</span>
 
+        <span class="n">gen_categories</span> <span class="o">=</span> <span class="n">GenCategories</span><span class="p">()</span><span class="o">.</span><span class="n">set_categories</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen_categories</span><span class="p">)</span>
         <span class="c1"># If Other category does not exist in ordered_gen, create entry</span>
         <span class="k">if</span> <span class="s2">&quot;Other&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ordered_gen</span><span class="p">:</span>
             <span class="n">ordered_gen</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Other&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">color_dictionary_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">PLEXOS_color_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">color_dictionary_file</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
-                <span class="n">columns</span><span class="o">=</span><span class="p">{</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">color_dictionary_file</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="s2">&quot;Generator&quot;</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">color_dictionary_file</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="s2">&quot;Colour&quot;</span><span class="p">,</span>
-                <span class="p">}</span>
-            <span class="p">)</span>
-
-            <span class="n">PLEXOS_color_dict</span><span class="p">[</span><span class="s2">&quot;Generator&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">PLEXOS_color_dict</span><span class="p">[</span><span class="s2">&quot;Generator&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="n">PLEXOS_color_dict</span><span class="p">[</span><span class="s2">&quot;Colour&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">PLEXOS_color_dict</span><span class="p">[</span><span class="s2">&quot;Colour&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="n">PLEXOS_color_dict</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">PLEXOS_color_dict</span><span class="p">[[</span><span class="s2">&quot;Generator&quot;</span><span class="p">,</span> <span class="s2">&quot;Colour&quot;</span><span class="p">]]</span>
-                <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;Generator&quot;</span><span class="p">)</span>
-                <span class="o">.</span><span class="n">to_dict</span><span class="p">()[</span><span class="s2">&quot;Colour&quot;</span><span class="p">]</span>
-            <span class="p">)</span>
+            <span class="n">marmot_color_dict</span> <span class="o">=</span> <span class="n">GeneratorColorDict</span><span class="o">.</span><span class="n">set_colors_from_df</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">color_dictionary_file</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">color_dict</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">PLEXOS_color_dict</span> <span class="o">=</span> <span class="kc">None</span>
-
-        <span class="n">color_list</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="s2">&quot;#396AB1&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;#CC2529&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;#3E9651&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;#ff7f00&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;#6B4C9A&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;#922428&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;#cab2d6&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;#6a3d9a&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;#fb9a99&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;#b15928&quot;</span>
-        <span class="p">]</span>
-        <span class="n">marker_style</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;^&quot;</span><span class="p">,</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;8&quot;</span><span class="p">,</span> <span class="s2">&quot;+&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;&#39;Color dictionary&#39; not passed! Random colors will now be used.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">marmot_color_dict</span> <span class="o">=</span> <span class="n">GeneratorColorDict</span><span class="o">.</span><span class="n">set_random_colors</span><span class="p">(</span>
+                <span class="n">ordered_gen</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">color_dict</span>
 
         <span class="n">gen_names_dict</span> <span class="o">=</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">gen_names</span><span class="p">[[</span><span class="s2">&quot;Original&quot;</span><span class="p">,</span> <span class="s2">&quot;New&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;Original&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()[</span><span class="s2">&quot;New&quot;</span><span class="p">]</span>
@@ -660,23 +648,23 @@
             <span class="c1"># List of required arguments</span>
             <span class="n">argument_list</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="n">Zones</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">,</span>
                 <span class="n">ordered_gen</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">marmot_solutions_folder</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">marmot_solutions_folder</span><span class="p">,</span>
             <span class="p">]</span>
             <span class="c1"># dictionary of keyword arguments passed to plotting modules;</span>
             <span class="c1"># key names match the instance variables in each module</span>
             <span class="n">argument_dict</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="s2">&quot;gen_names_dict&quot;</span><span class="p">:</span> <span class="n">gen_names_dict</span><span class="p">,</span>
-                <span class="s2">&quot;gen_categories&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen_categories</span><span class="p">,</span>
-                <span class="s2">&quot;PLEXOS_color_dict&quot;</span><span class="p">:</span> <span class="n">PLEXOS_color_dict</span><span class="p">,</span>
+                <span class="s2">&quot;gen_categories&quot;</span><span class="p">:</span> <span class="n">gen_categories</span><span class="p">,</span>
+                <span class="s2">&quot;marmot_color_dict&quot;</span><span class="p">:</span> <span class="n">marmot_color_dict</span><span class="p">,</span>
                 <span class="s2">&quot;Scenario_Diff&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">,</span>
                 <span class="s2">&quot;ylabels&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span><span class="p">,</span>
                 <span class="s2">&quot;xlabels&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span><span class="p">,</span>
                 <span class="s2">&quot;custom_xticklabels&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom_xticklabels</span><span class="p">,</span>
-                <span class="s2">&quot;color_list&quot;</span><span class="p">:</span> <span class="n">color_list</span><span class="p">,</span>
-                <span class="s2">&quot;marker_style&quot;</span><span class="p">:</span> <span class="n">marker_style</span><span class="p">,</span>
+                <span class="s2">&quot;color_list&quot;</span><span class="p">:</span> <span class="n">ColorList</span><span class="p">()</span><span class="o">.</span><span class="n">colors</span><span class="p">,</span>
+                <span class="s2">&quot;marker_style&quot;</span><span class="p">:</span> <span class="n">PlotMarkers</span><span class="p">()</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
                 <span class="s2">&quot;Region_Mapping&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">,</span>
                 <span class="s2">&quot;TECH_SUBSET&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">TECH_SUBSET</span><span class="p">,</span>
             <span class="p">}</span>
@@ -687,9 +675,10 @@
 
             <span class="n">class_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">plot_module</span><span class="p">,</span> <span class="n">Module_CLASS_MAPPING</span><span class="p">[</span><span class="n">module</span><span class="p">])</span>
             <span class="n">instantiate_mplot</span> <span class="o">=</span> <span class="n">class_name</span><span class="p">(</span><span class="o">*</span><span class="n">argument_list</span><span class="p">,</span> <span class="o">**</span><span class="n">argument_dict</span><span class="p">)</span>
-
             <span class="c1"># Create output folder for each plotting module</span>
-            <span class="n">figures</span> <span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">instantiate_mplot</span><span class="o">.</span><span class="n">figure_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">module</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">figures</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">instantiate_mplot</span><span class="o">.</span><span class="n">figure_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">module</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
             <span class="n">figures</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
             <span class="c1"># Main loop to process each figure and pass</span>
@@ -880,20 +869,16 @@
 
     <span class="c1"># For plots using the difference of the values between two scenarios.</span>
     <span class="c1"># Max two entries, the second scenario is subtracted from the first.</span>
-    <span class="k">if</span> <span class="p">(</span>
-        <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span>
-            <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
-                <span class="s2">&quot;Scenario_Diff_plot&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span>
-            <span class="p">]</span>
-        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span>
+        <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Scenario_Diff_plot&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span><span class="p">]</span>
     <span class="p">):</span>
         <span class="n">Scenario_Diff</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">Scenario_Diff</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
-                <span class="nb">str</span><span class="p">(</span><span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Scenario_Diff_plot&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">())</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
-                    <span class="s2">&quot;,&quot;</span>
-                <span class="p">)</span>
+                <span class="nb">str</span><span class="p">(</span>
+                    <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Scenario_Diff_plot&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
             <span class="p">)</span>
             <span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
@@ -901,12 +886,8 @@
 
     <span class="n">Mapping_folder</span> <span class="o">=</span> <span class="n">INPUT_DIR</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;mapping_folder&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="p">(</span>
-        <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span>
-            <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
-                <span class="s2">&quot;Region_Mapping.csv_name&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span>
-            <span class="p">]</span>
-        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span>
+        <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Region_Mapping.csv_name&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span><span class="p">]</span>
     <span class="p">):</span>
         <span class="n">Region_Mapping</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
@@ -937,62 +918,52 @@
         <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;color_dictionary_file&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span><span class="p">]</span>
     <span class="p">)</span>
 
-    <span class="n">AGG_BY</span> <span class="o">=</span> <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;AGG_BY&quot;</span><span class="p">,</span><span class="s2">&quot;User_defined_value&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">AGG_BY</span> <span class="o">=</span> <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;AGG_BY&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;TECH_SUBSET&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span><span class="p">]):</span>
-        <span class="n">TECH_SUBSET</span> <span class="o">=</span> <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;TECH_SUBSET&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">TECH_SUBSET</span> <span class="o">=</span> <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+            <span class="s2">&quot;TECH_SUBSET&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">TECH_SUBSET</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># Facet Grid Labels (Based on Scenarios)</span>
-    <span class="k">if</span> <span class="p">(</span>
-        <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span>
-            <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
-                <span class="s2">&quot;zone_region_sublist&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span>
-            <span class="p">]</span>
-        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span>
+        <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;zone_region_sublist&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span><span class="p">]</span>
     <span class="p">):</span>
         <span class="n">zone_region_sublist</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">zone_region_sublist</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
-                <span class="nb">str</span><span class="p">(</span><span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;zone_region_sublist&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">())</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
-                    <span class="s2">&quot;,&quot;</span>
-                <span class="p">)</span>
+                <span class="nb">str</span><span class="p">(</span>
+                    <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;zone_region_sublist&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
             <span class="p">)</span>
             <span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="p">)</span>
 
-    <span class="k">if</span> <span class="p">(</span>
-        <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span>
-            <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
-                <span class="s2">&quot;Facet_ylabels&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span>
-            <span class="p">]</span>
-        <span class="p">)</span>
-    <span class="p">):</span>
+    <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Facet_ylabels&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span><span class="p">]):</span>
         <span class="n">ylabels</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">ylabels</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
-                <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Facet_ylabels&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+                <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+                    <span class="s2">&quot;Facet_ylabels&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span>
+                <span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
             <span class="p">)</span>
             <span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="p">)</span>
 
-    <span class="k">if</span> <span class="p">(</span>
-        <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span>
-            <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
-                <span class="s2">&quot;Facet_xlabels&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span>
-            <span class="p">]</span>
-        <span class="p">)</span>
-    <span class="p">):</span>
+    <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Facet_xlabels&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span><span class="p">]):</span>
         <span class="n">xlabels</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">xlabels</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
-                <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Facet_xlabels&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+                <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+                    <span class="s2">&quot;Facet_xlabels&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span>
+                <span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
             <span class="p">)</span>
             <span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="o">.</span><span class="n">tolist</span><span class="p">()</span>

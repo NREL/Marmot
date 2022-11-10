@@ -24,6 +24,7 @@ marmot.plottingmodules.plotutils.plot\_library.SetupSubplot
 
    .. autosummary::
    
+        ~SetupSubplot.add_barplot_load_lines_and_use
         ~SetupSubplot.add_facet_labels
         ~SetupSubplot.add_legend
         ~SetupSubplot.add_main_title

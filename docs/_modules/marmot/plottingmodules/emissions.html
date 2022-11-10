@@ -190,45 +190,76 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="kn">import</span> <span class="nn">marmot.utils.mconfig</span> <span class="k">as</span> <span class="nn">mconfig</span>
-
-<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_library</span> <span class="kn">import</span> <span class="n">PlotLibrary</span>
-<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_data_helper</span> <span class="kn">import</span> <span class="n">MPlotDataHelper</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_data_helper</span> <span class="kn">import</span> <span class="n">PlotDataStoreAndProcessor</span>
 <span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_exceptions</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">MissingInputData</span><span class="p">,</span>
     <span class="n">InputSheetError</span><span class="p">,</span>
+    <span class="n">MissingInputData</span><span class="p">,</span>
     <span class="n">MissingZoneData</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_library</span> <span class="kn">import</span> <span class="n">PlotLibrary</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.styles</span> <span class="kn">import</span> <span class="n">GeneratorColorDict</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.timeseries_modifiers</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">set_timestamp_date_range</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;plotter.&quot;</span> <span class="o">+</span> <span class="vm">__name__</span><span class="p">)</span>
-<span class="n">plot_data_settings</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;plot_data&quot;</span><span class="p">)</span>
+<span class="n">plot_data_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;plot_data&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Emissions"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.emissions.Emissions.html#marmot.plottingmodules.emissions.Emissions">[docs]</a><span class="k">class</span> <span class="nc">Emissions</span><span class="p">(</span><span class="n">MPlotDataHelper</span><span class="p">):</span>
+<div class="viewcode-block" id="Emissions"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.emissions.Emissions.html#marmot.plottingmodules.emissions.Emissions">[docs]</a><span class="k">class</span> <span class="nc">Emissions</span><span class="p">(</span><span class="n">PlotDataStoreAndProcessor</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Generator emissions plots.</span>
 
 <span class="sd">    The emissions.py module contains methods that are</span>
 <span class="sd">    related to the fossil fuel emissions of generators.</span>
 
-<span class="sd">    Emissions inherits from the MPlotDataHelper class to assist</span>
+<span class="sd">    Emissions inherits from the PlotDataStoreAndProcessor class to assist</span>
 <span class="sd">    in creating figures.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">Zones</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">Scenarios</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">AGG_BY</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">ordered_gen</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">marmot_solutions_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="n">marmot_color_dict</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">custom_xticklabels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
-<span class="sd">            *args</span>
-<span class="sd">                Minimum required parameters passed to the MPlotDataHelper </span>
-<span class="sd">                class.</span>
-<span class="sd">            **kwargs</span>
-<span class="sd">                These parameters will be passed to the MPlotDataHelper </span>
-<span class="sd">                class.</span>
+<span class="sd">            Zones (List[str]): List of regions/zones to plot.</span>
+<span class="sd">            Scenarios (List[str]): List of scenarios to plot.</span>
+<span class="sd">            AGG_BY (str): Informs region type to aggregate by when creating plots.</span>
+<span class="sd">            ordered_gen (List[str]): Ordered list of generator technologies to plot,</span>
+<span class="sd">                order defines the generator technology position in stacked bar and area plots.</span>
+<span class="sd">            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.</span>
+<span class="sd">            marmot_color_dict (dict, optional): Dictionary of colors to use for</span>
+<span class="sd">                generation technologies.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            custom_xticklabels (List[str], optional): List of custom x labels to</span>
+<span class="sd">                apply to barplots. Values will overwite existing ones.</span>
+<span class="sd">                Defaults to None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Instantiation of MPlotHelperFunctions</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1"># Instantiation of PlotDataStoreAndProcessor</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">AGG_BY</span><span class="p">,</span> <span class="n">ordered_gen</span><span class="p">,</span> <span class="n">marmot_solutions_folder</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Zones</span> <span class="o">=</span> <span class="n">Zones</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span> <span class="o">=</span> <span class="n">Scenarios</span>
+        <span class="k">if</span> <span class="n">marmot_color_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span> <span class="o">=</span> <span class="n">GeneratorColorDict</span><span class="o">.</span><span class="n">set_random_colors</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">color_dict</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span> <span class="o">=</span> <span class="n">marmot_color_dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">custom_xticklabels</span> <span class="o">=</span> <span class="n">custom_xticklabels</span>
 
 <div class="viewcode-block" id="Emissions.total_emissions_by_type"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.emissions.Emissions.html#marmot.plottingmodules.emissions.Emissions.total_emissions_by_type">[docs]</a>    <span class="k">def</span> <span class="nf">total_emissions_by_type</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -255,8 +286,8 @@
 <span class="sd">            custom_data_file_path (Path, optional): Path to custom data file to concat extra</span>
 <span class="sd">                data. Index and column format should be consistent with output data csv.</span>
 <span class="sd">            scenario_groupby (str, optional): Specifies whether to group data by Scenario</span>
-<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified </span>
-<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when </span>
+<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified</span>
+<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when</span>
 <span class="sd">                plotting data which covers multiple years such as ReEDS.</span>
 <span class="sd">                Defaults to Scenario.</span>
 
@@ -268,12 +299,12 @@
         <span class="c1"># Create Dictionary to hold Datframes for each scenario</span>
         <span class="n">outputs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and </span>
-        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required, </span>
+        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and</span>
+        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required,</span>
         <span class="c1"># scenarios must be a list.</span>
         <span class="n">properties</span> <span class="o">=</span> <span class="p">[(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;emissions_generators_Production&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">)]</span>
 
-        <span class="c1"># Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary</span>
+        <span class="c1"># Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary</span>
         <span class="c1"># with all required properties, returns a 1 if required data is missing</span>
         <span class="n">check_input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_formatted_data</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
 
@@ -301,7 +332,7 @@
                     <span class="k">continue</span>
 
                 <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">start_date_range</span><span class="p">):</span>
-                    <span class="n">emit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_timestamp_date_range</span><span class="p">(</span>
+                    <span class="n">emit</span> <span class="o">=</span> <span class="n">set_timestamp_date_range</span><span class="p">(</span>
                         <span class="n">emit</span><span class="p">,</span> <span class="n">start_date_range</span><span class="p">,</span> <span class="n">end_date_range</span>
                     <span class="p">)</span>
                     <span class="k">if</span> <span class="n">emit</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
@@ -370,7 +401,7 @@
 
             <span class="n">mplt</span><span class="o">.</span><span class="n">barplot</span><span class="p">(</span>
                 <span class="n">emitPlot</span><span class="p">,</span>
-                <span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span><span class="p">,</span>
                 <span class="n">stacked</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">custom_tick_labels</span><span class="o">=</span><span class="n">tick_labels</span><span class="p">,</span>
             <span class="p">)</span>

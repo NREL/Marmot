@@ -193,11 +193,12 @@
 <span class="c1"># =======================================================================================</span>
 
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
 <span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">marmot.utils.mconfig</span> <span class="k">as</span> <span class="nn">mconfig</span>
@@ -206,12 +207,12 @@
 
     <span class="nb">print</span><span class="p">(</span><span class="n">INCORRECT_ENTRY_POINT</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
     <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
-<span class="kn">from</span> <span class="nn">marmot.utils.definitions</span> <span class="kn">import</span> <span class="n">INPUT_DIR</span><span class="p">,</span> <span class="n">PLEXOS_YEAR_WARNING</span>
-<span class="kn">from</span> <span class="nn">marmot.utils.loggersetup</span> <span class="kn">import</span> <span class="n">SetupLogger</span>
-<span class="kn">import</span> <span class="nn">marmot.utils.dataio</span> <span class="k">as</span> <span class="nn">dataio</span>
 <span class="kn">import</span> <span class="nn">marmot.formatters</span> <span class="k">as</span> <span class="nn">formatters</span>
+<span class="kn">import</span> <span class="nn">marmot.utils.dataio</span> <span class="k">as</span> <span class="nn">dataio</span>
 <span class="kn">from</span> <span class="nn">marmot.formatters.formatbase</span> <span class="kn">import</span> <span class="n">Process</span>
-
+<span class="kn">from</span> <span class="nn">marmot.utils.definitions</span> <span class="kn">import</span> <span class="n">INPUT_DIR</span><span class="p">,</span> <span class="n">PLEXOS_YEAR_WARNING</span>
+<span class="kn">from</span> <span class="nn">marmot.utils.error_handler</span> <span class="kn">import</span> <span class="n">PropertyNotFound</span>
+<span class="kn">from</span> <span class="nn">marmot.utils.loggersetup</span> <span class="kn">import</span> <span class="n">SetupLogger</span>
 
 <span class="c1"># A bug in pandas requires this to be included,</span>
 <span class="c1"># otherwise df.to_string truncates long strings. Fix available in Pandas 1.0</span>
@@ -258,7 +259,7 @@
 <span class="sd">                to rename emissions types.</span>
 <span class="sd">                Defaults to pd.DataFrame().</span>
 <span class="sd">            **kwargs</span>
-<span class="sd">                These parameters will be passed to the </span>
+<span class="sd">                These parameters will be passed to the</span>
 <span class="sd">                marmot.utils.loggersetup.SetupLogger class.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;formatter&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># Instantiation of SetupLogger</span>
@@ -364,17 +365,15 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">scen_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_name</span>
 
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">process_class</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">formatters</span><span class="p">,</span> <span class="n">sim_model</span><span class="o">.</span><span class="n">lower</span><span class="p">())()</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">process_class</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                    <span class="s2">&quot;A required module was not found to &quot;</span> <span class="sa">f</span><span class="s2">&quot;process </span><span class="si">{</span><span class="n">sim_model</span><span class="si">}</span><span class="s2"> results&quot;</span>
-                <span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">process_class</span><span class="p">)</span>
-                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
-        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No formatter found for model: </span><span class="si">{</span><span class="n">sim_model</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+        <span class="n">process_class</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">formatters</span><span class="p">,</span> <span class="n">sim_model</span><span class="o">.</span><span class="n">lower</span><span class="p">())()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">process_class</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;A required module was not found to &quot;</span> <span class="sa">f</span><span class="s2">&quot;process </span><span class="si">{</span><span class="n">sim_model</span><span class="si">}</span><span class="s2"> results&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">process_class</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ModuleNotFoundError</span><span class="p">(</span>
+                <span class="s2">&quot;A required module was not found to &quot;</span> <span class="sa">f</span><span class="s2">&quot;process </span><span class="si">{</span><span class="n">sim_model</span><span class="si">}</span><span class="s2"> results&quot;</span>
+            <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;#### Processing </span><span class="si">{</span><span class="n">scen_name</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">sim_model</span><span class="si">}</span><span class="s2"> &quot;</span> <span class="s2">&quot;Results ####&quot;</span><span class="p">)</span>
 
@@ -451,11 +450,13 @@
 
             <span class="k">if</span> <span class="n">property_key_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">existing_keys</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">files_list</span><span class="p">:</span>
-                    <span class="n">processed_data</span> <span class="o">=</span> <span class="n">process_sim_model</span><span class="o">.</span><span class="n">get_processed_data</span><span class="p">(</span>
-                        <span class="n">row</span><span class="p">[</span><span class="s2">&quot;group&quot;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;data_set&quot;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;data_type&quot;</span><span class="p">],</span> <span class="n">model</span>
-                    <span class="p">)</span>
-                    <span class="k">if</span> <span class="n">processed_data</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-                        <span class="n">data_chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">processed_data</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">processed_data</span> <span class="o">=</span> <span class="n">process_sim_model</span><span class="o">.</span><span class="n">get_processed_data</span><span class="p">(</span>
+                            <span class="n">row</span><span class="p">[</span><span class="s2">&quot;group&quot;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;data_set&quot;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;data_type&quot;</span><span class="p">],</span> <span class="n">model</span>
+                        <span class="p">)</span>
+                    <span class="k">except</span> <span class="n">PropertyNotFound</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+                        <span class="n">data_chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">())</span>
                         <span class="k">break</span>
 
                     <span class="c1"># Check if data is for year interval and of type capacity</span>
@@ -500,7 +501,9 @@
                             <span class="n">save_attempt</span> <span class="o">+=</span> <span class="mi">1</span>
 
                     <span class="c1"># Calculate any extra properties</span>
-                    <span class="n">extra_prop_functions</span> <span class="o">=</span> <span class="n">extraprops_init</span><span class="o">.</span><span class="n">get_extra_properties</span><span class="p">(</span><span class="n">property_key_name</span><span class="p">)</span>
+                    <span class="n">extra_prop_functions</span> <span class="o">=</span> <span class="n">extraprops_init</span><span class="o">.</span><span class="n">get_extra_properties</span><span class="p">(</span>
+                        <span class="n">property_key_name</span>
+                    <span class="p">)</span>
                     <span class="k">if</span> <span class="n">extra_prop_functions</span><span class="p">:</span>
 
                         <span class="k">for</span> <span class="n">prop_function_tup</span> <span class="ow">in</span> <span class="n">extra_prop_functions</span><span class="p">:</span>
@@ -524,9 +527,11 @@
                                 <span class="k">else</span><span class="p">:</span>
                                     <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prop_name</span><span class="si">}</span><span class="s2"> was not saved&quot;</span><span class="p">)</span>
                                     <span class="k">continue</span>
-                                
+
                             <span class="c1"># Run again to check for properties based of new properties</span>
-                            <span class="n">extra2_prop_functions</span> <span class="o">=</span> <span class="n">extraprops_init</span><span class="o">.</span><span class="n">get_extra_properties</span><span class="p">(</span><span class="n">prop_name</span><span class="p">)</span>
+                            <span class="n">extra2_prop_functions</span> <span class="o">=</span> <span class="p">(</span>
+                                <span class="n">extraprops_init</span><span class="o">.</span><span class="n">get_extra_properties</span><span class="p">(</span><span class="n">prop_name</span><span class="p">)</span>
+                            <span class="p">)</span>
                             <span class="k">if</span> <span class="n">extra2_prop_functions</span><span class="p">:</span>
 
                                 <span class="k">for</span> <span class="n">prop_function_tup2</span> <span class="ow">in</span> <span class="n">extra2_prop_functions</span><span class="p">:</span>

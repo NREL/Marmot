@@ -186,6 +186,7 @@
 
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 
@@ -226,6 +227,7 @@
     <span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Data saved to h5 file successfully</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
+
 <div class="viewcode-block" id="write_metadata_to_h5"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.utils.dataio.write_metadata_to_h5.html#marmot.utils.dataio.write_metadata_to_h5">[docs]</a><span class="k">def</span> <span class="nf">write_metadata_to_h5</span><span class="p">(</span>
     <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">file_name</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
@@ -240,21 +242,23 @@
 <span class="sd">        df (pd.DataFrame): Dataframe to save</span>
 <span class="sd">        file_name (Path): name of hdf5 file</span>
 <span class="sd">        key (str): metadata key, e.g objects/generators</span>
-<span class="sd">        partition (str, optional): metadata partition. </span>
+<span class="sd">        partition (str, optional): metadata partition.</span>
 <span class="sd">            Defaults to &quot;model_metadata&quot;.</span>
-<span class="sd">        mode (str, optional): file access mode. </span>
+<span class="sd">        mode (str, optional): file access mode.</span>
 <span class="sd">        Defaults to &quot;a&quot;.</span>
 <span class="sd">        **kwargs</span>
 <span class="sd">            These parameters will be passed pandas.to_hdf function.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">df</span><span class="o">.</span><span class="n">to_hdf</span><span class="p">(</span>
-        <span class="n">file_name</span><span class="p">,</span> 
+        <span class="n">file_name</span><span class="p">,</span>
         <span class="n">key</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;metadata/</span><span class="si">{</span><span class="n">partition</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
         <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span></div>
 
-<div class="viewcode-block" id="read_processed_h5file"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.utils.dataio.read_processed_h5file.html#marmot.utils.dataio.read_processed_h5file">[docs]</a><span class="k">def</span> <span class="nf">read_processed_h5file</span><span class="p">(</span><span class="n">processed_hdf5_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">plx_prop_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">scenario</span><span class="p">:</span> <span class="nb">str</span>
+
+<div class="viewcode-block" id="read_processed_h5file"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.utils.dataio.read_processed_h5file.html#marmot.utils.dataio.read_processed_h5file">[docs]</a><span class="k">def</span> <span class="nf">read_processed_h5file</span><span class="p">(</span>
+    <span class="n">processed_hdf5_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">plx_prop_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">scenario</span><span class="p">:</span> <span class="nb">str</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Reads Data from processed h5file.</span>
 
@@ -267,7 +271,7 @@
 <span class="sd">        pd.DataFrame: Requested dataframe.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;plotter.&quot;</span> <span class="o">+</span> <span class="vm">__name__</span><span class="p">)</span>
-    
+
     <span class="k">try</span><span class="p">:</span>
         <span class="k">with</span> <span class="n">pd</span><span class="o">.</span><span class="n">HDFStore</span><span class="p">(</span>
             <span class="n">processed_hdf5_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">scenario</span><span class="si">}</span><span class="s2">_formatted.h5&quot;</span><span class="p">),</span> <span class="s2">&quot;r&quot;</span>
@@ -276,17 +280,19 @@
     <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="read_csv_property_file"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.utils.dataio.read_csv_property_file.html#marmot.utils.dataio.read_csv_property_file">[docs]</a><span class="k">def</span> <span class="nf">read_csv_property_file</span><span class="p">(</span><span class="n">csv_property_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">plx_prop_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">scenario</span><span class="p">:</span> <span class="nb">str</span>
+
+<div class="viewcode-block" id="read_csv_property_file"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.utils.dataio.read_csv_property_file.html#marmot.utils.dataio.read_csv_property_file">[docs]</a><span class="k">def</span> <span class="nf">read_csv_property_file</span><span class="p">(</span>
+    <span class="n">csv_property_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">plx_prop_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">scenario</span><span class="p">:</span> <span class="nb">str</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Read formatted data from csv file.</span>
 
 <span class="sd">    Allows data to be read in from a csv if it is missing from the</span>
-<span class="sd">    formatted h5 file. Format of data must adhere to the standard </span>
+<span class="sd">    formatted h5 file. Format of data must adhere to the standard</span>
 <span class="sd">    Marmot formats for each data class, e.g generator, line etc.</span>
 
 <span class="sd">    Filename should be of the following pattern:</span>
 <span class="sd">    - {scenario}_{plx_prop_name}.csv</span>
-<span class="sd">    </span>
+
 <span class="sd">    An example of a line_Net_Import:</span>
 <span class="sd">    - Base DA_line_Net_Import.csv</span>
 
@@ -298,26 +304,25 @@
 <span class="sd">        scenario (str): Name of scenario.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        pd.DataFrame: Requested dataframe or empty dataframe if file not found. </span>
+<span class="sd">        pd.DataFrame: Requested dataframe or empty dataframe if file not found.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;plotter.&quot;</span> <span class="o">+</span> <span class="vm">__name__</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
-                <span class="n">csv_property_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">scenario</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">plx_prop_name</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">),</span>
-                <span class="n">index_col</span><span class="o">=</span><span class="kc">False</span>
-             <span class="p">)</span>
+            <span class="n">csv_property_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">scenario</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">plx_prop_name</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">),</span>
+            <span class="n">index_col</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="n">df</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">timestamp</span><span class="p">)</span>
         <span class="n">df_cols</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
-        <span class="n">df_cols</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">df_cols</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;values&#39;</span><span class="p">))</span>
+        <span class="n">df_cols</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">df_cols</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;values&quot;</span><span class="p">))</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">df_cols</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">df</span>
     <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">scenario</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">plx_prop_name</span><span class="si">}</span><span class="s2">.csv was not found in &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">csv_property_folder</span><span class="si">}</span><span class="s2">. Data is MISSING.&quot;</span>    
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">scenario</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">plx_prop_name</span><span class="si">}</span><span class="s2">.csv was not found in &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">csv_property_folder</span><span class="si">}</span><span class="s2">. Data is MISSING.&quot;</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span></div>
-    
-
 </pre></div>
 
               </article>

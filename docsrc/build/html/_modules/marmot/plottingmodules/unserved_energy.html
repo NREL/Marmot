@@ -187,43 +187,70 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="kn">import</span> <span class="nn">marmot.utils.mconfig</span> <span class="k">as</span> <span class="nn">mconfig</span>
-
-<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_library</span> <span class="kn">import</span> <span class="n">PlotLibrary</span>
-<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_data_helper</span> <span class="kn">import</span> <span class="n">MPlotDataHelper</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_data_helper</span> <span class="kn">import</span> <span class="n">PlotDataStoreAndProcessor</span>
 <span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_exceptions</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">MissingInputData</span><span class="p">,</span>
     <span class="n">MissingZoneData</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_library</span> <span class="kn">import</span> <span class="n">PlotLibrary</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.styles</span> <span class="kn">import</span> <span class="n">ColorList</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.timeseries_modifiers</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_sub_hour_interval_count</span><span class="p">,</span>
+    <span class="n">set_timestamp_date_range</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;plotter.&quot;</span> <span class="o">+</span> <span class="vm">__name__</span><span class="p">)</span>
-<span class="n">plot_data_settings</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;plot_data&quot;</span><span class="p">)</span>
+<span class="n">plot_data_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;plot_data&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="UnservedEnergy"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.unserved_energy.UnservedEnergy.html#marmot.plottingmodules.unserved_energy.UnservedEnergy">[docs]</a><span class="k">class</span> <span class="nc">UnservedEnergy</span><span class="p">(</span><span class="n">MPlotDataHelper</span><span class="p">):</span>
+<div class="viewcode-block" id="UnservedEnergy"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.unserved_energy.UnservedEnergy.html#marmot.plottingmodules.unserved_energy.UnservedEnergy">[docs]</a><span class="k">class</span> <span class="nc">UnservedEnergy</span><span class="p">(</span><span class="n">PlotDataStoreAndProcessor</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;System unserved energy plots.</span>
 
 <span class="sd">    The unserved_energy.py module contains methods that are</span>
 <span class="sd">    related to unserved energy in the power system.</span>
 
-<span class="sd">    UnservedEnergy inherits from the MPlotDataHelper class to assist</span>
+<span class="sd">    UnservedEnergy inherits from the PlotDataStoreAndProcessor class to assist</span>
 <span class="sd">    in creating figures.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">Zones</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">Scenarios</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">AGG_BY</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">ordered_gen</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">marmot_solutions_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="n">custom_xticklabels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">color_list</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="n">ColorList</span><span class="p">()</span><span class="o">.</span><span class="n">colors</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
-<span class="sd">            *args</span>
-<span class="sd">                Minimum required parameters passed to the MPlotDataHelper </span>
-<span class="sd">                class.</span>
-<span class="sd">            **kwargs</span>
-<span class="sd">                These parameters will be passed to the MPlotDataHelper </span>
-<span class="sd">                class.</span>
+<span class="sd">            Zones (List[str]): List of regions/zones to plot.</span>
+<span class="sd">            Scenarios (List[str]): List of scenarios to plot.</span>
+<span class="sd">            AGG_BY (str): Informs region type to aggregate by when creating plots.</span>
+<span class="sd">            ordered_gen (List[str]): Ordered list of generator technologies to plot,</span>
+<span class="sd">                order defines the generator technology position in stacked bar and area plots.</span>
+<span class="sd">            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.</span>
+<span class="sd">            custom_xticklabels (List[str], optional): List of custom x labels to</span>
+<span class="sd">                apply to barplots. Values will overwite existing ones.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            color_list (list, optional): List of colors to apply to non-gen plots.</span>
+<span class="sd">                Defaults to ColorList().colors.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Instantiation of MPlotHelperFunctions</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1"># Instantiation of PlotDataStoreAndProcessor</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">AGG_BY</span><span class="p">,</span> <span class="n">ordered_gen</span><span class="p">,</span> <span class="n">marmot_solutions_folder</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Zones</span> <span class="o">=</span> <span class="n">Zones</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span> <span class="o">=</span> <span class="n">Scenarios</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">custom_xticklabels</span> <span class="o">=</span> <span class="n">custom_xticklabels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">color_list</span> <span class="o">=</span> <span class="n">color_list</span>
 
 <div class="viewcode-block" id="UnservedEnergy.unserved_energy_timeseries"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.unserved_energy.UnservedEnergy.html#marmot.plottingmodules.unserved_energy.UnservedEnergy.unserved_energy_timeseries">[docs]</a>    <span class="k">def</span> <span class="nf">unserved_energy_timeseries</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -257,12 +284,12 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">agg</span> <span class="o">=</span> <span class="s2">&quot;region&quot;</span>
 
-        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and </span>
-        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required, </span>
+        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and</span>
+        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required,</span>
         <span class="c1"># scenarios must be a list.</span>
         <span class="n">properties</span> <span class="o">=</span> <span class="p">[(</span><span class="kc">True</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">agg</span><span class="si">}</span><span class="s2">_Unserved_Energy</span><span class="si">{</span><span class="n">data_resolution</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">)]</span>
 
-        <span class="c1"># Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary</span>
+        <span class="c1"># Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary</span>
         <span class="c1"># with all required properties, returns a 1 if required data is missing</span>
         <span class="n">check_input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_formatted_data</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
 
@@ -283,7 +310,7 @@
                 <span class="n">unserved_energy</span> <span class="o">=</span> <span class="n">unserved_energy</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">&quot;timestamp&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
                 <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">start_date_range</span><span class="p">):</span>
-                    <span class="n">unserved_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_timestamp_date_range</span><span class="p">(</span>
+                    <span class="n">unserved_energy</span> <span class="o">=</span> <span class="n">set_timestamp_date_range</span><span class="p">(</span>
                         <span class="n">unserved_energy</span><span class="p">,</span> <span class="n">start_date_range</span><span class="p">,</span> <span class="n">end_date_range</span>
                     <span class="p">)</span>
                     <span class="k">if</span> <span class="n">unserved_energy</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -307,7 +334,9 @@
                 <span class="k">continue</span>
 
             <span class="c1"># Determine auto unit coversion</span>
-            <span class="n">unitconversion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity_energy_unitconversion</span><span class="p">(</span><span class="n">unserved_energy_out</span><span class="p">)</span>
+            <span class="n">unitconversion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity_energy_unitconversion</span><span class="p">(</span>
+                <span class="n">unserved_energy_out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span>
+            <span class="p">)</span>
             <span class="n">unserved_energy_out</span> <span class="o">=</span> <span class="n">unserved_energy_out</span> <span class="o">/</span> <span class="n">unitconversion</span><span class="p">[</span><span class="s2">&quot;divisor&quot;</span><span class="p">]</span>
 
             <span class="c1"># Data table of values to return to main program</span>
@@ -359,8 +388,8 @@
 <span class="sd">            end_date_range (str, optional): Defines a end date at which to represent data to.</span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            scenario_groupby (str, optional): Specifies whether to group data by Scenario</span>
-<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified </span>
-<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when </span>
+<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified</span>
+<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when</span>
 <span class="sd">                plotting data which covers multiple years such as ReEDS.</span>
 <span class="sd">                Defaults to Scenario.</span>
 
@@ -376,12 +405,12 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">agg</span> <span class="o">=</span> <span class="s2">&quot;region&quot;</span>
 
-        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and </span>
-        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required, </span>
+        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and</span>
+        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required,</span>
         <span class="c1"># scenarios must be a list.</span>
         <span class="n">properties</span> <span class="o">=</span> <span class="p">[(</span><span class="kc">True</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">agg</span><span class="si">}</span><span class="s2">_Unserved_Energy&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">)]</span>
 
-        <span class="c1"># Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary</span>
+        <span class="c1"># Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary</span>
         <span class="c1"># with all required properties, returns a 1 if required data is missing</span>
         <span class="n">check_input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_formatted_data</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
 
@@ -402,10 +431,10 @@
                 <span class="n">unserved_energy</span> <span class="o">=</span> <span class="n">unserved_energy</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">&quot;timestamp&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
                 <span class="c1"># correct sum for non-hourly runs</span>
-                <span class="n">interval_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sub_hour_interval_count</span><span class="p">(</span><span class="n">unserved_energy</span><span class="p">)</span>
+                <span class="n">interval_count</span> <span class="o">=</span> <span class="n">get_sub_hour_interval_count</span><span class="p">(</span><span class="n">unserved_energy</span><span class="p">)</span>
                 <span class="n">unserved_energy</span> <span class="o">=</span> <span class="n">unserved_energy</span> <span class="o">/</span> <span class="n">interval_count</span>
                 <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">start_date_range</span><span class="p">):</span>
-                    <span class="n">unserved_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_timestamp_date_range</span><span class="p">(</span>
+                    <span class="n">unserved_energy</span> <span class="o">=</span> <span class="n">set_timestamp_date_range</span><span class="p">(</span>
                         <span class="n">unserved_energy</span><span class="p">,</span> <span class="n">start_date_range</span><span class="p">,</span> <span class="n">end_date_range</span>
                     <span class="p">)</span>
                     <span class="k">if</span> <span class="n">unserved_energy</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -435,7 +464,9 @@
                 <span class="k">continue</span>
 
             <span class="c1"># Determine auto unit coversion</span>
-            <span class="n">unitconversion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity_energy_unitconversion</span><span class="p">(</span><span class="n">unserved_energy_out</span><span class="p">)</span>
+            <span class="n">unitconversion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity_energy_unitconversion</span><span class="p">(</span>
+                <span class="n">unserved_energy_out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span>
+            <span class="p">)</span>
             <span class="n">unserved_energy_out</span> <span class="o">=</span> <span class="n">unserved_energy_out</span> <span class="o">/</span> <span class="n">unitconversion</span><span class="p">[</span><span class="s2">&quot;divisor&quot;</span><span class="p">]</span>
 
             <span class="c1"># Data table of values to return to main program</span>
@@ -506,8 +537,8 @@
 <span class="sd">            end_date_range (str, optional): Defines a end date at which to represent data to.</span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            scenario_groupby (str, optional): Specifies whether to group data by Scenario</span>
-<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified </span>
-<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when </span>
+<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified</span>
+<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when</span>
 <span class="sd">                plotting data which covers multiple years such as ReEDS.</span>
 <span class="sd">                Defaults to Scenario.</span>
 
@@ -529,8 +560,8 @@
         <span class="c1"># scenarios must be a list.</span>
         <span class="n">properties</span> <span class="o">=</span> <span class="p">[(</span><span class="kc">True</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">agg</span><span class="si">}</span><span class="s2">_Unserved_Energy&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">)]</span>
 
-        <span class="c1"># Runs get_formatted_data within MPlotDataHelper to populate</span>
-        <span class="c1"># MPlotDataHelper dictionary with all required properties,</span>
+        <span class="c1"># Runs get_formatted_data within PlotDataStoreAndProcessor to populate</span>
+        <span class="c1"># PlotDataStoreAndProcessor dictionary with all required properties,</span>
         <span class="c1"># returns a 1 if required data is missing</span>
         <span class="n">check_input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_formatted_data</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
 
@@ -553,14 +584,14 @@
                 <span class="n">unserved_energy</span> <span class="o">=</span> <span class="n">unserved_energy</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">&quot;timestamp&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
                 <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">start_date_range</span><span class="p">):</span>
-                    <span class="n">unserved_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_timestamp_date_range</span><span class="p">(</span>
+                    <span class="n">unserved_energy</span> <span class="o">=</span> <span class="n">set_timestamp_date_range</span><span class="p">(</span>
                         <span class="n">unserved_energy</span><span class="p">,</span> <span class="n">start_date_range</span><span class="p">,</span> <span class="n">end_date_range</span>
                     <span class="p">)</span>
                     <span class="k">if</span> <span class="n">unserved_energy</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No Unserved Energy in selected Date Range&quot;</span><span class="p">)</span>
                         <span class="k">continue</span>
 
-                <span class="n">interval_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sub_hour_interval_count</span><span class="p">(</span><span class="n">unserved_energy</span><span class="p">)</span>
+                <span class="n">interval_count</span> <span class="o">=</span> <span class="n">get_sub_hour_interval_count</span><span class="p">(</span><span class="n">unserved_energy</span><span class="p">)</span>
                 <span class="n">unserved_energy</span> <span class="o">=</span> <span class="n">unserved_energy</span> <span class="o">/</span> <span class="n">interval_count</span>
                 <span class="c1"># Group data by hours and find mean across entire range</span>
                 <span class="n">unserved_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">year_scenario_grouper</span><span class="p">(</span>
@@ -594,7 +625,9 @@
             <span class="n">mplt</span> <span class="o">=</span> <span class="n">PlotLibrary</span><span class="p">()</span>
             <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">mplt</span><span class="o">.</span><span class="n">get_figure</span><span class="p">()</span>
 
-            <span class="n">unitconversion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity_energy_unitconversion</span><span class="p">(</span><span class="n">unserved_energy_out</span><span class="p">)</span>
+            <span class="n">unitconversion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity_energy_unitconversion</span><span class="p">(</span>
+                <span class="n">unserved_energy_out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span>
+            <span class="p">)</span>
             <span class="n">unserved_energy_out</span> <span class="o">=</span> <span class="n">unserved_energy_out</span> <span class="o">/</span> <span class="n">unitconversion</span><span class="p">[</span><span class="s2">&quot;divisor&quot;</span><span class="p">]</span>
             <span class="n">Data_Table_Out</span> <span class="o">=</span> <span class="n">unserved_energy_out</span>
             <span class="n">Data_Table_Out</span> <span class="o">=</span> <span class="n">Data_Table_Out</span><span class="o">.</span><span class="n">add_suffix</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; (</span><span class="si">{</span><span class="n">unitconversion</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>

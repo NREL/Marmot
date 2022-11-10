@@ -184,44 +184,72 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="kn">import</span> <span class="nn">marmot.utils.mconfig</span> <span class="k">as</span> <span class="nn">mconfig</span>
-
-<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_library</span> <span class="kn">import</span> <span class="n">SetupSubplot</span>
-<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_data_helper</span> <span class="kn">import</span> <span class="n">MPlotDataHelper</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_data_helper</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">PlotDataStoreAndProcessor</span><span class="p">,</span>
+    <span class="n">set_x_y_dimension</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_exceptions</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DataSavedInModule</span><span class="p">,</span>
     <span class="n">MissingInputData</span><span class="p">,</span>
     <span class="n">MissingZoneData</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_library</span> <span class="kn">import</span> <span class="n">PlotLibrary</span><span class="p">,</span> <span class="n">SetupSubplot</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.styles</span> <span class="kn">import</span> <span class="n">ColorList</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.timeseries_modifiers</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">adjust_for_leapday</span><span class="p">,</span>
+    <span class="n">set_timestamp_date_range</span><span class="p">,</span>
+    <span class="n">sort_duration</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;plotter.&quot;</span> <span class="o">+</span> <span class="vm">__name__</span><span class="p">)</span>
-<span class="n">plot_data_settings</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;plot_data&quot;</span><span class="p">)</span>
+<span class="n">plot_data_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;plot_data&quot;</span><span class="p">)</span>
+<span class="n">shift_leapday</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;shift_leapday&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Storage"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.storage.Storage.html#marmot.plottingmodules.storage.Storage">[docs]</a><span class="k">class</span> <span class="nc">Storage</span><span class="p">(</span><span class="n">MPlotDataHelper</span><span class="p">):</span>
+<div class="viewcode-block" id="Storage"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.storage.Storage.html#marmot.plottingmodules.storage.Storage">[docs]</a><span class="k">class</span> <span class="nc">Storage</span><span class="p">(</span><span class="n">PlotDataStoreAndProcessor</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Energy storage plots.</span>
 
 <span class="sd">    The storage.py module contains methods that are</span>
 <span class="sd">    related to storage devices.</span>
 
-<span class="sd">    Storage inherits from the MPlotDataHelper class to assist</span>
+<span class="sd">    Storage inherits from the PlotDataStoreAndProcessor class to assist</span>
 <span class="sd">    in creating figures.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">Zones</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">Scenarios</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">AGG_BY</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">ordered_gen</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">marmot_solutions_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="n">color_list</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="n">ColorList</span><span class="p">()</span><span class="o">.</span><span class="n">colors</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
-<span class="sd">            *args</span>
-<span class="sd">                Minimum required parameters passed to the MPlotDataHelper </span>
-<span class="sd">                class.</span>
-<span class="sd">            **kwargs</span>
-<span class="sd">                These parameters will be passed to the MPlotDataHelper </span>
-<span class="sd">                class.</span>
+<span class="sd">            Zones (List[str]): List of regions/zones to plot.</span>
+<span class="sd">            Scenarios (List[str]): List of scenarios to plot.</span>
+<span class="sd">            AGG_BY (str): Informs region type to aggregate by when creating plots.</span>
+<span class="sd">            ordered_gen (List[str]): Ordered list of generator technologies to plot,</span>
+<span class="sd">                order defines the generator technology position in stacked bar and area plots.</span>
+<span class="sd">            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.</span>
+<span class="sd">            color_list (list, optional): List of colors to apply to non-gen plots.</span>
+<span class="sd">                Defaults to ColorList().colors.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Instantiation of MPlotHelperFunctions</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1"># Instantiation of PlotDataStoreAndProcessor</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">AGG_BY</span><span class="p">,</span> <span class="n">ordered_gen</span><span class="p">,</span> <span class="n">marmot_solutions_folder</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Zones</span> <span class="o">=</span> <span class="n">Zones</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span> <span class="o">=</span> <span class="n">Scenarios</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">color_list</span> <span class="o">=</span> <span class="n">color_list</span>
 
 <div class="viewcode-block" id="Storage.storage_volume"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.storage.Storage.html#marmot.plottingmodules.storage.Storage.storage_volume">[docs]</a>    <span class="k">def</span> <span class="nf">storage_volume</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -253,8 +281,8 @@
 
         <span class="n">outputs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and </span>
-        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required, </span>
+        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and</span>
+        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required,</span>
         <span class="c1"># scenarios must be a list.</span>
         <span class="n">properties</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;storage_Initial_Volume&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
@@ -262,7 +290,7 @@
             <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;storage_Max_Volume&quot;</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">[</span><span class="mi">0</span><span class="p">]]),</span>
         <span class="p">]</span>
 
-        <span class="c1"># Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary</span>
+        <span class="c1"># Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary</span>
         <span class="c1"># with all required properties, returns a 1 if required data is missing</span>
         <span class="n">check_input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_formatted_data</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
 
@@ -317,7 +345,7 @@
                 <span class="n">use</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">scenario</span><span class="p">]</span>
 
                 <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">start_date_range</span><span class="p">):</span>
-                    <span class="n">storage_volume</span><span class="p">,</span> <span class="n">max_volume</span><span class="p">,</span> <span class="n">use</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_timestamp_date_range</span><span class="p">(</span>
+                    <span class="n">storage_volume</span><span class="p">,</span> <span class="n">max_volume</span><span class="p">,</span> <span class="n">use</span> <span class="o">=</span> <span class="n">set_timestamp_date_range</span><span class="p">(</span>
                         <span class="p">[</span><span class="n">storage_volume</span><span class="p">,</span> <span class="n">max_volume</span><span class="p">,</span> <span class="n">use</span><span class="p">],</span>
                         <span class="n">start_date_range</span><span class="p">,</span>
                         <span class="n">end_date_range</span><span class="p">,</span>
@@ -393,6 +421,185 @@
                 <span class="n">mplt</span><span class="o">.</span><span class="n">add_main_title</span><span class="p">(</span><span class="n">zone_input</span><span class="p">)</span>
 
             <span class="n">outputs</span><span class="p">[</span><span class="n">zone_input</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;fig&quot;</span><span class="p">:</span> <span class="n">fig</span><span class="p">,</span> <span class="s2">&quot;data_table&quot;</span><span class="p">:</span> <span class="n">Data_Table_Out</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">outputs</span></div>
+
+<div class="viewcode-block" id="Storage.ind_bat"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.storage.Storage.html#marmot.plottingmodules.storage.Storage.ind_bat">[docs]</a>    <span class="k">def</span> <span class="nf">ind_bat</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">figure_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">prop</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">timezone</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">start_date_range</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">end_date_range</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">_</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Creates time series or duration curve plot of generation or load for a single battery.</span>
+
+<span class="sd">        A horizontal line represents max discharge power of the battery.</span>
+<span class="sd">        All scenarios are plotted on a single figure.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            figure_name (str): Figure output name. Used to control whether plot shows generation or load,</span>
+<span class="sd">                                as well as duration curve or chronological time series.</span>
+<span class="sd">            timezone (str, optional): The timezone to display on the x-axes.</span>
+<span class="sd">                Defaults to &quot;&quot;.</span>
+<span class="sd">            prop (str): Used to pass in battery names.</span>
+<span class="sd">                Input format should be a comma seperated string.</span>
+<span class="sd">            start_date_range (str, optional): Defines a start date at which to represent data from.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            end_date_range (str, optional): Defines a end date at which to represent data to.</span>
+<span class="sd">                Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionary containing the created plot and its data table.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">duration_curve</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="s2">&quot;duration_curve&quot;</span> <span class="ow">in</span> <span class="n">figure_name</span><span class="p">:</span>
+            <span class="n">duration_curve</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">var</span> <span class="o">=</span> <span class="s2">&quot;Generation&quot;</span>
+        <span class="n">var_name</span> <span class="o">=</span> <span class="s2">&quot;Battery discharge&quot;</span>
+        <span class="k">if</span> <span class="s2">&quot;Load&quot;</span> <span class="ow">in</span> <span class="n">figure_name</span><span class="p">:</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="s2">&quot;Load&quot;</span>
+            <span class="n">var_name</span> <span class="o">=</span> <span class="s2">&quot;Battery charging&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span> <span class="o">==</span> <span class="s2">&quot;zone&quot;</span><span class="p">:</span>
+            <span class="n">agg</span> <span class="o">=</span> <span class="s2">&quot;zone&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">agg</span> <span class="o">=</span> <span class="s2">&quot;region&quot;</span>
+
+        <span class="n">outputs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and</span>
+        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required,</span>
+        <span class="c1"># scenarios must be a list.</span>
+        <span class="n">properties</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;batterie_</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
+        <span class="p">]</span>
+        <span class="c1"># Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary</span>
+        <span class="c1"># with all required properties, returns a 1 if required data is missing</span>
+        <span class="n">check_input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_formatted_data</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="mi">1</span> <span class="ow">in</span> <span class="n">check_input_data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">MissingInputData</span><span class="p">()</span>
+
+        <span class="c1"># Select only lines specified in Marmot_plot_select.csv.</span>
+        <span class="n">select_bats</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">prop</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)]</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plotting only batteries specified in Marmot_plot_select.csv&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">select_bats</span><span class="p">)</span>
+
+        <span class="n">xdim</span><span class="p">,</span> <span class="n">ydim</span> <span class="o">=</span> <span class="n">set_x_y_dimension</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">select_bats</span><span class="p">))</span>
+        <span class="n">mplt</span> <span class="o">=</span> <span class="n">PlotLibrary</span><span class="p">(</span><span class="n">ydim</span><span class="p">,</span> <span class="n">xdim</span><span class="p">,</span> <span class="n">squeeze</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ravel_axs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">mplt</span><span class="o">.</span><span class="n">get_figure</span><span class="p">()</span>
+
+        <span class="n">data_tables</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">bat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">select_bats</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Battery = </span><span class="si">{</span><span class="n">bat</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">chunks_bat</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">scenario</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Scenario = </span><span class="si">{</span><span class="n">scenario</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">gen</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;batterie_</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">scenario</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">gen</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">bat</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;battery_name&quot;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bat</span><span class="si">}</span><span class="s2"> not found in results.&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">MissingInputData</span><span class="p">()</span>
+
+                <span class="n">gen</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">droplevel</span><span class="p">([</span><span class="s2">&quot;units&quot;</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">])</span>
+                <span class="n">gen</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="n">scenario</span><span class="p">})</span>
+
+                <span class="k">if</span> <span class="n">shift_leapday</span><span class="p">:</span>
+                    <span class="n">gen</span> <span class="o">=</span> <span class="n">adjust_for_leapday</span><span class="p">(</span><span class="n">gen</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">start_date_range</span><span class="p">):</span>
+                    <span class="n">gen</span> <span class="o">=</span> <span class="n">set_timestamp_date_range</span><span class="p">(</span>
+                        <span class="n">gen</span><span class="p">,</span> <span class="n">start_date_range</span><span class="p">,</span> <span class="n">end_date_range</span>
+                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">gen</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No data in selected Date Range&quot;</span><span class="p">)</span>
+                        <span class="k">continue</span>
+
+                <span class="n">chunks_bat</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gen</span><span class="p">)</span>
+
+                <span class="c1"># For output time series.csv</span>
+                <span class="n">gen_out</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="n">scenario</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;battery </span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">})</span>
+                <span class="n">scenario_names</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">scenario</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">gen_out</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Scenario&quot;</span><span class="p">)</span>
+                <span class="n">gen_name</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">bat</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">gen_out</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;battery&quot;</span><span class="p">)</span>
+                <span class="n">gen_out</span> <span class="o">=</span> <span class="n">gen_out</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="n">scenario_names</span><span class="p">,</span> <span class="n">gen_name</span><span class="p">],</span> <span class="n">append</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+                <span class="c1"># print(gen_out)</span>
+                <span class="n">data_tables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gen_out</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">chunks_bat</span><span class="p">:</span>
+                <span class="n">gen_out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">chunks_bat</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">MissingInputData</span><span class="p">()</span>
+
+            <span class="c1"># Only convert on first lines</span>
+            <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">unitconversion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity_energy_unitconversion</span><span class="p">(</span>
+                    <span class="n">gen_out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">,</span> <span class="n">sum_values</span><span class="o">=</span><span class="kc">False</span>
+                <span class="p">)</span>
+            <span class="n">gen_out</span> <span class="o">=</span> <span class="n">gen_out</span> <span class="o">/</span> <span class="n">unitconversion</span><span class="p">[</span><span class="s2">&quot;divisor&quot;</span><span class="p">]</span>
+
+            <span class="n">legend_order</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># Plot line flow</span>
+            <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">gen_out</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">duration_curve</span><span class="p">:</span>
+                    <span class="n">gen_single</span> <span class="o">=</span> <span class="n">sort_duration</span><span class="p">(</span><span class="n">gen_out</span><span class="p">,</span> <span class="n">column</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">gen_single</span> <span class="o">=</span> <span class="n">gen_out</span>
+                <span class="n">legend_label</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">column</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">mplt</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span><span class="n">gen_single</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">legend_label</span><span class="p">,</span> <span class="n">sub_pos</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+                <span class="n">legend_order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">legend_label</span><span class="p">)</span>
+
+            <span class="c1"># Get and process all line limits</span>
+            <span class="c1"># line_limits = self.get_line_interface_limits(</span>
+            <span class="c1">#                 [f&quot;{connection}_Export_Limit&quot;,</span>
+            <span class="c1">#                     f&quot;{connection}_Import_Limit&quot;,</span>
+            <span class="c1">#                 ],</span>
+            <span class="c1">#                 line,</span>
+            <span class="c1"># ) / unitconversion[&quot;divisor&quot;]</span>
+            <span class="c1"># # Plot line limits</span>
+            <span class="c1"># self.plot_line_interface_limits(line_limits, mplt, n, duration_curve)</span>
+
+            <span class="c1"># axs[n].set_title(line)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">duration_curve</span><span class="p">:</span>
+                <span class="n">mplt</span><span class="o">.</span><span class="n">set_subplot_timeseries_format</span><span class="p">(</span><span class="n">sub_pos</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+
+        <span class="n">data_table_out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">data_tables</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">unitconversion</span><span class="p">[</span><span class="s2">&quot;divisor&quot;</span><span class="p">]</span>
+        <span class="n">data_table_out</span> <span class="o">=</span> <span class="n">data_table_out</span><span class="o">.</span><span class="n">add_suffix</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; (</span><span class="si">{</span><span class="n">unitconversion</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+        <span class="c1"># legend_order.extend([&quot;Export Limit&quot;, &quot;Import Limit&quot;])</span>
+        <span class="n">mplt</span><span class="o">.</span><span class="n">add_legend</span><span class="p">(</span><span class="n">sort_by</span><span class="o">=</span><span class="n">legend_order</span><span class="p">)</span>
+        <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mi">83</span><span class="p">)</span>
+        <span class="c1"># axs[0].set_xlim(right = 2000)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">unitconversion</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+            <span class="n">rotation</span><span class="o">=</span><span class="s2">&quot;vertical&quot;</span><span class="p">,</span>
+            <span class="n">labelpad</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># plt.tight_layout()</span>
+        <span class="k">if</span> <span class="n">duration_curve</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span>
+                <span class="s2">&quot;Hour of the year&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="s2">&quot;horizontal&quot;</span><span class="p">,</span> <span class="n">labelpad</span><span class="o">=</span><span class="mi">20</span>
+            <span class="p">)</span>
+        <span class="n">fn_suffix</span> <span class="o">=</span> <span class="s2">&quot;_duration_curve&quot;</span> <span class="k">if</span> <span class="n">duration_curve</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">figure_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="si">}</span><span class="s2">_storage&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">figure_name</span><span class="si">}{</span><span class="n">fn_suffix</span><span class="si">}</span><span class="s2">.svg&quot;</span>
+            <span class="p">),</span>
+            <span class="n">dpi</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span>
+            <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">data_table_out</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">figure_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="si">}</span><span class="s2">_storage&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">figure_name</span><span class="si">}{</span><span class="n">fn_suffix</span><span class="si">}</span><span class="s2">.csv&quot;</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">DataSavedInModule</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">outputs</span></div></div>
 </pre></div>
 

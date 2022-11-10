@@ -186,47 +186,95 @@
 <span class="sd">@author: Daniel Levie</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
 <span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
 <span class="kn">import</span> <span class="nn">marmot.utils.mconfig</span> <span class="k">as</span> <span class="nn">mconfig</span>
-
-<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_library</span> <span class="kn">import</span> <span class="n">SetupSubplot</span><span class="p">,</span> <span class="n">PlotLibrary</span>
-<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_data_helper</span> <span class="kn">import</span> <span class="n">MPlotDataHelper</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_data_helper</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">PlotDataStoreAndProcessor</span><span class="p">,</span>
+    <span class="n">set_facet_col_row_dimensions</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_exceptions</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">MissingInputData</span><span class="p">,</span>
     <span class="n">MissingZoneData</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_library</span> <span class="kn">import</span> <span class="n">PlotLibrary</span><span class="p">,</span> <span class="n">SetupSubplot</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.styles</span> <span class="kn">import</span> <span class="n">ColorList</span><span class="p">,</span> <span class="n">GeneratorColorDict</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.timeseries_modifiers</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_sub_hour_interval_count</span><span class="p">,</span>
+    <span class="n">set_timestamp_date_range</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;plotter.&quot;</span> <span class="o">+</span> <span class="vm">__name__</span><span class="p">)</span>
-<span class="n">plot_data_settings</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;plot_data&quot;</span><span class="p">)</span>
+<span class="n">plot_data_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;plot_data&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Reserves"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.reserves.Reserves.html#marmot.plottingmodules.reserves.Reserves">[docs]</a><span class="k">class</span> <span class="nc">Reserves</span><span class="p">(</span><span class="n">MPlotDataHelper</span><span class="p">):</span>
+<div class="viewcode-block" id="Reserves"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.reserves.Reserves.html#marmot.plottingmodules.reserves.Reserves">[docs]</a><span class="k">class</span> <span class="nc">Reserves</span><span class="p">(</span><span class="n">PlotDataStoreAndProcessor</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Generator and system reserve plots.</span>
 
 <span class="sd">    The reserves.py module contains methods that are</span>
 <span class="sd">    related to reserve provision and shortage.</span>
 
-<span class="sd">    Reserves inherits from the MPlotDataHelper class to assist</span>
+<span class="sd">    Reserves inherits from the PlotDataStoreAndProcessor class to assist</span>
 <span class="sd">    in creating figures.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">Zones</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">Scenarios</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">AGG_BY</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">ordered_gen</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">marmot_solutions_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="n">marmot_color_dict</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ylabels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">xlabels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">custom_xticklabels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">color_list</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="n">ColorList</span><span class="p">()</span><span class="o">.</span><span class="n">colors</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
-<span class="sd">            *args</span>
-<span class="sd">                Minimum required parameters passed to the MPlotDataHelper </span>
-<span class="sd">                class.</span>
-<span class="sd">            **kwargs</span>
-<span class="sd">                These parameters will be passed to the MPlotDataHelper </span>
-<span class="sd">                class.</span>
+<span class="sd">            Zones (List[str]): List of regions/zones to plot.</span>
+<span class="sd">            Scenarios (List[str]): List of scenarios to plot.</span>
+<span class="sd">            AGG_BY (str): Informs region type to aggregate by when creating plots.</span>
+<span class="sd">            ordered_gen (List[str]): Ordered list of generator technologies to plot,</span>
+<span class="sd">                order defines the generator technology position in stacked bar and area plots.</span>
+<span class="sd">            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.</span>
+<span class="sd">            marmot_color_dict (dict, optional): Dictionary of colors to use for</span>
+<span class="sd">                generation technologies.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            ylabels (List[str], optional): y-axis labels for facet plots.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            xlabels (List[str], optional): x-axis labels for facet plots.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            custom_xticklabels (List[str], optional): List of custom x labels to</span>
+<span class="sd">                apply to barplots. Values will overwite existing ones.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            color_list (list, optional): List of colors to apply to non-gen plots.</span>
+<span class="sd">                Defaults to ColorList().colors.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Instantiation of MPlotHelperFunctions</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1"># Instantiation of PlotDataStoreAndProcessor</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">AGG_BY</span><span class="p">,</span> <span class="n">ordered_gen</span><span class="p">,</span> <span class="n">marmot_solutions_folder</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Zones</span> <span class="o">=</span> <span class="n">Zones</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span> <span class="o">=</span> <span class="n">Scenarios</span>
+        <span class="k">if</span> <span class="n">marmot_color_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span> <span class="o">=</span> <span class="n">GeneratorColorDict</span><span class="o">.</span><span class="n">set_random_colors</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">color_dict</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span> <span class="o">=</span> <span class="n">marmot_color_dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span> <span class="o">=</span> <span class="n">ylabels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span> <span class="o">=</span> <span class="n">xlabels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">custom_xticklabels</span> <span class="o">=</span> <span class="n">custom_xticklabels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">color_list</span> <span class="o">=</span> <span class="n">color_list</span>
 
 <div class="viewcode-block" id="Reserves.reserve_gen_timeseries"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.reserves.Reserves.html#marmot.plottingmodules.reserves.Reserves.reserve_gen_timeseries">[docs]</a>    <span class="k">def</span> <span class="nf">reserve_gen_timeseries</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -282,14 +330,14 @@
 
         <span class="n">outputs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and </span>
-        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required, </span>
+        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and</span>
+        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required,</span>
         <span class="c1"># scenarios must be a list.</span>
         <span class="n">properties</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;reserves_generators_Provision</span><span class="si">{</span><span class="n">data_resolution</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">)</span>
         <span class="p">]</span>
 
-        <span class="c1"># Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary</span>
+        <span class="c1"># Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary</span>
         <span class="c1"># with all required properties, returns a 1 if required data is missing</span>
         <span class="n">check_input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_formatted_data</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
 
@@ -300,8 +348,8 @@
         <span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Zones</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Zone = </span><span class="si">{</span><span class="n">region</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-            <span class="n">ncols</span><span class="p">,</span> <span class="n">nrows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_facet_col_row_dimensions</span><span class="p">(</span>
-                <span class="n">multi_scenario</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span>
+            <span class="n">ncols</span><span class="p">,</span> <span class="n">nrows</span> <span class="o">=</span> <span class="n">set_facet_col_row_dimensions</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span><span class="p">,</span> <span class="n">multi_scenario</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span>
             <span class="p">)</span>
             <span class="n">grid_size</span> <span class="o">=</span> <span class="n">ncols</span> <span class="o">*</span> <span class="n">nrows</span>
             <span class="n">excess_axs</span> <span class="o">=</span> <span class="n">grid_size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">)</span>
@@ -331,7 +379,7 @@
                 <span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">start_date_range</span><span class="p">):</span>
-                    <span class="n">reserve_provision_timeseries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_timestamp_date_range</span><span class="p">(</span>
+                    <span class="n">reserve_provision_timeseries</span> <span class="o">=</span> <span class="n">set_timestamp_date_range</span><span class="p">(</span>
                         <span class="n">reserve_provision_timeseries</span><span class="p">,</span> <span class="n">start_date_range</span><span class="p">,</span> <span class="n">end_date_range</span>
                     <span class="p">)</span>
                     <span class="k">if</span> <span class="n">reserve_provision_timeseries</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -341,7 +389,7 @@
                 <span class="c1"># unitconversion based off peak generation hour, only checked once</span>
                 <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">unitconversion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity_energy_unitconversion</span><span class="p">(</span>
-                        <span class="n">reserve_provision_timeseries</span><span class="p">,</span> <span class="n">sum_values</span><span class="o">=</span><span class="kc">True</span>
+                        <span class="n">reserve_provision_timeseries</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">,</span> <span class="n">sum_values</span><span class="o">=</span><span class="kc">True</span>
                     <span class="p">)</span>
                 <span class="n">reserve_provision_timeseries</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">reserve_provision_timeseries</span> <span class="o">/</span> <span class="n">unitconversion</span><span class="p">[</span><span class="s2">&quot;divisor&quot;</span><span class="p">]</span>
@@ -385,7 +433,7 @@
 
                 <span class="n">mplt</span><span class="o">.</span><span class="n">stackplot</span><span class="p">(</span>
                     <span class="n">reserve_provision_timeseries</span><span class="p">,</span>
-                    <span class="n">color_dict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span><span class="p">,</span>
+                    <span class="n">color_dict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span><span class="p">,</span>
                     <span class="n">labels</span><span class="o">=</span><span class="n">reserve_provision_timeseries</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span>
                     <span class="n">sub_pos</span><span class="o">=</span><span class="n">n</span><span class="p">,</span>
                 <span class="p">)</span>
@@ -434,8 +482,8 @@
 <span class="sd">            end_date_range (str, optional): Defines a end date at which to represent data to.</span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            scenario_groupby (str, optional): Specifies whether to group data by Scenario</span>
-<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified </span>
-<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when </span>
+<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified</span>
+<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when</span>
 <span class="sd">                plotting data which covers multiple years such as ReEDS.</span>
 <span class="sd">                Defaults to Scenario.</span>
 
@@ -446,12 +494,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">outputs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and </span>
-        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required, </span>
+        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and</span>
+        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required,</span>
         <span class="c1"># scenarios must be a list.</span>
         <span class="n">properties</span> <span class="o">=</span> <span class="p">[(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;reserves_generators_Provision&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">)]</span>
 
-        <span class="c1"># Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary</span>
+        <span class="c1"># Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary</span>
         <span class="c1"># with all required properties, returns a 1 if required data is missing</span>
         <span class="n">check_input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_formatted_data</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
 
@@ -482,7 +530,7 @@
                 <span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">start_date_range</span><span class="p">):</span>
-                    <span class="n">reserve_provision_timeseries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_timestamp_date_range</span><span class="p">(</span>
+                    <span class="n">reserve_provision_timeseries</span> <span class="o">=</span> <span class="n">set_timestamp_date_range</span><span class="p">(</span>
                         <span class="n">reserve_provision_timeseries</span><span class="p">,</span> <span class="n">start_date_range</span><span class="p">,</span> <span class="n">end_date_range</span>
                     <span class="p">)</span>
                     <span class="k">if</span> <span class="n">reserve_provision_timeseries</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -490,7 +538,7 @@
                         <span class="k">continue</span>
 
                 <span class="c1"># Calculates interval step to correct for MWh of generation</span>
-                <span class="n">interval_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sub_hour_interval_count</span><span class="p">(</span>
+                <span class="n">interval_count</span> <span class="o">=</span> <span class="n">get_sub_hour_interval_count</span><span class="p">(</span>
                     <span class="n">reserve_provision_timeseries</span>
                 <span class="p">)</span>
                 <span class="n">reserve_provision_timeseries</span> <span class="o">=</span> <span class="p">(</span>
@@ -516,7 +564,7 @@
 
             <span class="c1"># Convert units</span>
             <span class="n">unitconversion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity_energy_unitconversion</span><span class="p">(</span>
-                <span class="n">total_reserves_out</span><span class="p">,</span> <span class="n">sum_values</span><span class="o">=</span><span class="kc">True</span>
+                <span class="n">total_reserves_out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">,</span> <span class="n">sum_values</span><span class="o">=</span><span class="kc">True</span>
             <span class="p">)</span>
             <span class="n">total_reserves_out</span> <span class="o">=</span> <span class="n">total_reserves_out</span> <span class="o">/</span> <span class="n">unitconversion</span><span class="p">[</span><span class="s2">&quot;divisor&quot;</span><span class="p">]</span>
             <span class="n">data_table_out</span> <span class="o">=</span> <span class="n">total_reserves_out</span><span class="o">.</span><span class="n">add_suffix</span><span class="p">(</span>
@@ -533,7 +581,7 @@
 
             <span class="n">mplt</span><span class="o">.</span><span class="n">barplot</span><span class="p">(</span>
                 <span class="n">total_reserves_out</span><span class="p">,</span>
-                <span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span><span class="p">,</span>
                 <span class="n">stacked</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">custom_tick_labels</span><span class="o">=</span><span class="n">tick_labels</span><span class="p">,</span>
             <span class="p">)</span>
@@ -617,8 +665,8 @@
 <span class="sd">            end_date_range (str, optional): Defines a end date at which to represent data to.</span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            scenario_groupby (str, optional): Specifies whether to group data by Scenario</span>
-<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified </span>
-<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when </span>
+<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified</span>
+<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when</span>
 <span class="sd">                plotting data which covers multiple years such as ReEDS.</span>
 <span class="sd">                Defaults to Scenario.</span>
 
@@ -629,12 +677,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">outputs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and </span>
-        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required, </span>
+        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and</span>
+        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required,</span>
         <span class="c1"># scenarios must be a list.</span>
         <span class="n">properties</span> <span class="o">=</span> <span class="p">[(</span><span class="kc">True</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;reserve_</span><span class="si">{</span><span class="n">data_set</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">)]</span>
 
-        <span class="c1"># Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary</span>
+        <span class="c1"># Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary</span>
         <span class="c1"># with all required properties, returns a 1 if required data is missing</span>
         <span class="n">check_input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_formatted_data</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
 
@@ -662,7 +710,7 @@
                     <span class="k">continue</span>
 
                 <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">start_date_range</span><span class="p">):</span>
-                    <span class="n">reserve_timeseries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_timestamp_date_range</span><span class="p">(</span>
+                    <span class="n">reserve_timeseries</span> <span class="o">=</span> <span class="n">set_timestamp_date_range</span><span class="p">(</span>
                         <span class="n">reserve_timeseries</span><span class="p">,</span> <span class="n">start_date_range</span><span class="p">,</span> <span class="n">end_date_range</span>
                     <span class="p">)</span>
                     <span class="k">if</span> <span class="n">reserve_timeseries</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -682,7 +730,7 @@
                     <span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">,</span> <span class="s2">&quot;Type&quot;</span><span class="p">,</span> <span class="s2">&quot;parent&quot;</span><span class="p">],</span> <span class="n">append</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
                 <span class="p">)</span>
 
-                <span class="n">interval_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sub_hour_interval_count</span><span class="p">(</span><span class="n">reserve_timeseries</span><span class="p">)</span>
+                <span class="n">interval_count</span> <span class="o">=</span> <span class="n">get_sub_hour_interval_count</span><span class="p">(</span><span class="n">reserve_timeseries</span><span class="p">)</span>
                 <span class="c1"># Groupby Type</span>
                 <span class="k">if</span> <span class="n">count_hours</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
                     <span class="n">reserve_total</span> <span class="o">=</span> <span class="p">(</span>
@@ -726,7 +774,9 @@
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">count_hours</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
                 <span class="c1"># Convert units</span>
-                <span class="n">unitconversion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity_energy_unitconversion</span><span class="p">(</span><span class="n">reserve_out</span><span class="p">)</span>
+                <span class="n">unitconversion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity_energy_unitconversion</span><span class="p">(</span>
+                    <span class="n">reserve_out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span>
+                <span class="p">)</span>
                 <span class="n">reserve_out</span> <span class="o">=</span> <span class="n">reserve_out</span> <span class="o">/</span> <span class="n">unitconversion</span><span class="p">[</span><span class="s2">&quot;divisor&quot;</span><span class="p">]</span>
                 <span class="n">Data_Table_Out</span> <span class="o">=</span> <span class="n">reserve_out</span><span class="o">.</span><span class="n">add_suffix</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot; (</span><span class="si">{</span><span class="n">unitconversion</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">h)&quot;</span>
@@ -810,12 +860,12 @@
 
         <span class="n">outputs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and </span>
-        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required, </span>
+        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and</span>
+        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required,</span>
         <span class="c1"># scenarios must be a list.</span>
         <span class="n">properties</span> <span class="o">=</span> <span class="p">[(</span><span class="kc">True</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;reserve_Shortage</span><span class="si">{</span><span class="n">data_resolution</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">Scenarios</span><span class="p">)]</span>
 
-        <span class="c1"># Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary</span>
+        <span class="c1"># Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary</span>
         <span class="c1"># with all required properties, returns a 1 if required data is missing</span>
         <span class="n">check_input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_formatted_data</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
 
@@ -826,8 +876,8 @@
         <span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Zones</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Zone = </span><span class="si">{</span><span class="n">region</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-            <span class="n">ncols</span><span class="p">,</span> <span class="n">nrows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_facet_col_row_dimensions</span><span class="p">(</span>
-                <span class="n">facet</span><span class="p">,</span> <span class="n">multi_scenario</span><span class="o">=</span><span class="n">Scenarios</span>
+            <span class="n">ncols</span><span class="p">,</span> <span class="n">nrows</span> <span class="o">=</span> <span class="n">set_facet_col_row_dimensions</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span><span class="p">,</span> <span class="n">facet</span><span class="p">,</span> <span class="n">multi_scenario</span><span class="o">=</span><span class="n">Scenarios</span>
             <span class="p">)</span>
             <span class="n">grid_size</span> <span class="o">=</span> <span class="n">ncols</span> <span class="o">*</span> <span class="n">nrows</span>
             <span class="n">excess_axs</span> <span class="o">=</span> <span class="n">grid_size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">Scenarios</span><span class="p">)</span>
@@ -869,7 +919,7 @@
                 <span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">start_date_range</span><span class="p">):</span>
-                    <span class="n">reserve_timeseries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_timestamp_date_range</span><span class="p">(</span>
+                    <span class="n">reserve_timeseries</span> <span class="o">=</span> <span class="n">set_timestamp_date_range</span><span class="p">(</span>
                         <span class="n">reserve_timeseries</span><span class="p">,</span> <span class="n">start_date_range</span><span class="p">,</span> <span class="n">end_date_range</span>
                     <span class="p">)</span>
                     <span class="k">if</span> <span class="n">reserve_timeseries</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>

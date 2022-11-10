@@ -186,47 +186,96 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="kn">import</span> <span class="nn">marmot.utils.mconfig</span> <span class="k">as</span> <span class="nn">mconfig</span>
-
-<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_library</span> <span class="kn">import</span> <span class="n">PlotLibrary</span><span class="p">,</span> <span class="n">SetupSubplot</span>
-<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_data_helper</span> <span class="kn">import</span> <span class="n">MPlotDataHelper</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_data_helper</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">GenCategories</span><span class="p">,</span>
+    <span class="n">PlotDataStoreAndProcessor</span><span class="p">,</span>
+    <span class="n">set_facet_col_row_dimensions</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_exceptions</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">MissingInputData</span><span class="p">,</span>
     <span class="n">MissingZoneData</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_library</span> <span class="kn">import</span> <span class="n">PlotLibrary</span><span class="p">,</span> <span class="n">SetupSubplot</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.styles</span> <span class="kn">import</span> <span class="n">GeneratorColorDict</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.timeseries_modifiers</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_sub_hour_interval_count</span><span class="p">,</span>
+    <span class="n">set_timestamp_date_range</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;plotter.&quot;</span> <span class="o">+</span> <span class="vm">__name__</span><span class="p">)</span>
+<span class="n">shift_leapday</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;shift_leapday&quot;</span><span class="p">)</span>
 <span class="n">plot_data_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;plot_data&quot;</span><span class="p">)</span>
-<span class="n">load_legend_names</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;load_legend_names&quot;</span><span class="p">)</span>
+<span class="n">curtailment_prop</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;plot_data&quot;</span><span class="p">,</span> <span class="s2">&quot;curtailment_property&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="TotalGeneration"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.total_generation.TotalGeneration.html#marmot.plottingmodules.total_generation.TotalGeneration">[docs]</a><span class="k">class</span> <span class="nc">TotalGeneration</span><span class="p">(</span><span class="n">MPlotDataHelper</span><span class="p">):</span>
+<div class="viewcode-block" id="TotalGeneration"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.total_generation.TotalGeneration.html#marmot.plottingmodules.total_generation.TotalGeneration">[docs]</a><span class="k">class</span> <span class="nc">TotalGeneration</span><span class="p">(</span><span class="n">PlotDataStoreAndProcessor</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Total generation plots.</span>
 
 <span class="sd">    The total_genertion.py module contains methods that are</span>
 <span class="sd">    display the total amount of generation over a given time period.</span>
 
-<span class="sd">    TotalGeneration inherits from the MPlotDataHelper class to assist</span>
+<span class="sd">    TotalGeneration inherits from the PlotDataStoreAndProcessor class to assist</span>
 <span class="sd">    in creating figures.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">Zones</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">Scenarios</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">AGG_BY</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">ordered_gen</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">marmot_solutions_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="n">gen_categories</span><span class="p">:</span> <span class="n">GenCategories</span> <span class="o">=</span> <span class="n">GenCategories</span><span class="p">(),</span>
+        <span class="n">marmot_color_dict</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ylabels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">xlabels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">custom_xticklabels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
-<span class="sd">            *args</span>
-<span class="sd">                Minimum required parameters passed to the MPlotDataHelper </span>
-<span class="sd">                class.</span>
-<span class="sd">            **kwargs</span>
-<span class="sd">                These parameters will be passed to the MPlotDataHelper </span>
-<span class="sd">                class.</span>
+<span class="sd">            Zones (List[str]): List of regions/zones to plot.</span>
+<span class="sd">            Scenarios (List[str]): List of scenarios to plot.</span>
+<span class="sd">            AGG_BY (str): Informs region type to aggregate by when creating plots.</span>
+<span class="sd">            ordered_gen (List[str]): Ordered list of generator technologies to plot,</span>
+<span class="sd">                order defines the generator technology position in stacked bar and area plots.</span>
+<span class="sd">            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.</span>
+<span class="sd">            gen_categories (GenCategories): Instance of GenCategories class, groups generator technologies</span>
+<span class="sd">                into defined categories.</span>
+<span class="sd">                Deafults to GenCategories.</span>
+<span class="sd">            marmot_color_dict (dict, optional): Dictionary of colors to use for</span>
+<span class="sd">                generation technologies.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            ylabels (List[str], optional): y-axis labels for facet plots.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            xlabels (List[str], optional): x-axis labels for facet plots.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            custom_xticklabels (List[str], optional): List of custom x labels to</span>
+<span class="sd">                apply to barplots. Values will overwite existing ones.</span>
+<span class="sd">                Defaults to None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Instantiation of MPlotHelperFunctions</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1"># Instantiation of PlotDataStoreAndProcessor</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">AGG_BY</span><span class="p">,</span> <span class="n">ordered_gen</span><span class="p">,</span> <span class="n">marmot_solutions_folder</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">curtailment_prop</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;plot_data&quot;</span><span class="p">,</span> <span class="s2">&quot;curtailment_property&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Zones</span> <span class="o">=</span> <span class="n">Zones</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span> <span class="o">=</span> <span class="n">Scenarios</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gen_categories</span> <span class="o">=</span> <span class="n">gen_categories</span>
+        <span class="k">if</span> <span class="n">marmot_color_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span> <span class="o">=</span> <span class="n">GeneratorColorDict</span><span class="o">.</span><span class="n">set_random_colors</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">color_dict</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span> <span class="o">=</span> <span class="n">marmot_color_dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span> <span class="o">=</span> <span class="n">ylabels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span> <span class="o">=</span> <span class="n">xlabels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">custom_xticklabels</span> <span class="o">=</span> <span class="n">custom_xticklabels</span>
 
 <div class="viewcode-block" id="TotalGeneration.total_gen"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.total_generation.TotalGeneration.html#marmot.plottingmodules.total_generation.TotalGeneration.total_gen">[docs]</a>    <span class="k">def</span> <span class="nf">total_gen</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -245,8 +294,8 @@
 <span class="sd">            end_date_range (str, optional): Defines a end date at which to represent data to.</span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            scenario_groupby (str, optional): Specifies whether to group data by Scenario</span>
-<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified </span>
-<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when </span>
+<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified</span>
+<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when</span>
 <span class="sd">                plotting data which covers multiple years such as ReEDS.</span>
 <span class="sd">                Defaults to Scenario.</span>
 
@@ -262,18 +311,19 @@
             <span class="n">agg</span> <span class="o">=</span> <span class="s2">&quot;zone&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">agg</span> <span class="o">=</span> <span class="s2">&quot;region&quot;</span>
-        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and </span>
-        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required, </span>
+        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and</span>
+        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required,</span>
         <span class="c1"># scenarios must be a list.</span>
         <span class="n">properties</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;generator_Generation&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
-            <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;generator_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">curtailment_prop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
+            <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;generator_</span><span class="si">{</span><span class="n">curtailment_prop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
             <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">agg</span><span class="si">}</span><span class="s2">_Load&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
             <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">agg</span><span class="si">}</span><span class="s2">_Demand&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
             <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">agg</span><span class="si">}</span><span class="s2">_Unserved_Energy&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
+            <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;batterie_Generation&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
         <span class="p">]</span>
 
-        <span class="c1"># Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary</span>
+        <span class="c1"># Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary</span>
         <span class="c1"># with all required properties, returns a 1 if required data is missing</span>
         <span class="n">check_input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_formatted_data</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
 
@@ -295,17 +345,16 @@
                 <span class="n">Total_Gen_Stack</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;generator_Generation&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                     <span class="n">scenario</span>
                 <span class="p">)</span>
-
                 <span class="c1"># Check if zone has generation, if not skips</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">Total_Gen_Stack</span> <span class="o">=</span> <span class="n">Total_Gen_Stack</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">zone_input</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No installed capacity in: </span><span class="si">{</span><span class="n">zone_input</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No generation in: </span><span class="si">{</span><span class="n">zone_input</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                     <span class="k">continue</span>
                 <span class="n">Total_Gen_Stack</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_process_gen_inputs</span><span class="p">(</span><span class="n">Total_Gen_Stack</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">start_date_range</span><span class="p">):</span>
-                    <span class="n">Total_Gen_Stack</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_timestamp_date_range</span><span class="p">(</span>
+                    <span class="n">Total_Gen_Stack</span> <span class="o">=</span> <span class="n">set_timestamp_date_range</span><span class="p">(</span>
                         <span class="n">Total_Gen_Stack</span><span class="p">,</span> <span class="n">start_date_range</span><span class="p">,</span> <span class="n">end_date_range</span>
                     <span class="p">)</span>
                     <span class="k">if</span> <span class="n">Total_Gen_Stack</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -313,72 +362,30 @@
                         <span class="k">continue</span>
 
                 <span class="c1"># Calculates interval step to correct for MWh of generation</span>
-                <span class="n">interval_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sub_hour_interval_count</span><span class="p">(</span><span class="n">Total_Gen_Stack</span><span class="p">)</span>
+                <span class="n">interval_count</span> <span class="o">=</span> <span class="n">get_sub_hour_interval_count</span><span class="p">(</span><span class="n">Total_Gen_Stack</span><span class="p">)</span>
 
-                <span class="n">curtailment_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gen_names_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Curtailment&quot;</span><span class="p">,</span> <span class="s2">&quot;Curtailment&quot;</span><span class="p">)</span>
                 <span class="c1"># Insert Curtailment into gen stack if it exists in database</span>
-                <span class="n">Stacked_Curt</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;generator_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">curtailment_prop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">scenario</span><span class="p">)</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">Stacked_Curt</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="p">(</span>
-                        <span class="n">zone_input</span>
-                        <span class="ow">in</span> <span class="n">Stacked_Curt</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
-                    <span class="p">):</span>
-                        <span class="n">Stacked_Curt</span> <span class="o">=</span> <span class="n">Stacked_Curt</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">zone_input</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span>
-                        <span class="n">Stacked_Curt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_process_gen_inputs</span><span class="p">(</span><span class="n">Stacked_Curt</span><span class="p">)</span>
-                        <span class="c1"># If using Marmot&#39;s curtailment property</span>
-                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">curtailment_prop</span> <span class="o">==</span> <span class="s2">&quot;Curtailment&quot;</span><span class="p">:</span>
-                            <span class="n">Stacked_Curt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assign_curtailment_techs</span><span class="p">(</span><span class="n">Stacked_Curt</span><span class="p">)</span>
-                        <span class="n">Stacked_Curt</span> <span class="o">=</span> <span class="n">Stacked_Curt</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-                        <span class="n">Total_Gen_Stack</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
-                            <span class="nb">len</span><span class="p">(</span><span class="n">Total_Gen_Stack</span><span class="o">.</span><span class="n">columns</span><span class="p">),</span>
-                            <span class="n">column</span><span class="o">=</span><span class="n">curtailment_name</span><span class="p">,</span>
-                            <span class="n">value</span><span class="o">=</span><span class="n">Stacked_Curt</span><span class="p">,</span>
-                        <span class="p">)</span>  <span class="c1"># Insert curtailment into</span>
-                        <span class="n">Total_Gen_Stack</span> <span class="o">=</span> <span class="n">Total_Gen_Stack</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
-                            <span class="p">:,</span> <span class="p">(</span><span class="n">Total_Gen_Stack</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-                        <span class="p">]</span>
+                <span class="n">Total_Gen_Stack</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_curtailment_to_df</span><span class="p">(</span>
+                    <span class="n">Total_Gen_Stack</span><span class="p">,</span> <span class="n">scenario</span><span class="p">,</span> <span class="n">zone_input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gen_categories</span><span class="o">.</span><span class="n">vre</span>
+                <span class="p">)</span>
+                <span class="c1"># Insert battery generation.</span>
+                <span class="n">Total_Gen_Stack</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_battery_gen_to_df</span><span class="p">(</span>
+                    <span class="n">Total_Gen_Stack</span><span class="p">,</span> <span class="n">scenario</span><span class="p">,</span> <span class="n">zone_input</span>
+                <span class="p">)</span>
 
                 <span class="n">Total_Gen_Stack</span> <span class="o">=</span> <span class="n">Total_Gen_Stack</span> <span class="o">/</span> <span class="n">interval_count</span>
 
-                <span class="c1"># Extra optional properties</span>
-                <span class="n">extra_data_frames</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="c1"># Process extra optional properties</span>
                 <span class="n">extra_property_names</span> <span class="o">=</span> <span class="p">[</span>
                     <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">agg</span><span class="si">}</span><span class="s2">_Load&quot;</span><span class="p">,</span>
                     <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">agg</span><span class="si">}</span><span class="s2">_Demand&quot;</span><span class="p">,</span>
                     <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">agg</span><span class="si">}</span><span class="s2">_Unserved_Energy&quot;</span><span class="p">,</span>
                 <span class="p">]</span>
-                <span class="c1"># Get and process extra properties</span>
-                <span class="k">for</span> <span class="n">ext_prop</span> <span class="ow">in</span> <span class="n">extra_property_names</span><span class="p">:</span>
-                    <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">ext_prop</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">scenario</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">empty</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">plot_data_settings</span><span class="p">[</span><span class="s2">&quot;include_barplot_load_lines&quot;</span><span class="p">]:</span>
-                        <span class="n">date_index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span>
-                            <span class="n">start</span><span class="o">=</span><span class="s2">&quot;2010-01-01&quot;</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;timestamp&quot;</span>
-                        <span class="p">)</span>
-                        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="n">date_index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">])</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">zone_input</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span>
-                        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">&quot;timestamp&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-                    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="n">ext_prop</span><span class="p">})</span>
-                    <span class="n">extra_data_frames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
-
-                <span class="n">extra_plot_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">extra_data_frames</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-
-                <span class="k">if</span> <span class="p">(</span><span class="n">extra_plot_data</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">agg</span><span class="si">}</span><span class="s2">_Unserved_Energy&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
-                    <span class="n">extra_plot_data</span><span class="p">[</span><span class="s2">&quot;Load-Unserved_Energy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="n">extra_plot_data</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">agg</span><span class="si">}</span><span class="s2">_Demand&quot;</span><span class="p">]</span>
-                        <span class="o">-</span> <span class="n">extra_plot_data</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">agg</span><span class="si">}</span><span class="s2">_Unserved_Energy&quot;</span><span class="p">]</span>
-                    <span class="p">)</span>
-
-                <span class="n">extra_plot_data</span> <span class="o">=</span> <span class="n">extra_plot_data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
-                    <span class="n">columns</span><span class="o">=</span><span class="p">{</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">agg</span><span class="si">}</span><span class="s2">_Load&quot;</span><span class="p">:</span> <span class="s2">&quot;Total Load&quot;</span><span class="p">,</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">agg</span><span class="si">}</span><span class="s2">_Unserved_Energy&quot;</span><span class="p">:</span> <span class="s2">&quot;Unserved Energy&quot;</span><span class="p">,</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">agg</span><span class="si">}</span><span class="s2">_Demand&quot;</span><span class="p">:</span> <span class="s2">&quot;Total Demand&quot;</span><span class="p">,</span>
-                    <span class="p">}</span>
+                <span class="n">extra_plot_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_extra_properties</span><span class="p">(</span>
+                    <span class="n">extra_property_names</span><span class="p">,</span> <span class="n">scenario</span><span class="p">,</span> <span class="n">zone_input</span><span class="p">,</span> <span class="n">agg</span>
                 <span class="p">)</span>
-                <span class="n">extra_plot_data</span> <span class="o">=</span> <span class="n">extra_plot_data</span> <span class="o">/</span> <span class="n">interval_count</span>
 
-                <span class="c1"># Adjust extra data to generator date range</span>
+                <span class="n">extra_plot_data</span> <span class="o">=</span> <span class="n">extra_plot_data</span> <span class="o">/</span> <span class="n">interval_count</span>
                 <span class="n">extra_plot_data</span> <span class="o">=</span> <span class="n">extra_plot_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
                     <span class="n">Total_Gen_Stack</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="p">:</span> <span class="n">Total_Gen_Stack</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
                 <span class="p">]</span>
@@ -397,9 +404,9 @@
                 <span class="n">outputs</span><span class="p">[</span><span class="n">zone_input</span><span class="p">]</span> <span class="o">=</span> <span class="n">MissingZoneData</span><span class="p">()</span>
                 <span class="k">continue</span>
 
-            <span class="n">total_generation_stack_out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
-                <span class="n">gen_chunks</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">total_generation_stack_out</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">gen_chunks</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
             <span class="n">extra_data_out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">extra_data_chunks</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
             <span class="c1"># Add Net Imports if desired</span>
@@ -416,7 +423,7 @@
 
             <span class="c1"># unit conversion return divisor and energy units</span>
             <span class="n">unitconversion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity_energy_unitconversion</span><span class="p">(</span>
-                <span class="n">total_generation_stack_out</span><span class="p">,</span> <span class="n">sum_values</span><span class="o">=</span><span class="kc">True</span>
+                <span class="n">total_generation_stack_out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">,</span> <span class="n">sum_values</span><span class="o">=</span><span class="kc">True</span>
             <span class="p">)</span>
 
             <span class="n">total_generation_stack_out</span> <span class="o">=</span> <span class="p">(</span>
@@ -425,12 +432,9 @@
             <span class="n">extra_data_out</span> <span class="o">=</span> <span class="n">extra_data_out</span> <span class="o">/</span> <span class="n">unitconversion</span><span class="p">[</span><span class="s2">&quot;divisor&quot;</span><span class="p">]</span>
 
             <span class="c1"># Data table of values to return to main program</span>
-            <span class="k">if</span> <span class="n">plot_data_settings</span><span class="p">[</span><span class="s2">&quot;include_barplot_load_lines&quot;</span><span class="p">]:</span>
-                <span class="n">Data_Table_Out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
-                    <span class="p">[</span><span class="n">extra_data_out</span><span class="p">,</span> <span class="n">total_generation_stack_out</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span>
-                <span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">Data_Table_Out</span> <span class="o">=</span> <span class="n">total_generation_stack_out</span>
+            <span class="n">Data_Table_Out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">extra_data_out</span><span class="p">,</span> <span class="n">total_generation_stack_out</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span>
             <span class="n">Data_Table_Out</span> <span class="o">=</span> <span class="n">Data_Table_Out</span><span class="o">.</span><span class="n">add_suffix</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; (</span><span class="si">{</span><span class="n">unitconversion</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">h)&quot;</span><span class="p">)</span>
 
             <span class="n">mplt</span> <span class="o">=</span> <span class="n">PlotLibrary</span><span class="p">()</span>
@@ -444,7 +448,7 @@
 
             <span class="n">mplt</span><span class="o">.</span><span class="n">barplot</span><span class="p">(</span>
                 <span class="n">total_generation_stack_out</span><span class="p">,</span>
-                <span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span><span class="p">,</span>
                 <span class="n">stacked</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">custom_tick_labels</span><span class="o">=</span><span class="n">tick_labels</span><span class="p">,</span>
             <span class="p">)</span>
@@ -456,60 +460,8 @@
             <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">plot_data_settings</span><span class="p">[</span><span class="s2">&quot;include_barplot_load_lines&quot;</span><span class="p">]:</span>
-                <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">scenario</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">total_generation_stack_out</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">unique</span><span class="p">()):</span>
-                    <span class="n">x</span> <span class="o">=</span> <span class="p">[</span>
-                        <span class="n">ax</span><span class="o">.</span><span class="n">patches</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">get_x</span><span class="p">(),</span>
-                        <span class="n">ax</span><span class="o">.</span><span class="n">patches</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">get_x</span><span class="p">()</span> <span class="o">+</span> <span class="n">ax</span><span class="o">.</span><span class="n">patches</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">get_width</span><span class="p">(),</span>
-                    <span class="p">]</span>
+                <span class="n">mplt</span><span class="o">.</span><span class="n">add_barplot_load_lines_and_use</span><span class="p">(</span><span class="n">extra_data_out</span><span class="p">)</span>
 
-                    <span class="n">height1</span> <span class="o">=</span> <span class="p">[</span>
-                        <span class="nb">float</span><span class="p">(</span><span class="n">extra_data_out</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">scenario</span><span class="p">,</span> <span class="s2">&quot;Total Load&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
-                    <span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
-
-                    <span class="k">if</span> <span class="p">(</span>
-                        <span class="n">plot_data_settings</span><span class="p">[</span><span class="s2">&quot;include_barplot_load_storage_charging_line&quot;</span><span class="p">]</span>
-                        <span class="ow">and</span> <span class="n">extra_plot_data</span><span class="p">[</span><span class="s2">&quot;Total Load&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-                        <span class="o">&gt;</span> <span class="n">extra_plot_data</span><span class="p">[</span><span class="s2">&quot;Total Demand&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-                    <span class="p">):</span>
-                        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-                            <span class="n">x</span><span class="p">,</span>
-                            <span class="n">height1</span><span class="p">,</span>
-                            <span class="n">c</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
-                            <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span>
-                            <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span>
-                            <span class="n">label</span><span class="o">=</span><span class="n">load_legend_names</span><span class="p">[</span><span class="s2">&quot;load&quot;</span><span class="p">],</span>
-                        <span class="p">)</span>
-                        <span class="n">height2</span> <span class="o">=</span> <span class="p">[</span>
-                            <span class="nb">float</span><span class="p">(</span><span class="n">extra_data_out</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">scenario</span><span class="p">,</span> <span class="s2">&quot;Total Demand&quot;</span><span class="p">])</span>
-                        <span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
-                        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-                            <span class="n">x</span><span class="p">,</span>
-                            <span class="n">height2</span><span class="p">,</span>
-                            <span class="n">c</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
-                            <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span>
-                            <span class="n">label</span><span class="o">=</span><span class="n">load_legend_names</span><span class="p">[</span><span class="s2">&quot;demand&quot;</span><span class="p">],</span>
-                        <span class="p">)</span>
-                    <span class="k">elif</span> <span class="n">extra_plot_data</span><span class="p">[</span><span class="s2">&quot;Total Demand&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-                            <span class="n">x</span><span class="p">,</span>
-                            <span class="n">height1</span><span class="p">,</span>
-                            <span class="n">c</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
-                            <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span>
-                            <span class="n">label</span><span class="o">=</span><span class="n">load_legend_names</span><span class="p">[</span><span class="s2">&quot;demand&quot;</span><span class="p">],</span>
-                        <span class="p">)</span>
-
-                    <span class="k">if</span> <span class="n">extra_data_out</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">scenario</span><span class="p">,</span> <span class="s2">&quot;Unserved Energy&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                        <span class="n">height3</span> <span class="o">=</span> <span class="p">[</span>
-                            <span class="nb">float</span><span class="p">(</span><span class="n">extra_data_out</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">scenario</span><span class="p">,</span> <span class="s2">&quot;Load-Unserved_Energy&quot;</span><span class="p">])</span>
-                        <span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
-                        <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
-                            <span class="n">x</span><span class="p">,</span>
-                            <span class="n">height3</span><span class="p">,</span>
-                            <span class="n">height1</span><span class="p">,</span>
-                            <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;#DD0200&quot;</span><span class="p">,</span>
-                            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
-                            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Unserved Energy&quot;</span><span class="p">,</span>
-                        <span class="p">)</span>
             <span class="c1"># Add legend</span>
             <span class="n">mplt</span><span class="o">.</span><span class="n">add_legend</span><span class="p">(</span><span class="n">reverse_legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sort_by</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen</span><span class="p">)</span>
             <span class="c1"># Add title</span>
@@ -539,8 +491,8 @@
 <span class="sd">            end_date_range (str, optional): Defines a end date at which to represent data to.</span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            scenario_groupby (str, optional): Specifies whether to group data by Scenario</span>
-<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified </span>
-<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when </span>
+<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified</span>
+<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when</span>
 <span class="sd">                plotting data which covers multiple years such as ReEDS.</span>
 <span class="sd">                Defaults to Scenario.</span>
 
@@ -552,15 +504,15 @@
         <span class="c1"># Create Dictionary to hold Datframes for each scenario</span>
         <span class="n">outputs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and </span>
-        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required, </span>
+        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and</span>
+        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required,</span>
         <span class="c1"># scenarios must be a list.</span>
         <span class="n">properties</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;generator_Generation&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
-            <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;generator_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">curtailment_prop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
+            <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;generator_</span><span class="si">{</span><span class="n">curtailment_prop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
         <span class="p">]</span>
 
-        <span class="c1"># Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary</span>
+        <span class="c1"># Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary</span>
         <span class="c1"># with all required properties, returns a 1 if required data is missing</span>
         <span class="n">check_input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_formatted_data</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
 
@@ -589,37 +541,17 @@
                 <span class="n">Total_Gen_Stack</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_process_gen_inputs</span><span class="p">(</span><span class="n">Total_Gen_Stack</span><span class="p">)</span>
 
                 <span class="c1"># Calculates interval step to correct for MWh of generation</span>
-                <span class="n">interval_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sub_hour_interval_count</span><span class="p">(</span><span class="n">Total_Gen_Stack</span><span class="p">)</span>
+                <span class="n">interval_count</span> <span class="o">=</span> <span class="n">get_sub_hour_interval_count</span><span class="p">(</span><span class="n">Total_Gen_Stack</span><span class="p">)</span>
 
                 <span class="c1"># Insert Curtailment into gen stack if it exists in database</span>
-                <span class="n">Stacked_Curt</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;generator_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">curtailment_prop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">scenario</span><span class="p">)</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">Stacked_Curt</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-                    <span class="n">curtailment_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gen_names_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                        <span class="s2">&quot;Curtailment&quot;</span><span class="p">,</span> <span class="s2">&quot;Curtailment&quot;</span>
-                    <span class="p">)</span>
-                    <span class="k">if</span> <span class="p">(</span>
-                        <span class="n">zone_input</span>
-                        <span class="ow">in</span> <span class="n">Stacked_Curt</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
-                    <span class="p">):</span>
-                        <span class="n">Stacked_Curt</span> <span class="o">=</span> <span class="n">Stacked_Curt</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">zone_input</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span>
-                        <span class="n">Stacked_Curt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_process_gen_inputs</span><span class="p">(</span><span class="n">Stacked_Curt</span><span class="p">)</span>
-                        <span class="c1"># If using Marmot&#39;s curtailment property</span>
-                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">curtailment_prop</span> <span class="o">==</span> <span class="s2">&quot;Curtailment&quot;</span><span class="p">:</span>
-                            <span class="n">Stacked_Curt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assign_curtailment_techs</span><span class="p">(</span><span class="n">Stacked_Curt</span><span class="p">)</span>
-                        <span class="n">Stacked_Curt</span> <span class="o">=</span> <span class="n">Stacked_Curt</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-                        <span class="n">Total_Gen_Stack</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
-                            <span class="nb">len</span><span class="p">(</span><span class="n">Total_Gen_Stack</span><span class="o">.</span><span class="n">columns</span><span class="p">),</span>
-                            <span class="n">column</span><span class="o">=</span><span class="n">curtailment_name</span><span class="p">,</span>
-                            <span class="n">value</span><span class="o">=</span><span class="n">Stacked_Curt</span><span class="p">,</span>
-                        <span class="p">)</span>  <span class="c1"># Insert curtailment into</span>
-                        <span class="n">Total_Gen_Stack</span> <span class="o">=</span> <span class="n">Total_Gen_Stack</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
-                            <span class="p">:,</span> <span class="p">(</span><span class="n">Total_Gen_Stack</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-                        <span class="p">]</span>
+                <span class="n">Total_Gen_Stack</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_curtailment_to_df</span><span class="p">(</span>
+                    <span class="n">Total_Gen_Stack</span><span class="p">,</span> <span class="n">scenario</span><span class="p">,</span> <span class="n">zone_input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gen_categories</span><span class="o">.</span><span class="n">vre</span>
+                <span class="p">)</span>
 
                 <span class="n">Total_Gen_Stack</span> <span class="o">=</span> <span class="n">Total_Gen_Stack</span> <span class="o">/</span> <span class="n">interval_count</span>
 
                 <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">start_date_range</span><span class="p">):</span>
-                    <span class="n">Total_Gen_Stack</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_timestamp_date_range</span><span class="p">(</span>
+                    <span class="n">Total_Gen_Stack</span> <span class="o">=</span> <span class="n">set_timestamp_date_range</span><span class="p">(</span>
                         <span class="n">Total_Gen_Stack</span><span class="p">,</span> <span class="n">start_date_range</span><span class="p">,</span> <span class="n">end_date_range</span>
                     <span class="p">)</span>
 
@@ -659,7 +591,7 @@
                 <span class="k">continue</span>
 
             <span class="n">unitconversion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity_energy_unitconversion</span><span class="p">(</span>
-                <span class="n">total_generation_stack_out</span><span class="p">,</span> <span class="n">sum_values</span><span class="o">=</span><span class="kc">True</span>
+                <span class="n">total_generation_stack_out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">,</span> <span class="n">sum_values</span><span class="o">=</span><span class="kc">True</span>
             <span class="p">)</span>
             <span class="n">total_generation_stack_out</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">total_generation_stack_out</span> <span class="o">/</span> <span class="n">unitconversion</span><span class="p">[</span><span class="s2">&quot;divisor&quot;</span><span class="p">]</span>
@@ -669,6 +601,8 @@
             <span class="n">Data_Table_Out</span> <span class="o">=</span> <span class="n">total_generation_stack_out</span><span class="o">.</span><span class="n">add_suffix</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot; (</span><span class="si">{</span><span class="n">unitconversion</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">h)&quot;</span>
             <span class="p">)</span>
+
+            <span class="n">curtailment_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gen_names_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Curtailment&quot;</span><span class="p">,</span> <span class="s2">&quot;Curtailment&quot;</span><span class="p">)</span>
 
             <span class="n">net_diff</span> <span class="o">=</span> <span class="n">total_generation_stack_out</span>
             <span class="k">try</span><span class="p">:</span>
@@ -681,7 +615,7 @@
             <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">mplt</span><span class="o">.</span><span class="n">get_figure</span><span class="p">()</span>
 
             <span class="n">mplt</span><span class="o">.</span><span class="n">barplot</span><span class="p">(</span>
-                <span class="n">total_generation_stack_out</span><span class="p">,</span> <span class="n">stacked</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span>
+                <span class="n">total_generation_stack_out</span><span class="p">,</span> <span class="n">stacked</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span>
             <span class="p">)</span>
 
             <span class="c1"># Set x-tick labels</span>
@@ -794,17 +728,17 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">agg</span> <span class="o">=</span> <span class="s2">&quot;region&quot;</span>
 
-        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and </span>
-        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required, </span>
+        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and</span>
+        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required,</span>
         <span class="c1"># scenarios must be a list.</span>
         <span class="n">properties</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;generator_Generation&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
-            <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;generator_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">curtailment_prop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
+            <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;generator_</span><span class="si">{</span><span class="n">curtailment_prop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
             <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">agg</span><span class="si">}</span><span class="s2">_Load&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
             <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">agg</span><span class="si">}</span><span class="s2">_Demand&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
         <span class="p">]</span>
 
-        <span class="c1"># Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary</span>
+        <span class="c1"># Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary</span>
         <span class="c1"># with all required properties, returns a 1 if required data is missing</span>
         <span class="n">check_input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_formatted_data</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
 
@@ -812,7 +746,9 @@
             <span class="n">outputs</span> <span class="o">=</span> <span class="n">MissingInputData</span><span class="p">()</span>
             <span class="k">return</span> <span class="n">outputs</span>
 
-        <span class="n">ncols</span><span class="p">,</span> <span class="n">nrows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_facet_col_row_dimensions</span><span class="p">(</span><span class="n">multi_scenario</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">)</span>
+        <span class="n">ncols</span><span class="p">,</span> <span class="n">nrows</span> <span class="o">=</span> <span class="n">set_facet_col_row_dimensions</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span><span class="p">,</span> <span class="n">multi_scenario</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span>
+        <span class="p">)</span>
         <span class="n">grid_size</span> <span class="o">=</span> <span class="n">ncols</span> <span class="o">*</span> <span class="n">nrows</span>
 
         <span class="c1"># Used to calculate any excess axis to delete</span>
@@ -856,60 +792,21 @@
                 <span class="p">)</span>
 
                 <span class="c1"># Calculates interval step to correct for MWh of generation if data is subhourly</span>
-                <span class="n">interval_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sub_hour_interval_count</span><span class="p">(</span><span class="n">Total_Gen_Stack</span><span class="p">)</span>
+                <span class="n">interval_count</span> <span class="o">=</span> <span class="n">get_sub_hour_interval_count</span><span class="p">(</span><span class="n">Total_Gen_Stack</span><span class="p">)</span>
 
                 <span class="c1"># Insert Curtailment into gen stack if it exists in database</span>
-                <span class="n">Stacked_Curt</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;generator_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">curtailment_prop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">scenario</span><span class="p">)</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">Stacked_Curt</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-                    <span class="n">curtailment_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gen_names_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                        <span class="s2">&quot;Curtailment&quot;</span><span class="p">,</span> <span class="s2">&quot;Curtailment&quot;</span>
-                    <span class="p">)</span>
-                    <span class="k">if</span> <span class="p">(</span>
-                        <span class="n">zone_input</span>
-                        <span class="ow">in</span> <span class="n">Stacked_Curt</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
-                    <span class="p">):</span>
-                        <span class="n">Stacked_Curt</span> <span class="o">=</span> <span class="n">Stacked_Curt</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">zone_input</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span>
-                        <span class="n">Stacked_Curt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_process_gen_inputs</span><span class="p">(</span><span class="n">Stacked_Curt</span><span class="p">)</span>
-                        <span class="c1"># If using Marmot&#39;s curtailment property</span>
-                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">curtailment_prop</span> <span class="o">==</span> <span class="s2">&quot;Curtailment&quot;</span><span class="p">:</span>
-                            <span class="n">Stacked_Curt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assign_curtailment_techs</span><span class="p">(</span><span class="n">Stacked_Curt</span><span class="p">)</span>
-                        <span class="n">Stacked_Curt</span> <span class="o">=</span> <span class="n">Stacked_Curt</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-                        <span class="n">Total_Gen_Stack</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
-                            <span class="nb">len</span><span class="p">(</span><span class="n">Total_Gen_Stack</span><span class="o">.</span><span class="n">columns</span><span class="p">),</span>
-                            <span class="n">column</span><span class="o">=</span><span class="n">curtailment_name</span><span class="p">,</span>
-                            <span class="n">value</span><span class="o">=</span><span class="n">Stacked_Curt</span><span class="p">,</span>
-                        <span class="p">)</span>
-                        <span class="n">Total_Gen_Stack</span> <span class="o">=</span> <span class="n">Total_Gen_Stack</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
-                            <span class="p">:,</span> <span class="p">(</span><span class="n">Total_Gen_Stack</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-                        <span class="p">]</span>
+                <span class="n">Total_Gen_Stack</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_curtailment_to_df</span><span class="p">(</span>
+                    <span class="n">Total_Gen_Stack</span><span class="p">,</span> <span class="n">scenario</span><span class="p">,</span> <span class="n">zone_input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gen_categories</span><span class="o">.</span><span class="n">vre</span>
+                <span class="p">)</span>
 
-                <span class="n">extra_data_frames</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="c1"># Process extra optional properties</span>
                 <span class="n">extra_property_names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">agg</span><span class="si">}</span><span class="s2">_Load&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">agg</span><span class="si">}</span><span class="s2">_Demand&quot;</span><span class="p">]</span>
-                <span class="c1"># Get and process extra properties</span>
-                <span class="k">for</span> <span class="n">ext_prop</span> <span class="ow">in</span> <span class="n">extra_property_names</span><span class="p">:</span>
-                    <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">ext_prop</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">scenario</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">empty</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">plot_data_settings</span><span class="p">[</span><span class="s2">&quot;include_barplot_load_lines&quot;</span><span class="p">]:</span>
-                        <span class="n">date_index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span>
-                            <span class="n">start</span><span class="o">=</span><span class="s2">&quot;2010-01-01&quot;</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;timestamp&quot;</span>
-                        <span class="p">)</span>
-                        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="n">date_index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">])</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">zone_input</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span>
-                        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">&quot;timestamp&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-                    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="n">ext_prop</span><span class="p">})</span>
-                    <span class="n">extra_data_frames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
-
-                <span class="n">extra_plot_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">extra_data_frames</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-
-                <span class="n">extra_plot_data</span> <span class="o">=</span> <span class="n">extra_plot_data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
-                    <span class="n">columns</span><span class="o">=</span><span class="p">{</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">agg</span><span class="si">}</span><span class="s2">_Load&quot;</span><span class="p">:</span> <span class="s2">&quot;Total Load&quot;</span><span class="p">,</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">agg</span><span class="si">}</span><span class="s2">_Demand&quot;</span><span class="p">:</span> <span class="s2">&quot;Total Demand&quot;</span><span class="p">,</span>
-                    <span class="p">}</span>
+                <span class="n">extra_plot_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_extra_properties</span><span class="p">(</span>
+                    <span class="n">extra_property_names</span><span class="p">,</span> <span class="n">scenario</span><span class="p">,</span> <span class="n">zone_input</span><span class="p">,</span> <span class="n">agg</span>
                 <span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">start_date_range</span><span class="p">):</span>
-                    <span class="n">Total_Gen_Stack</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_timestamp_date_range</span><span class="p">(</span>
+                    <span class="n">Total_Gen_Stack</span> <span class="o">=</span> <span class="n">set_timestamp_date_range</span><span class="p">(</span>
                         <span class="n">Total_Gen_Stack</span><span class="p">,</span> <span class="n">start_date_range</span><span class="p">,</span> <span class="n">end_date_range</span>
                     <span class="p">)</span>
                     <span class="k">if</span> <span class="n">Total_Gen_Stack</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -994,10 +891,13 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">plot_as_percnt</span><span class="p">:</span>
                 <span class="c1"># unit conversion return divisor and energy units</span>
                 <span class="k">if</span> <span class="n">vre_only</span><span class="p">:</span>
-                    <span class="n">unitconversion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity_energy_unitconversion</span><span class="p">(</span><span class="n">Gen_Out</span><span class="p">)</span>
+                    <span class="n">unitconversion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity_energy_unitconversion</span><span class="p">(</span>
+                        <span class="n">Gen_Out</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">,</span>
+                    <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">unitconversion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity_energy_unitconversion</span><span class="p">(</span>
-                        <span class="n">Gen_Out</span><span class="p">,</span> <span class="n">sum_values</span><span class="o">=</span><span class="kc">True</span>
+                        <span class="n">Gen_Out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">,</span> <span class="n">sum_values</span><span class="o">=</span><span class="kc">True</span>
                     <span class="p">)</span>
                 <span class="n">Gen_Out</span> <span class="o">=</span> <span class="n">Gen_Out</span> <span class="o">/</span> <span class="n">unitconversion</span><span class="p">[</span><span class="s2">&quot;divisor&quot;</span><span class="p">]</span>
                 <span class="n">extra_data_out</span> <span class="o">=</span> <span class="n">extra_data_out</span> <span class="o">/</span> <span class="n">unitconversion</span><span class="p">[</span><span class="s2">&quot;divisor&quot;</span><span class="p">]</span>
@@ -1037,7 +937,7 @@
                     <span class="n">stack</span> <span class="o">=</span> <span class="kc">True</span>
 
                 <span class="n">mplt</span><span class="o">.</span><span class="n">barplot</span><span class="p">(</span>
-                    <span class="n">month_gen</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span><span class="p">,</span> <span class="n">stacked</span><span class="o">=</span><span class="n">stack</span><span class="p">,</span> <span class="n">sub_pos</span><span class="o">=</span><span class="n">i</span>
+                    <span class="n">month_gen</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span><span class="p">,</span> <span class="n">stacked</span><span class="o">=</span><span class="n">stack</span><span class="p">,</span> <span class="n">sub_pos</span><span class="o">=</span><span class="n">i</span>
                 <span class="p">)</span>
 
                 <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">margins</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
@@ -1046,45 +946,9 @@
                 <span class="k">if</span> <span class="n">plot_as_percnt</span><span class="p">:</span>
                     <span class="n">mplt</span><span class="o">.</span><span class="n">set_yaxis_major_tick_format</span><span class="p">(</span><span class="n">tick_format</span><span class="o">=</span><span class="s2">&quot;percent&quot;</span><span class="p">,</span> <span class="n">sub_pos</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">vre_only</span> <span class="ow">and</span> <span class="n">plot_data_settings</span><span class="p">[</span><span class="s2">&quot;include_barplot_load_lines&quot;</span><span class="p">]:</span>
-                <span class="n">month_extra</span> <span class="o">=</span> <span class="n">extra_data_out</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">scenario</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;Scenario&quot;</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">_m</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">month_extra</span><span class="o">.</span><span class="n">index</span><span class="p">):</span>
-                    <span class="n">x</span> <span class="o">=</span> <span class="p">[</span>
-                        <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">patches</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">get_x</span><span class="p">(),</span>
-                        <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">patches</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">get_x</span><span class="p">()</span> <span class="o">+</span> <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">patches</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">get_width</span><span class="p">(),</span>
-                    <span class="p">]</span>
-                    <span class="n">height1</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">month_extra</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">_m</span><span class="p">,</span> <span class="s2">&quot;Total Load&quot;</span><span class="p">])]</span> <span class="o">*</span> <span class="mi">2</span>
-
-                    <span class="k">if</span> <span class="p">(</span>
-                        <span class="n">plot_data_settings</span><span class="p">[</span><span class="s2">&quot;include_barplot_load_storage_charging_line&quot;</span><span class="p">]</span>
-                        <span class="ow">and</span> <span class="n">month_extra</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">_m</span><span class="p">,</span> <span class="s2">&quot;Total Load&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-                        <span class="o">&gt;</span> <span class="n">month_extra</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">_m</span><span class="p">,</span> <span class="s2">&quot;Total Demand&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-                    <span class="p">):</span>
-
-                        <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-                            <span class="n">x</span><span class="p">,</span>
-                            <span class="n">height1</span><span class="p">,</span>
-                            <span class="n">c</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
-                            <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                            <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span>
-                            <span class="n">label</span><span class="o">=</span><span class="n">load_legend_names</span><span class="p">[</span><span class="s2">&quot;load&quot;</span><span class="p">],</span>
-                        <span class="p">)</span>
-                        <span class="n">height2</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">month_extra</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">_m</span><span class="p">,</span> <span class="s2">&quot;Total Demand&quot;</span><span class="p">])]</span> <span class="o">*</span> <span class="mi">2</span>
-                        <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-                            <span class="n">x</span><span class="p">,</span>
-                            <span class="n">height2</span><span class="p">,</span>
-                            <span class="n">c</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
-                            <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span>
-                            <span class="n">label</span><span class="o">=</span><span class="n">load_legend_names</span><span class="p">[</span><span class="s2">&quot;demand&quot;</span><span class="p">],</span>
-                        <span class="p">)</span>
-                    <span class="k">elif</span> <span class="n">month_extra</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">_m</span><span class="p">,</span> <span class="s2">&quot;Total Demand&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                        <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-                            <span class="n">x</span><span class="p">,</span>
-                            <span class="n">height1</span><span class="p">,</span>
-                            <span class="n">c</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
-                            <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                            <span class="n">label</span><span class="o">=</span><span class="n">load_legend_names</span><span class="p">[</span><span class="s2">&quot;demand&quot;</span><span class="p">],</span>
-                        <span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">vre_only</span> <span class="ow">and</span> <span class="n">plot_data_settings</span><span class="p">[</span><span class="s2">&quot;include_barplot_load_lines&quot;</span><span class="p">]:</span>
+                    <span class="n">month_extra</span> <span class="o">=</span> <span class="n">extra_data_out</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">scenario</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;Scenario&quot;</span><span class="p">)</span>
+                    <span class="n">mplt</span><span class="o">.</span><span class="n">add_barplot_load_lines_and_use</span><span class="p">(</span><span class="n">month_extra</span><span class="p">,</span> <span class="n">sub_pos</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
 
             <span class="c1"># add facet labels</span>
             <span class="n">mplt</span><span class="o">.</span><span class="n">add_facet_labels</span><span class="p">(</span><span class="n">xlabels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span><span class="p">,</span> <span class="n">ylabels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span><span class="p">)</span>
@@ -1093,7 +957,7 @@
             <span class="c1"># Remove extra axes</span>
             <span class="n">mplt</span><span class="o">.</span><span class="n">remove_excess_axs</span><span class="p">(</span><span class="n">excess_axs</span><span class="p">,</span> <span class="n">grid_size</span><span class="p">)</span>
 
-            <span class="c1"># Y-label should change if there are facet labels, leave at 40 for now, </span>
+            <span class="c1"># Y-label should change if there are facet labels, leave at 40 for now,</span>
             <span class="c1"># works for all values in spacing</span>
             <span class="n">labelpad</span> <span class="o">=</span> <span class="mi">40</span>
             <span class="k">if</span> <span class="n">plot_as_percnt</span><span class="p">:</span>
@@ -1137,15 +1001,15 @@
         <span class="c1"># Create Dictionary to hold Datframes for each scenario</span>
         <span class="n">outputs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and </span>
-        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required, </span>
+        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and</span>
+        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required,</span>
         <span class="c1"># scenarios must be a list.</span>
         <span class="n">properties</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;generator_Generation&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
-            <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;generator_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">curtailment_prop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
+            <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;generator_</span><span class="si">{</span><span class="n">curtailment_prop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
         <span class="p">]</span>
 
-        <span class="c1"># Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary</span>
+        <span class="c1"># Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary</span>
         <span class="c1"># with all required properties, returns a 1 if required data is missing</span>
         <span class="n">check_input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_formatted_data</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
 
@@ -1153,7 +1017,9 @@
             <span class="n">outputs</span> <span class="o">=</span> <span class="n">MissingInputData</span><span class="p">()</span>
             <span class="k">return</span> <span class="n">outputs</span>
 
-        <span class="n">ncols</span><span class="p">,</span> <span class="n">nrows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_facet_col_row_dimensions</span><span class="p">(</span><span class="n">multi_scenario</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">)</span>
+        <span class="n">ncols</span><span class="p">,</span> <span class="n">nrows</span> <span class="o">=</span> <span class="n">set_facet_col_row_dimensions</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span><span class="p">,</span> <span class="n">multi_scenario</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span>
+        <span class="p">)</span>
         <span class="n">grid_size</span> <span class="o">=</span> <span class="n">ncols</span> <span class="o">*</span> <span class="n">nrows</span>
 
         <span class="c1"># Used to calculate any excess axis to delete</span>
@@ -1184,39 +1050,18 @@
 
                 <span class="n">Total_Gen_Stack</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_process_gen_inputs</span><span class="p">(</span><span class="n">Total_Gen_Stack</span><span class="p">)</span>
 
+                <span class="c1"># Insert Curtailment into gen stack if it exists in database</span>
+                <span class="n">Total_Gen_Stack</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_curtailment_to_df</span><span class="p">(</span>
+                    <span class="n">Total_Gen_Stack</span><span class="p">,</span> <span class="n">scenario</span><span class="p">,</span> <span class="n">zone_input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gen_categories</span><span class="o">.</span><span class="n">vre</span>
+                <span class="p">)</span>
+
                 <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">start_date_range</span><span class="p">):</span>
-                    <span class="n">Total_Gen_Stack</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_timestamp_date_range</span><span class="p">(</span>
+                    <span class="n">Total_Gen_Stack</span> <span class="o">=</span> <span class="n">set_timestamp_date_range</span><span class="p">(</span>
                         <span class="n">Total_Gen_Stack</span><span class="p">,</span> <span class="n">start_date_range</span><span class="p">,</span> <span class="n">end_date_range</span>
                     <span class="p">)</span>
                     <span class="k">if</span> <span class="n">Total_Gen_Stack</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No Generation in selected Date Range&quot;</span><span class="p">)</span>
                         <span class="k">continue</span>
-
-                <span class="c1"># Insert Curtailment into gen stack if it exists in database</span>
-                <span class="n">Stacked_Curt</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;generator_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">curtailment_prop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">scenario</span><span class="p">)</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">Stacked_Curt</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-                    <span class="n">curtailment_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gen_names_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                        <span class="s2">&quot;Curtailment&quot;</span><span class="p">,</span> <span class="s2">&quot;Curtailment&quot;</span>
-                    <span class="p">)</span>
-                    <span class="k">if</span> <span class="p">(</span>
-                        <span class="n">zone_input</span>
-                        <span class="ow">in</span> <span class="n">Stacked_Curt</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
-                    <span class="p">):</span>
-                        <span class="n">Stacked_Curt</span> <span class="o">=</span> <span class="n">Stacked_Curt</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">zone_input</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span>
-                        <span class="n">Stacked_Curt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_process_gen_inputs</span><span class="p">(</span><span class="n">Stacked_Curt</span><span class="p">)</span>
-                        <span class="c1"># If using Marmot&#39;s curtailment property</span>
-                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">curtailment_prop</span> <span class="o">==</span> <span class="s2">&quot;Curtailment&quot;</span><span class="p">:</span>
-                            <span class="n">Stacked_Curt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assign_curtailment_techs</span><span class="p">(</span><span class="n">Stacked_Curt</span><span class="p">)</span>
-                        <span class="n">Stacked_Curt</span> <span class="o">=</span> <span class="n">Stacked_Curt</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-                        <span class="c1"># Insert curtailment into</span>
-                        <span class="n">Total_Gen_Stack</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
-                            <span class="nb">len</span><span class="p">(</span><span class="n">Total_Gen_Stack</span><span class="o">.</span><span class="n">columns</span><span class="p">),</span>
-                            <span class="n">column</span><span class="o">=</span><span class="n">curtailment_name</span><span class="p">,</span>
-                            <span class="n">value</span><span class="o">=</span><span class="n">Stacked_Curt</span><span class="p">,</span>
-                        <span class="p">)</span>
-                        <span class="n">Total_Gen_Stack</span> <span class="o">=</span> <span class="n">Total_Gen_Stack</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
-                            <span class="p">:,</span> <span class="p">(</span><span class="n">Total_Gen_Stack</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-                        <span class="p">]</span>
 
                 <span class="n">Total_Gen_Stack</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">year_scenario_grouper</span><span class="p">(</span>
                     <span class="n">Total_Gen_Stack</span><span class="p">,</span> <span class="n">scenario</span>
@@ -1250,7 +1095,7 @@
                     <span class="n">startangle</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span>
                     <span class="n">labeldistance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                     <span class="n">colors</span><span class="o">=</span><span class="p">[</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;#333333&quot;</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;#333333&quot;</span><span class="p">)</span>
                         <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">scenario_data</span><span class="o">.</span><span class="n">index</span>
                     <span class="p">],</span>
                 <span class="p">)</span>
@@ -1283,7 +1128,7 @@
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Creates a stacked barplot of total generation.</span>
 <span class="sd">        Each scenario will be plotted in a separate bar subplot.</span>
-<span class="sd">        This plot is particularly useful for plotting ReEDS results or </span>
+<span class="sd">        This plot is particularly useful for plotting ReEDS results or</span>
 <span class="sd">        other models than span multiple years with changing capacity.</span>
 <span class="sd">        Ensure scenario_groupby is set to &#39;Year-Sceanrio&#39; to observe this</span>
 <span class="sd">        effect.</span>
@@ -1294,8 +1139,8 @@
 <span class="sd">            end_date_range (str, optional): Defines a end date at which to represent data to.</span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            scenario_groupby (str, optional): Specifies whether to group data by Scenario</span>
-<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified </span>
-<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when </span>
+<span class="sd">                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified</span>
+<span class="sd">                from the timestamp and appeneded to the sceanrio name. This is useful when</span>
 <span class="sd">                plotting data which covers multiple years such as ReEDS.</span>
 <span class="sd">                Defaults to Scenario.</span>
 
@@ -1305,8 +1150,8 @@
 <span class="sd">            dict: Dictionary containing the created plot and its data table.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">outputs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and </span>
-        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required, </span>
+        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and</span>
+        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required,</span>
         <span class="c1"># scenarios must be a list.</span>
         <span class="n">properties</span> <span class="o">=</span> <span class="p">[(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;generator_Generation&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">)]</span>
 
@@ -1322,10 +1167,10 @@
         <span class="k">for</span> <span class="n">zone_input</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Zones</span><span class="p">:</span>
 
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Zone = </span><span class="si">{</span><span class="n">zone_input</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            
+
             <span class="c1"># sets up x, y dimensions of plot</span>
-            <span class="n">ncols</span><span class="p">,</span> <span class="n">nrows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_facet_col_row_dimensions</span><span class="p">(</span>
-                <span class="n">multi_scenario</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span>
+            <span class="n">ncols</span><span class="p">,</span> <span class="n">nrows</span> <span class="o">=</span> <span class="n">set_facet_col_row_dimensions</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span><span class="p">,</span> <span class="n">multi_scenario</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span>
             <span class="p">)</span>
             <span class="n">grid_size</span> <span class="o">=</span> <span class="n">ncols</span> <span class="o">*</span> <span class="n">nrows</span>
             <span class="c1"># Used to calculate any excess axis to delete</span>
@@ -1351,10 +1196,7 @@
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">scenario</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">):</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Scenario = </span><span class="si">{</span><span class="n">scenario</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-
-                <span class="n">total_generation</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;generator_Generation&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                    <span class="n">scenario</span>
-                <span class="p">)</span>
+                <span class="n">total_generation</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;generator_Generation&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">scenario</span><span class="p">)</span>
 
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">generation</span> <span class="o">=</span> <span class="n">total_generation</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">zone_input</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span>
@@ -1363,30 +1205,25 @@
                     <span class="n">outputs</span><span class="p">[</span><span class="n">zone_input</span><span class="p">]</span> <span class="o">=</span> <span class="n">MissingZoneData</span><span class="p">()</span>
                     <span class="k">continue</span>
 
-                <span class="n">generation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_process_gen_inputs</span><span class="p">(</span>
-                    <span class="n">generation</span>
-                <span class="p">)</span>
+                <span class="n">generation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_process_gen_inputs</span><span class="p">(</span><span class="n">generation</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">start_date_range</span><span class="p">):</span>
-                    <span class="n">generation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_timestamp_date_range</span><span class="p">(</span>
+                    <span class="n">generation</span> <span class="o">=</span> <span class="n">set_timestamp_date_range</span><span class="p">(</span>
                         <span class="n">generation</span><span class="p">,</span> <span class="n">start_date_range</span><span class="p">,</span> <span class="n">end_date_range</span>
                     <span class="p">)</span>
                     <span class="k">if</span> <span class="n">generation</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No Data in selected Date Range&quot;</span><span class="p">)</span>
                         <span class="k">continue</span>
                 <span class="n">generation_grouped</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">year_scenario_grouper</span><span class="p">(</span>
-                        <span class="n">generation</span><span class="p">,</span> <span class="n">scenario</span><span class="p">,</span> <span class="n">groupby</span><span class="o">=</span><span class="n">scenario_groupby</span>
-                    <span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-                
+                    <span class="n">generation</span><span class="p">,</span> <span class="n">scenario</span><span class="p">,</span> <span class="n">groupby</span><span class="o">=</span><span class="n">scenario_groupby</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
                 <span class="c1"># unitconversion based off peak generation hour, only checked once</span>
                 <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">unitconversion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity_energy_unitconversion</span><span class="p">(</span>
-                    <span class="n">generation_grouped</span><span class="p">,</span> <span class="n">sum_values</span><span class="o">=</span><span class="kc">True</span>
+                        <span class="n">generation_grouped</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">,</span> <span class="n">sum_values</span><span class="o">=</span><span class="kc">True</span>
                     <span class="p">)</span>
-                <span class="n">generation_grouped</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="n">generation_grouped</span> <span class="o">/</span> <span class="n">unitconversion</span><span class="p">[</span><span class="s2">&quot;divisor&quot;</span><span class="p">]</span>
-                <span class="p">)</span>
+                <span class="n">generation_grouped</span> <span class="o">=</span> <span class="n">generation_grouped</span> <span class="o">/</span> <span class="n">unitconversion</span><span class="p">[</span><span class="s2">&quot;divisor&quot;</span><span class="p">]</span>
 
                 <span class="n">data_tables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">generation_grouped</span><span class="p">)</span>
 
@@ -1400,12 +1237,12 @@
 
                 <span class="n">mplt</span><span class="o">.</span><span class="n">barplot</span><span class="p">(</span>
                     <span class="n">generation_grouped</span><span class="p">,</span>
-                    <span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span><span class="p">,</span>
                     <span class="n">stacked</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                     <span class="n">custom_tick_labels</span><span class="o">=</span><span class="n">tick_labels</span><span class="p">,</span>
                     <span class="n">sub_pos</span><span class="o">=</span><span class="n">i</span><span class="p">,</span>
                 <span class="p">)</span>
-                
+
                 <span class="k">if</span> <span class="n">scenario_groupby</span> <span class="o">==</span> <span class="s2">&quot;Year-Scenario&quot;</span><span class="p">:</span>
                     <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">scenario</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -1414,7 +1251,7 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">data_tables</span><span class="p">:</span>
                 <span class="n">outputs</span><span class="p">[</span><span class="n">zone_input</span><span class="p">]</span> <span class="o">=</span> <span class="n">MissingZoneData</span><span class="p">()</span>
                 <span class="k">continue</span>
-            
+
             <span class="c1"># Add facet labels</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span><span class="p">:</span>
                 <span class="n">mplt</span><span class="o">.</span><span class="n">add_facet_labels</span><span class="p">(</span><span class="n">xlabels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span><span class="p">,</span> <span class="n">ylabels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span><span class="p">)</span>
@@ -1430,10 +1267,10 @@
             <span class="c1"># works for all values in spacing</span>
             <span class="n">labelpad</span> <span class="o">=</span> <span class="mi">40</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Total Generation (</span><span class="si">{</span><span class="n">unitconversion</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
-                    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
-                    <span class="n">rotation</span><span class="o">=</span><span class="s2">&quot;vertical&quot;</span><span class="p">,</span>
-                    <span class="n">labelpad</span><span class="o">=</span><span class="n">labelpad</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">&quot;Total Generation (</span><span class="si">{</span><span class="n">unitconversion</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+                <span class="n">rotation</span><span class="o">=</span><span class="s2">&quot;vertical&quot;</span><span class="p">,</span>
+                <span class="n">labelpad</span><span class="o">=</span><span class="n">labelpad</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="n">Data_Table_Out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">data_tables</span><span class="p">)</span>

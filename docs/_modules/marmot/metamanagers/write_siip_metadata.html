@@ -180,30 +180,40 @@
 <span></span><span class="sd">&quot;&quot;&quot;Write SIIP metadata to Marmot formatted results file </span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
 <span class="kn">from</span> <span class="nn">marmot.utils.dataio</span> <span class="kn">import</span> <span class="n">write_metadata_to_h5</span>
 
 <span class="n">META_KEYS_TO_FUNCTIONS</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;Regions&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;format_regions_meta&quot;</span><span class="p">,</span> <span class="s2">&quot;objects/regions&quot;</span><span class="p">)],</span>
-        <span class="s2">&quot;Generator_fuel_mapping&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;format_generator_category_meta&quot;</span><span class="p">,</span> <span class="s2">&quot;objects/generators&quot;</span><span class="p">)],</span>
-        <span class="s2">&quot;Generator_region_mapping&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;format_region_generators_meta&quot;</span><span class="p">,</span> <span class="s2">&quot;relations/regions_generators&quot;</span><span class="p">)],</span>
-        <span class="s2">&quot;Generator_reserve_mapping&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;format_reserve_generators_meta&quot;</span><span class="p">,</span> <span class="s2">&quot;relations/reserves_generators&quot;</span><span class="p">)],</span>
-        <span class="s2">&quot;Lines&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s2">&quot;format_region_intraregionallines&quot;</span><span class="p">,</span> <span class="s2">&quot;relations/region_intraregionallines&quot;</span><span class="p">),</span>
-            <span class="p">(</span><span class="s2">&quot;format_region_interregionallines&quot;</span><span class="p">,</span> <span class="s2">&quot;relations/region_interregionallines&quot;</span><span class="p">)</span>
-        <span class="p">]</span>
-    <span class="p">}</span>
+    <span class="s2">&quot;Regions&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;format_regions_meta&quot;</span><span class="p">,</span> <span class="s2">&quot;objects/regions&quot;</span><span class="p">)],</span>
+    <span class="s2">&quot;Generator_fuel_mapping&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s2">&quot;format_generator_category_meta&quot;</span><span class="p">,</span> <span class="s2">&quot;objects/generators&quot;</span><span class="p">)</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;Generator_region_mapping&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s2">&quot;format_region_generators_meta&quot;</span><span class="p">,</span> <span class="s2">&quot;relations/regions_generators&quot;</span><span class="p">)</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;Generator_reserve_mapping&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s2">&quot;format_reserve_generators_meta&quot;</span><span class="p">,</span> <span class="s2">&quot;relations/reserves_generators&quot;</span><span class="p">)</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;Lines&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s2">&quot;format_region_intraregionallines&quot;</span><span class="p">,</span> <span class="s2">&quot;relations/region_intraregionallines&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;format_region_interregionallines&quot;</span><span class="p">,</span> <span class="s2">&quot;relations/region_interregionallines&quot;</span><span class="p">),</span>
+    <span class="p">],</span>
+<span class="p">}</span>
 <span class="sd">&quot;&quot;&quot;json metadata keys to functions and Marmot metadata keys.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="metadata_to_h5"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.metamanagers.write_siip_metadata.metadata_to_h5.html#marmot.metamanagers.write_siip_metadata.metadata_to_h5">[docs]</a><span class="k">def</span> <span class="nf">metadata_to_h5</span><span class="p">(</span><span class="n">metadata_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">output_file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> 
-            <span class="n">partition</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;SIIP_metadata&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+<div class="viewcode-block" id="metadata_to_h5"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.metamanagers.write_siip_metadata.metadata_to_h5.html#marmot.metamanagers.write_siip_metadata.metadata_to_h5">[docs]</a><span class="k">def</span> <span class="nf">metadata_to_h5</span><span class="p">(</span>
+    <span class="n">metadata_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">output_file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">partition</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;SIIP_metadata&quot;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Process and write all SIIP metadata to hdf5 file</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        metadata_file (Path): Path to SIIP metadata json file</span>
 <span class="sd">        output_file_path (Path): Path to formatted h5 output file.</span>
-<span class="sd">        partition (str, optional): Metadata partition. </span>
+<span class="sd">        partition (str, optional): Metadata partition.</span>
 <span class="sd">            Defaults to &quot;SIIP_metadata&quot;.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">metadata_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
@@ -215,6 +225,7 @@
             <span class="n">meta_func</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">func_key</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
             <span class="n">df</span> <span class="o">=</span> <span class="n">meta_func</span><span class="p">(</span><span class="n">json_data</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
             <span class="n">write_metadata_to_h5</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">output_file_path</span><span class="p">,</span> <span class="n">func_key</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">partition</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="format_regions_meta"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.metamanagers.write_siip_metadata.format_regions_meta.html#marmot.metamanagers.write_siip_metadata.format_regions_meta">[docs]</a><span class="k">def</span> <span class="nf">format_regions_meta</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Format SIIP regions metadata</span>
@@ -229,6 +240,7 @@
     <span class="n">df</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;-&quot;</span>
     <span class="k">return</span> <span class="n">df</span></div>
 
+
 <div class="viewcode-block" id="format_generator_category_meta"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.metamanagers.write_siip_metadata.format_generator_category_meta.html#marmot.metamanagers.write_siip_metadata.format_generator_category_meta">[docs]</a><span class="k">def</span> <span class="nf">format_generator_category_meta</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Format SIIP generator category metadata</span>
 
@@ -239,6 +251,7 @@
 <span class="sd">        pd.DataFrame: Formatted metadata</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">())</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;category&quot;</span><span class="p">})</span></div>
+
 
 <div class="viewcode-block" id="format_region_generators_meta"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.metamanagers.write_siip_metadata.format_region_generators_meta.html#marmot.metamanagers.write_siip_metadata.format_region_generators_meta">[docs]</a><span class="k">def</span> <span class="nf">format_region_generators_meta</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Format SIIP region generator metadata</span>
@@ -251,6 +264,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">())</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;child&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;parent&quot;</span><span class="p">})</span></div>
 
+
 <div class="viewcode-block" id="format_reserve_generators_meta"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.metamanagers.write_siip_metadata.format_reserve_generators_meta.html#marmot.metamanagers.write_siip_metadata.format_reserve_generators_meta">[docs]</a><span class="k">def</span> <span class="nf">format_reserve_generators_meta</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Format SIIP reserve generators metadata</span>
 
@@ -260,9 +274,10 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        pd.DataFrame: Formatted metadata</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;child&quot;</span><span class="p">,</span> <span class="s2">&quot;parent&quot;</span><span class="p">])</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;child&quot;</span><span class="p">,</span> <span class="s2">&quot;parent&quot;</span><span class="p">])</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;index&quot;</span><span class="p">:</span> <span class="s2">&quot;gen_name_reserve&quot;</span><span class="p">})</span>
     <span class="k">return</span> <span class="n">df</span></div>
+
 
 <div class="viewcode-block" id="format_region_intraregionallines"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.metamanagers.write_siip_metadata.format_region_intraregionallines.html#marmot.metamanagers.write_siip_metadata.format_region_intraregionallines">[docs]</a><span class="k">def</span> <span class="nf">format_region_intraregionallines</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Format SIIP region_intraregionallines metadata</span>
@@ -273,9 +288,13 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        pd.DataFrame: Formatted metadata</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;from_region&quot;</span><span class="p">,</span> <span class="s2">&quot;to_region&quot;</span><span class="p">])</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
+        <span class="n">data</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;from_region&quot;</span><span class="p">,</span> <span class="s2">&quot;to_region&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">from_region</span> <span class="o">==</span> <span class="n">df</span><span class="o">.</span><span class="n">to_region</span><span class="p">][</span><span class="s2">&quot;from_region&quot;</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;index&quot;</span><span class="p">:</span> <span class="s2">&quot;child&quot;</span><span class="p">,</span> <span class="s2">&quot;from_region&quot;</span><span class="p">:</span> <span class="s2">&quot;parent&quot;</span><span class="p">})[[</span><span class="s2">&quot;parent&quot;</span><span class="p">,</span> <span class="s2">&quot;child&quot;</span><span class="p">]]</span></div>
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;index&quot;</span><span class="p">:</span> <span class="s2">&quot;child&quot;</span><span class="p">,</span> <span class="s2">&quot;from_region&quot;</span><span class="p">:</span> <span class="s2">&quot;parent&quot;</span><span class="p">})[</span>
+        <span class="p">[</span><span class="s2">&quot;parent&quot;</span><span class="p">,</span> <span class="s2">&quot;child&quot;</span><span class="p">]</span>
+    <span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="format_region_interregionallines"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.metamanagers.write_siip_metadata.format_region_interregionallines.html#marmot.metamanagers.write_siip_metadata.format_region_interregionallines">[docs]</a><span class="k">def</span> <span class="nf">format_region_interregionallines</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
@@ -287,10 +306,14 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        pd.DataFrame: Formatted metadata</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;from_region&quot;</span><span class="p">,</span> <span class="s2">&quot;to_region&quot;</span><span class="p">])</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
+        <span class="n">data</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;from_region&quot;</span><span class="p">,</span> <span class="s2">&quot;to_region&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">from_region</span> <span class="o">!=</span> <span class="n">df</span><span class="o">.</span><span class="n">to_region</span><span class="p">)]</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="o">.</span><span class="n">from_region</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">to_region</span><span class="p">])</span>
-    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;index&quot;</span><span class="p">:</span> <span class="s2">&quot;child&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;parent&quot;</span><span class="p">})[[</span><span class="s2">&quot;parent&quot;</span><span class="p">,</span> <span class="s2">&quot;child&quot;</span><span class="p">]]</span></div>
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;index&quot;</span><span class="p">:</span> <span class="s2">&quot;child&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;parent&quot;</span><span class="p">})[</span>
+        <span class="p">[</span><span class="s2">&quot;parent&quot;</span><span class="p">,</span> <span class="s2">&quot;child&quot;</span><span class="p">]</span>
+    <span class="p">]</span></div>
 </pre></div>
 
               </article>

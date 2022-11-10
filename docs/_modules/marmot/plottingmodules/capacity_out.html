@@ -185,50 +185,95 @@
 <span class="sd">@author: Daniel Levie </span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.dates</span> <span class="k">as</span> <span class="nn">mdates</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">matplotlib.dates</span> <span class="k">as</span> <span class="nn">mdates</span>
 
 <span class="kn">import</span> <span class="nn">marmot.utils.mconfig</span> <span class="k">as</span> <span class="nn">mconfig</span>
-
-<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_library</span> <span class="kn">import</span> <span class="n">PlotLibrary</span>
-<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_data_helper</span> <span class="kn">import</span> <span class="n">MPlotDataHelper</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_data_helper</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">GenCategories</span><span class="p">,</span>
+    <span class="n">PlotDataStoreAndProcessor</span><span class="p">,</span>
+    <span class="n">set_facet_col_row_dimensions</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_exceptions</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">MissingInputData</span><span class="p">,</span>
-    <span class="n">UnderDevelopment</span><span class="p">,</span>
     <span class="n">MissingZoneData</span><span class="p">,</span>
+    <span class="n">UnderDevelopment</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_library</span> <span class="kn">import</span> <span class="n">PlotLibrary</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.styles</span> <span class="kn">import</span> <span class="n">GeneratorColorDict</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.timeseries_modifiers</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">adjust_for_leapday</span><span class="p">,</span>
+    <span class="n">set_timestamp_date_range</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;plotter.&quot;</span> <span class="o">+</span> <span class="vm">__name__</span><span class="p">)</span>
-<span class="n">plot_data_settings</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;plot_data&quot;</span><span class="p">)</span>
+<span class="n">plot_data_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;plot_data&quot;</span><span class="p">)</span>
 <span class="n">shift_leapday</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;shift_leapday&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="CapacityOut"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.capacity_out.CapacityOut.html#marmot.plottingmodules.capacity_out.CapacityOut">[docs]</a><span class="k">class</span> <span class="nc">CapacityOut</span><span class="p">(</span><span class="n">MPlotDataHelper</span><span class="p">):</span>
+<div class="viewcode-block" id="CapacityOut"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.capacity_out.CapacityOut.html#marmot.plottingmodules.capacity_out.CapacityOut">[docs]</a><span class="k">class</span> <span class="nc">CapacityOut</span><span class="p">(</span><span class="n">PlotDataStoreAndProcessor</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Generator outage plots.</span>
 
 <span class="sd">    The capacity_out.py module contains methods that are</span>
 <span class="sd">    related to generators that are on an outage.</span>
 
-<span class="sd">    CapacityOut inherits from the MPlotDataHelper class to assist</span>
+<span class="sd">    CapacityOut inherits from the PlotDataStoreAndProcessor class to assist</span>
 <span class="sd">    in creating figures.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">Zones</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">Scenarios</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">AGG_BY</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">ordered_gen</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">marmot_solutions_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="n">marmot_color_dict</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">gen_categories</span><span class="p">:</span> <span class="n">GenCategories</span> <span class="o">=</span> <span class="n">GenCategories</span><span class="p">(),</span>
+        <span class="n">ylabels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">xlabels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
-<span class="sd">            *args</span>
-<span class="sd">                Minimum required parameters passed to the MPlotDataHelper </span>
-<span class="sd">                class.</span>
-<span class="sd">            **kwargs</span>
-<span class="sd">                These parameters will be passed to the MPlotDataHelper </span>
-<span class="sd">                class.</span>
+<span class="sd">            Zones (List[str]): List of regions/zones to plot.</span>
+<span class="sd">            Scenarios (List[str]): List of scenarios to plot.</span>
+<span class="sd">            AGG_BY (str): Informs region type to aggregate by when creating plots.</span>
+<span class="sd">            ordered_gen (List[str]): Ordered list of generator technologies to plot,</span>
+<span class="sd">                order defines the generator technology position in stacked bar and area plots.</span>
+<span class="sd">            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.</span>
+<span class="sd">            gen_categories (GenCategories): Instance of GenCategories class, groups generator technologies</span>
+<span class="sd">                into defined categories.</span>
+<span class="sd">                Deafults to GenCategories.</span>
+<span class="sd">            marmot_color_dict (dict, optional): Dictionary of colors to use for</span>
+<span class="sd">                generation technologies.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            ylabels (List[str], optional): y-axis labels for facet plots.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            xlabels (List[str], optional): x-axis labels for facet plots.</span>
+<span class="sd">                Defaults to None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Instantiation of MPlotHelperFunctions</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1"># Instantiation of PlotDataStoreAndProcessor</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">AGG_BY</span><span class="p">,</span> <span class="n">ordered_gen</span><span class="p">,</span> <span class="n">marmot_solutions_folder</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Zones</span> <span class="o">=</span> <span class="n">Zones</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span> <span class="o">=</span> <span class="n">Scenarios</span>
+        <span class="k">if</span> <span class="n">marmot_color_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span> <span class="o">=</span> <span class="n">GeneratorColorDict</span><span class="o">.</span><span class="n">set_random_colors</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">color_dict</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span> <span class="o">=</span> <span class="n">marmot_color_dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gen_categories</span> <span class="o">=</span> <span class="n">gen_categories</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span> <span class="o">=</span> <span class="n">ylabels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span> <span class="o">=</span> <span class="n">xlabels</span>
 
 <div class="viewcode-block" id="CapacityOut.capacity_out_stack"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.capacity_out.CapacityOut.html#marmot.plottingmodules.capacity_out.CapacityOut.capacity_out_stack">[docs]</a>    <span class="k">def</span> <span class="nf">capacity_out_stack</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -257,15 +302,15 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">outputs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and </span>
-        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required, </span>
+        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and</span>
+        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required,</span>
         <span class="c1"># scenarios must be a list.</span>
         <span class="n">properties</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;generator_Installed_Capacity</span><span class="si">{</span><span class="n">data_resolution</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
             <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;generator_Available_Capacity</span><span class="si">{</span><span class="n">data_resolution</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
         <span class="p">]</span>
 
-        <span class="c1"># Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary</span>
+        <span class="c1"># Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary</span>
         <span class="c1"># with all required properties, returns a 1 if required data is missing</span>
         <span class="n">check_input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_formatted_data</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
 
@@ -273,7 +318,9 @@
             <span class="k">return</span> <span class="n">MissingInputData</span><span class="p">()</span>
 
         <span class="c1"># sets up x, y dimensions of plot</span>
-        <span class="n">ncols</span><span class="p">,</span> <span class="n">nrows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_facet_col_row_dimensions</span><span class="p">(</span><span class="n">multi_scenario</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">)</span>
+        <span class="n">ncols</span><span class="p">,</span> <span class="n">nrows</span> <span class="o">=</span> <span class="n">set_facet_col_row_dimensions</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span><span class="p">,</span> <span class="n">multi_scenario</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span>
+        <span class="p">)</span>
 
         <span class="n">grid_size</span> <span class="o">=</span> <span class="n">ncols</span> <span class="o">*</span> <span class="n">nrows</span>
 
@@ -308,7 +355,7 @@
                     <span class="o">.</span><span class="n">copy</span><span class="p">()</span>
                 <span class="p">)</span>
                 <span class="k">if</span> <span class="n">shift_leapday</span><span class="p">:</span>
-                    <span class="n">avail_cap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjust_for_leapday</span><span class="p">(</span><span class="n">avail_cap</span><span class="p">)</span>
+                    <span class="n">avail_cap</span> <span class="o">=</span> <span class="n">adjust_for_leapday</span><span class="p">(</span><span class="n">avail_cap</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">zone_input</span> <span class="ow">in</span> <span class="n">avail_cap</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
                     <span class="n">avail_cap</span> <span class="o">=</span> <span class="n">avail_cap</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">zone_input</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -329,7 +376,9 @@
                 <span class="n">cap_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_process_gen_inputs</span><span class="p">(</span><span class="n">cap_out</span><span class="p">)</span>
                 <span class="c1"># Subset only thermal gen categories</span>
                 <span class="n">thermal_gens</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="n">therm</span> <span class="k">for</span> <span class="n">therm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">gen_categories</span><span class="o">.</span><span class="n">thermal</span> <span class="k">if</span> <span class="n">therm</span> <span class="ow">in</span> <span class="n">cap_out</span><span class="o">.</span><span class="n">columns</span>
+                    <span class="n">therm</span>
+                    <span class="k">for</span> <span class="n">therm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">gen_categories</span><span class="o">.</span><span class="n">thermal</span>
+                    <span class="k">if</span> <span class="n">therm</span> <span class="ow">in</span> <span class="n">cap_out</span><span class="o">.</span><span class="n">columns</span>
                 <span class="p">]</span>
                 <span class="n">cap_out</span> <span class="o">=</span> <span class="n">cap_out</span><span class="p">[</span><span class="n">thermal_gens</span><span class="p">]</span>
 
@@ -337,7 +386,7 @@
                     <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No Thermal Generation in: </span><span class="si">{</span><span class="n">zone_input</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                     <span class="k">continue</span>
                 <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">start_date_range</span><span class="p">):</span>
-                    <span class="n">cap_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_timestamp_date_range</span><span class="p">(</span>
+                    <span class="n">cap_out</span> <span class="o">=</span> <span class="n">set_timestamp_date_range</span><span class="p">(</span>
                         <span class="n">cap_out</span><span class="p">,</span> <span class="n">start_date_range</span><span class="p">,</span> <span class="n">end_date_range</span>
                     <span class="p">)</span>
                     <span class="k">if</span> <span class="n">cap_out</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -347,7 +396,7 @@
                 <span class="c1"># unitconversion based off peak outage hour, only checked once</span>
                 <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">unitconversion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">capacity_energy_unitconversion</span><span class="p">(</span>
-                        <span class="n">cap_out</span><span class="p">,</span> <span class="n">sum_values</span><span class="o">=</span><span class="kc">True</span>
+                        <span class="n">cap_out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">,</span> <span class="n">sum_values</span><span class="o">=</span><span class="kc">True</span>
                     <span class="p">)</span>
 
                 <span class="n">cap_out</span> <span class="o">=</span> <span class="n">cap_out</span> <span class="o">/</span> <span class="n">unitconversion</span><span class="p">[</span><span class="s2">&quot;divisor&quot;</span><span class="p">]</span>
@@ -358,7 +407,7 @@
 
                 <span class="n">mplt</span><span class="o">.</span><span class="n">stackplot</span><span class="p">(</span>
                     <span class="n">df</span><span class="o">=</span><span class="n">cap_out</span><span class="p">,</span>
-                    <span class="n">color_dict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span><span class="p">,</span>
+                    <span class="n">color_dict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span><span class="p">,</span>
                     <span class="n">labels</span><span class="o">=</span><span class="n">cap_out</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span>
                     <span class="n">sub_pos</span><span class="o">=</span><span class="n">i</span><span class="p">,</span>
                 <span class="p">)</span>
@@ -405,12 +454,14 @@
 
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Zone = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">zone_input</span><span class="p">))</span>
 
-            <span class="n">ncols</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">ncols</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span><span class="p">:</span>
                 <span class="n">ncols</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="n">nrows</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">nrows</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ncols</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span><span class="p">:</span>
                 <span class="n">nrows</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">nrows</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span><span class="p">)</span>
             <span class="n">grid_size</span> <span class="o">=</span> <span class="n">ncols</span> <span class="o">*</span> <span class="n">nrows</span>
             <span class="n">fig1</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span>
                 <span class="n">nrows</span><span class="p">,</span> <span class="n">ncols</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">((</span><span class="mi">8</span> <span class="o">*</span> <span class="n">ncols</span><span class="p">),</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">nrows</span><span class="p">)),</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">True</span>
@@ -501,7 +552,7 @@
                         <span class="n">labels</span><span class="o">=</span><span class="n">one_zone</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span>
                         <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                         <span class="n">colors</span><span class="o">=</span><span class="p">[</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;#333333&quot;</span><span class="p">)</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;#333333&quot;</span><span class="p">)</span>
                             <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">one_zone</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">index</span>
                         <span class="p">],</span>
                     <span class="p">)</span>
@@ -537,7 +588,7 @@
                         <span class="n">labels</span><span class="o">=</span><span class="n">one_zone</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span>
                         <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                         <span class="n">colors</span><span class="o">=</span><span class="p">[</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;#333333&quot;</span><span class="p">)</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;#333333&quot;</span><span class="p">)</span>
                             <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">one_zone</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">index</span>
                         <span class="p">],</span>
                     <span class="p">)</span>
