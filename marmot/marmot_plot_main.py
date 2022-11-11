@@ -67,7 +67,7 @@ class MarmotPlot(SetupLogger):
         Scenarios: Union[str, list],
         AGG_BY: str,
         model_solutions_folder: Union[str, Path],
-        gen_names: Union[str, Path, pd.DataFrame],
+        gen_names_dict: Union[str, Path, pd.DataFrame, dict],
         ordered_gen_categories: Union[str, Path, pd.DataFrame],
         color_dictionary: Union[str, Path, pd.DataFrame, dict],
         marmot_plot_select: Union[str, Path, pd.DataFrame],
@@ -87,17 +87,17 @@ class MarmotPlot(SetupLogger):
                 to process.
             AGG_BY (str): Informs region type to aggregate by
                 when creating plots.
-            model_solutions_folder (Union[str, Path]): Folder containing model
-                simulation results subfolders and their files.
-            gen_names (Union[str, Path, pd.DataFrame]): Mapping file to rename
-                generator technologies.
+            model_solutions_folder (Union[str, Path]): Directory containing model simulation
+                results subfolders and their files.
+            gen_names_dict (Union[str, Path, pd.DataFrame, dict]): Path to, Dataframe or dict
+                of generator technologies to rename.
             ordered_gen_categories (Union[str, Path, pd.DataFrame]): Path to or Dataframe
                 containing ordered generation and columns to specify technology subsets.
-            color_dictionary (Union[str, Path, pd.DataFrame, dict]): Path to or Dataframe
-                containing list of colors to assign to each generator category..
-            marmot_plot_select (Union[str, Path, pd.DataFrame]): Selection of plots
-                to plot.
-            marmot_solutions_folder (Union[str, Path], optional): Folder to save
+            color_dictionary (Union[str, Path, pd.DataFrame, dict]): Path to, Dataframe or dict
+                containing list of colors to assign to each generator category.
+            marmot_plot_select (Union[str, Path, pd.DataFrame]): Path to or DataFrame
+                containing information on plots to create and certain settings.
+            marmot_solutions_folder (Union[str, Path], optional): Directory to save
                 Marmot solution files.
                 Defaults to None.
             Scenario_Diff (Union[str, list], optional): 2 value string
@@ -113,7 +113,7 @@ class MarmotPlot(SetupLogger):
             ticklabels (Union[str, list], optional): custom ticklabels for plots,
                 not available for every plot type.
                 Defaults to None.
-            region_mapping (Union[str, Path, pd.DataFrame], optional): Mapping file
+            region_mapping (Union[str, Path, pd.DataFrame], optional): Path to or Dataframe
                 to map custom regions/zones to create custom aggregations.
                 Aggregations are created by grouping PLEXOS regions.
                 Defaults to pd.DataFrame().
@@ -130,7 +130,7 @@ class MarmotPlot(SetupLogger):
         self.Scenarios = self.convert_str_to_list(Scenarios)
         self.AGG_BY = AGG_BY
         self.model_solutions_folder = Path(model_solutions_folder)
-        self.gen_names_dict = gen_names
+        self.gen_names_dict = gen_names_dict
         self.ordered_gen_categories = ordered_gen_categories
         self.color_dictionary = color_dictionary
         self.marmot_plot_select = marmot_plot_select
@@ -200,35 +200,39 @@ class MarmotPlot(SetupLogger):
         return self._gen_names_dict
 
     @gen_names_dict.setter
-    def gen_names_dict(self, gen_names) -> None:
+    def gen_names_dict(self, gen_names_dict) -> None:
 
-        if isinstance(gen_names, (str, Path)):
+        if isinstance(gen_names_dict, (str, Path)):
             try:
-                gen_names = pd.read_csv(gen_names)
+                gen_names_dict = pd.read_csv(gen_names_dict)
             except FileNotFoundError:
                 msg = (
-                    "Could not find specified gen_names csv file; "
+                    "Could not find specified gen_names_dict csv file; "
                     "check file name and path."
                 )
                 self.logger.error(msg)
                 raise FileNotFoundError(msg)
 
-        if isinstance(gen_names, pd.DataFrame):
-            if len(gen_names.axes[1]) == 2:
+        if isinstance(gen_names_dict, pd.DataFrame):
+            if len(gen_names_dict.axes[1]) == 2:
                 self._gen_names_dict = (
-                    gen_names.set_index(gen_names.columns[0]).squeeze().to_dict()
+                    gen_names_dict.set_index(gen_names_dict.columns[0])
+                    .squeeze()
+                    .to_dict()
                 )
             else:
                 msg = (
-                    "Expected exactly 2 columns for gen_names input, "
+                    "Expected exactly 2 columns for gen_names_dict input, "
                     f"{len(input.axes[1])} columns were in the DataFrame."
                 )
                 self.logger.error(msg)
                 raise ValueError(msg)
+        elif isinstance(gen_names_dict, dict):
+            self._gen_names_dict = gen_names_dict
         else:
             msg = (
-                "Expected a DataFrame or a file path to csv for the gen_names input but "
-                f"recieved a {type(gen_names)}"
+                "Expected a DataFrame, dict, or a file path to csv for the gen_names_dict input but "
+                f"recieved a {type(gen_names_dict)}"
             )
             self.logger.error(msg)
             raise NotImplementedError(msg)
@@ -284,7 +288,7 @@ class MarmotPlot(SetupLogger):
             )
             self.logger.warning(
                 "The following tech categories from the "
-                "gen_names input do not exist in "
+                "gen_names_dict input do not exist in "
                 "ordered_gen_categorie input!: "
                 f"{missing_gen}"
             )
@@ -328,7 +332,7 @@ class MarmotPlot(SetupLogger):
             self._color_dictionary = GeneratorColorDict(color_dictionary).color_dict
         else:
             msg = (
-                "Expected a DataFrame a dict or a file path to csv for the color_dictionary input but "
+                "Expected a DataFrame, dict, or file path to csv for the color_dictionary input but "
                 f"recieved a {type(color_dictionary)}"
             )
             self.logger.error(msg)
@@ -823,7 +827,7 @@ def main():
             ]
         )
 
-    gen_names = Mapping_folder.joinpath(
+    gen_names_dict = Mapping_folder.joinpath(
         Marmot_user_defined_inputs.loc["gen_names.csv_name", "User_defined_value"]
     )
 
@@ -875,7 +879,7 @@ def main():
         Scenarios,
         AGG_BY,
         model_solutions_folder,
-        gen_names,
+        gen_names_dict,
         ordered_gen_cat_file,
         color_dictionary,
         marmot_plot_select,
