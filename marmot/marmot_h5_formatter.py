@@ -65,18 +65,18 @@ class MarmotFormat(SetupLogger):
         """
         Args:
             Scenario_name (str): Name of scenario to process.
-            model_solutions_folder (Union[str, Path]): Folder containing model simulation
+            model_solutions_folder (Union[str, Path]): Directory containing model simulation
                 results subfolders and their files.
-            properties_file (Union[str, Path, pd.DataFrame]): Properties
-                to process, must follow format seen in Marmot directory.
-            marmot_solutions_folder (Union[str, Path], optional): Folder to save Marmot
+            properties_file (Union[str, Path, pd.DataFrame]): Path to or DataFrame of properties
+                to process.
+            marmot_solutions_folder (Union[str, Path], optional): Direcrory to save Marmot
                 solution files.
                 Defaults to None.
-            region_mapping (Union[str, Path, pd.DataFrame], optional): Mapping file
+            region_mapping (Union[str, Path, pd.DataFrame], optional): Path to or Dataframe
                 to map custom regions/zones to create custom aggregations.
                 Aggregations are created by grouping PLEXOS regions.
                 Defaults to pd.DataFrame().
-            emit_names_dict (Union[str, Path, pd.DataFrame, dict], optional): Mapping
+            emit_names_dict (Union[str, Path, pd.DataFrame, dict], optional): Path to, DataFrame or dict
                 to rename emissions types.
                 Defaults to None.
             **kwargs
