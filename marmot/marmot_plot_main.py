@@ -66,7 +66,7 @@ class MarmotPlot(SetupLogger):
         self,
         Scenarios: Union[str, list],
         AGG_BY: str,
-        Model_Solutions_folder: Union[str, Path],
+        model_solutions_folder: Union[str, Path],
         gen_names: Union[str, Path, pd.DataFrame],
         ordered_gen_categories: Union[str, Path, pd.DataFrame],
         color_dictionary: Union[str, Path, pd.DataFrame, dict],
@@ -87,7 +87,7 @@ class MarmotPlot(SetupLogger):
                 to process.
             AGG_BY (str): Informs region type to aggregate by
                 when creating plots.
-            Model_Solutions_folder (Union[str, Path]): Folder containing model
+            model_solutions_folder (Union[str, Path]): Folder containing model
                 simulation results subfolders and their files.
             gen_names (Union[str, Path, pd.DataFrame]): Mapping file to rename
                 generator technologies.
@@ -129,14 +129,14 @@ class MarmotPlot(SetupLogger):
 
         self.Scenarios = self.convert_str_to_list(Scenarios)
         self.AGG_BY = AGG_BY
-        self.Model_Solutions_folder = Path(Model_Solutions_folder)
+        self.model_solutions_folder = Path(model_solutions_folder)
         self.gen_names_dict = gen_names
         self.ordered_gen_categories = ordered_gen_categories
         self.color_dictionary = color_dictionary
         self.marmot_plot_select = marmot_plot_select
 
         if marmot_solutions_folder is None:
-            self.marmot_solutions_folder = self.Model_Solutions_folder
+            self.marmot_solutions_folder = self.model_solutions_folder
         else:
             self.marmot_solutions_folder = Path(marmot_solutions_folder)
 
@@ -151,12 +151,12 @@ class MarmotPlot(SetupLogger):
 
     @property
     def ordered_gen_list(self) -> list:
-        """ Returns List of ordered generator technolgies. 
+        """List of ordered generator technolgies.
 
         Oder is specified in the ordered_gen_categories input.
 
         Returns:
-            list: Ordered list of generator technolgies 
+            list: Ordered list of generator technolgies
         """
 
         if self._ordered_gen_list is None:
@@ -190,7 +190,7 @@ class MarmotPlot(SetupLogger):
 
     @property
     def gen_names_dict(self) -> dict:
-        """Returns dictionary of existing gen technology names to new names.
+        """Dictionary of existing gen technology names to new names.
 
         Used to rename technologies.
 
@@ -235,9 +235,9 @@ class MarmotPlot(SetupLogger):
 
     @property
     def ordered_gen_categories(self) -> pd.DataFrame:
-        """DataFrame containing generator order and category information 
+        """DataFrame containing generator order and category information
 
-        Has at least one column named Ordered_Gen. 
+        Has at least one column named Ordered_Gen.
         Other columns define different generator technology category groupings.
 
         Returns:
@@ -291,10 +291,10 @@ class MarmotPlot(SetupLogger):
 
     @property
     def color_dictionary(self) -> dict:
-        """Dictionary of gen technology names to plotting colors. 
+        """Dictionary of gen technology names to plotting colors.
 
         Returns:
-            dict: Keys gen technologies, Values colors 
+            dict: Keys gen technologies, Values colors
         """
         return self._color_dictionary
 
@@ -336,10 +336,10 @@ class MarmotPlot(SetupLogger):
 
     @property
     def marmot_plot_select(self) -> pd.DataFrame:
-        """DataFrame containing information on plots to create and certain settings. 
+        """DataFrame containing information on plots to create and certain settings.
 
         Returns:
-            pd.DataFrame: 
+            pd.DataFrame:
         """
         return self._marmot_plot_select
 
@@ -369,10 +369,10 @@ class MarmotPlot(SetupLogger):
 
     @property
     def region_mapping(self) -> pd.DataFrame:
-        """Region mapping Dataframe to map custom aggregations. 
+        """Region mapping Dataframe to map custom aggregations.
 
         Returns:
-            pd.DataFrame: 
+            pd.DataFrame:
         """
         return self._region_mapping
 
@@ -394,6 +394,13 @@ class MarmotPlot(SetupLogger):
             if "category" in region_mapping.columns:
                 # delete category columns if exists
                 self._region_mapping = self._region_mapping.drop(["category"], axis=1)
+        else:
+            msg = (
+                "Expected a DataFrame or a file path to csv for the region_mapping input but "
+                f"recieved a {type(region_mapping)}"
+            )
+            self.logger.error(msg)
+            raise NotImplementedError(msg)
 
     @staticmethod
     def convert_str_to_list(string_object: str) -> list:
@@ -403,7 +410,7 @@ class MarmotPlot(SetupLogger):
             string_object (str): A comma separated string
 
         Returns:
-            list: list of strings. 
+            list: list of strings.
         """
         if isinstance(string_object, str):
             list_obj = [x.strip() for x in string_object.split(",")]
@@ -415,18 +422,18 @@ class MarmotPlot(SetupLogger):
         """Gets the geographic regions to plot based on the geographic aggregation.
 
         The aggregation is determined with the AGG_BY attribute.
-        
-        region and zone (PLEXOS) will pull model defined aggregations. 
-        Other aggregations will use values from the region mapping file. 
 
-        The zone_region_sublist attribute can be used to reduce the set of geographic regions 
-        to plot. 
+        region and zone (PLEXOS) will pull model defined aggregations.
+        Other aggregations will use values from the region mapping file.
+
+        The zone_region_sublist attribute can be used to reduce the set of geographic regions
+        to plot.
 
         Args:
-            meta (MetaData): instance of MetaData class 
+            meta (MetaData): instance of MetaData class
 
         Returns:
-            list: List of geographic regions to plot 
+            list: List of geographic regions to plot
         """
 
         if self.AGG_BY in {"zone", "zones", "Zone", "Zones"}:
@@ -488,7 +495,7 @@ class MarmotPlot(SetupLogger):
 
         elif not self.region_mapping.empty:
             self.logger.info(
-                "Plotting Custom region aggregation from " "Region_Mapping File"
+                "Plotting Custom region aggregation from " "region_mapping File"
             )
             regions = pd.concat([meta.regions(scenario) for scenario in self.Scenarios])
             self.region_mapping = regions.merge(
@@ -501,7 +508,7 @@ class MarmotPlot(SetupLogger):
             except KeyError:
                 self.logger.warning(
                     f"AGG_BY = '{self.AGG_BY}' is not in the "
-                    "Region_Mapping File, enter a different aggregation"
+                    "region_mapping File, enter a different aggregation"
                 )
                 sys.exit()
 
@@ -515,7 +522,7 @@ class MarmotPlot(SetupLogger):
                         zsub.append(region)
                     else:
                         self.logger.info(
-                            "Region_Mapping File does not contain region: "
+                            "region_mapping File does not contain region: "
                             f"{region}, SKIPPING REGION"
                         )
                 if zsub:
@@ -523,7 +530,7 @@ class MarmotPlot(SetupLogger):
                 else:
                     self.logger.warning(
                         f"None of: {self.zone_region_sublist} "
-                        "in Region_Mapping File. Plotting all "
+                        "in region_mapping File. Plotting all "
                         f"Regions of aggregation '{self.AGG_BY}'"
                     )
         else:
@@ -557,7 +564,7 @@ class MarmotPlot(SetupLogger):
             figure_format = "png"
 
         # Create an instance of MetaData.
-        meta = MetaData(processed_hdf5_folder, Region_Mapping=self.region_mapping)
+        meta = MetaData(processed_hdf5_folder, region_mapping=self.region_mapping)
         Zones = self.get_geographic_regions(meta)
 
         # ================================================================================
@@ -598,7 +605,7 @@ class MarmotPlot(SetupLogger):
                 "custom_xticklabels": self.custom_xticklabels,
                 "color_list": ColorList().colors,
                 "marker_style": PlotMarkers().markers,
-                "Region_Mapping": self.region_mapping,
+                "region_mapping": self.region_mapping,
                 "TECH_SUBSET": self.TECH_SUBSET,
             }
 
@@ -787,8 +794,8 @@ def main():
 
     Scenarios = Marmot_user_defined_inputs.loc["Scenarios", "User_defined_value"]
 
-    # These variables (along with Region_Mapping) are used to initialize MetaData
-    Model_Solutions_folder = Marmot_user_defined_inputs.loc[
+    # These variables (along with region_mapping) are used to initialize MetaData
+    model_solutions_folder = Marmot_user_defined_inputs.loc[
         "Model_Solutions_folder", "User_defined_value"
     ].strip()
 
@@ -808,9 +815,9 @@ def main():
     if pd.isna(
         Marmot_user_defined_inputs.loc["Region_Mapping.csv_name", "User_defined_value"]
     ):
-        Region_Mapping = pd.DataFrame()
+        region_mapping = pd.DataFrame()
     else:
-        Region_Mapping = Mapping_folder.joinpath(
+        region_mapping = Mapping_folder.joinpath(
             Marmot_user_defined_inputs.loc[
                 "Region_Mapping.csv_name", "User_defined_value"
             ]
@@ -867,7 +874,7 @@ def main():
     initiate = MarmotPlot(
         Scenarios,
         AGG_BY,
-        Model_Solutions_folder,
+        model_solutions_folder,
         gen_names,
         ordered_gen_cat_file,
         color_dictionary,
@@ -878,7 +885,7 @@ def main():
         xlabels=xlabels,
         ylabels=ylabels,
         ticklabels=ticklabels,
-        region_mapping=Region_Mapping,
+        region_mapping=region_mapping,
         TECH_SUBSET=TECH_SUBSET,
     )
 
