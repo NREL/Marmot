@@ -30,7 +30,7 @@ class MetaData:
         self,
         HDF5_folder_in: Path,
         read_from_formatted_h5: bool = True,
-        Region_Mapping: pd.DataFrame = pd.DataFrame(),
+        region_mapping: pd.DataFrame = pd.DataFrame(),
         partition_number: int = 0,
     ):
         """
@@ -39,13 +39,13 @@ class MetaData:
             read_from_formatted_h5 (bool, optional): Boolean for whether the metadata is
                 being read from the formatted hdf5 file or the original PLEXOS solution file.
                 Defaults to True.
-            Region_Mapping (pd.DataFrame, optional): DataFrame of extra regions to map.
+            region_mapping (pd.DataFrame, optional): DataFrame of extra regions to map.
                 Defaults to pd.DataFrame().
             partition_number (int, optional): Which temporal partition of h5 data to retrieve
                 metadata from in the formatted h5 file. Defaults to 0.
         """
         self.HDF5_folder_in = Path(HDF5_folder_in)
-        self.Region_Mapping = Region_Mapping
+        self.region_mapping = region_mapping
         self.read_from_formatted_h5 = read_from_formatted_h5
         self.partition_number = partition_number
         self.start_index = None
@@ -295,10 +295,10 @@ class MetaData:
             )  # For batteries which belong to more than 1 region, drop duplicates.
 
             # Merge in region mapping.
-            if not self.Region_Mapping.empty:
+            if not self.region_mapping.empty:
                 region_batt = pd.merge(
                     region_batt,
-                    self.Region_Mapping,
+                    self.region_mapping,
                     how="left",
                     on="region",
                 )
@@ -615,10 +615,10 @@ class MetaData:
             region_interregionallines.rename(
                 columns={"parent": "region", "child": "line_name"}, inplace=True
             )
-            if not self.Region_Mapping.empty:
+            if not self.region_mapping.empty:
                 region_interregionallines = pd.merge(
                     region_interregionallines,
-                    self.Region_Mapping,
+                    self.region_mapping,
                     how="left",
                     on="region",
                 )
@@ -671,10 +671,10 @@ class MetaData:
             region_intraregionallines.rename(
                 columns={"parent": "region", "child": "line_name"}, inplace=True
             )
-            if not self.Region_Mapping.empty:
+            if not self.region_mapping.empty:
                 region_intraregionallines = pd.merge(
                     region_intraregionallines,
-                    self.Region_Mapping,
+                    self.region_mapping,
                     how="left",
                     on="region",
                 )
@@ -713,9 +713,9 @@ class MetaData:
             region_exportinglines = region_exportinglines.rename(
                 columns={"parent": "region", "child": "line_name"}
             )
-            if not self.Region_Mapping.empty:
+            if not self.region_mapping.empty:
                 region_exportinglines = pd.merge(
-                    region_exportinglines, self.Region_Mapping, how="left", on="region"
+                    region_exportinglines, self.region_mapping, how="left", on="region"
                 )
                 region_exportinglines.dropna(axis=1, how="all", inplace=True)
         except KeyError:
@@ -751,9 +751,9 @@ class MetaData:
             region_importinglines = region_importinglines.rename(
                 columns={"parent": "region", "child": "line_name"}
             )
-            if not self.Region_Mapping.empty:
+            if not self.region_mapping.empty:
                 region_importinglines = pd.merge(
-                    region_importinglines, self.Region_Mapping, how="left", on="region"
+                    region_importinglines, self.region_mapping, how="left", on="region"
                 )
                 region_importinglines.dropna(axis=1, how="all", inplace=True)
         except KeyError:
@@ -1024,9 +1024,9 @@ class MetaData:
         except KeyError:
             logger.warning("Reserves Region data not available in h5plexos results")
             return pd.DataFrame()
-        if not self.Region_Mapping.empty:
+        if not self.region_mapping.empty:
             reserves_regions = pd.merge(
-                reserves_regions, self.Region_Mapping, how="left", on="region"
+                reserves_regions, self.region_mapping, how="left", on="region"
             )
             reserves_regions.dropna(axis=1, how="all", inplace=True)
         reserves_regions.drop("gen_name", axis=1, inplace=True)

@@ -739,7 +739,7 @@ class PlotDataStoreAndProcessor(dict):
 
 
 def merge_new_agg(
-    Region_Mapping: pd.DataFrame, df: pd.DataFrame, AGG_BY: str
+    region_mapping: pd.DataFrame, df: pd.DataFrame, AGG_BY: str
 ) -> pd.DataFrame:
     """Adds new region aggregation in the plotting step.
 
@@ -750,7 +750,7 @@ def merge_new_agg(
     Returns:
         pd.DataFrame: Same dataframe, with new aggregation level added.
     """
-    agg_new = Region_Mapping[["region", AGG_BY]]
+    agg_new = region_mapping[["region", AGG_BY]]
     agg_new = agg_new.set_index("region")
     df = df.merge(agg_new, left_on="region", right_index=True)
     return df

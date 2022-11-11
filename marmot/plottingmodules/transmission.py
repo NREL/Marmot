@@ -74,7 +74,7 @@ class Transmission(PlotDataStoreAndProcessor):
         xlabels: List[str] = None,
         custom_xticklabels: List[str] = None,
         color_list: list = ColorList().colors,
-        Region_Mapping: pd.DataFrame = pd.DataFrame(),
+        region_mapping: pd.DataFrame = pd.DataFrame(),
         **kwargs,
     ):
         """
@@ -100,7 +100,7 @@ class Transmission(PlotDataStoreAndProcessor):
                 Defaults to None.
             color_list (list, optional): List of colors to apply to non-gen plots.
                 Defaults to ColorList().colors.
-            Region_Mapping (pd.DataFrame, optional): Mapping file to map
+            region_mapping (pd.DataFrame, optional): Mapping file to map
                 custom regions/zones to create custom aggregations.
                 Aggregations are created by grouping PLEXOS regions.
                 Defaults to pd.DataFrame().
@@ -119,10 +119,10 @@ class Transmission(PlotDataStoreAndProcessor):
         self.xlabels = xlabels
         self.custom_xticklabels = custom_xticklabels
         self.color_list = color_list
-        self.Region_Mapping = Region_Mapping
+        self.region_mapping = region_mapping
 
         self.meta = MetaData(
-            self.processed_hdf5_folder, Region_Mapping=self.Region_Mapping
+            self.processed_hdf5_folder, region_mapping=self.region_mapping
         )
 
     def line_util(self, **kwargs):
@@ -1976,7 +1976,7 @@ class Transmission(PlotDataStoreAndProcessor):
 
                 if self.AGG_BY != "region" and self.AGG_BY != "zone":
                     agg_region_mapping = (
-                        self.Region_Mapping[["region", self.AGG_BY]]
+                        self.region_mapping[["region", self.AGG_BY]]
                         .set_index("region")
                         .to_dict()[self.AGG_BY]
                     )
@@ -2631,7 +2631,7 @@ class Transmission(PlotDataStoreAndProcessor):
 
                 if self.AGG_BY != "region" and self.AGG_BY != "zone":
                     agg_region_mapping = (
-                        self.Region_Mapping[["region", self.AGG_BY]]
+                        self.region_mapping[["region", self.AGG_BY]]
                         .set_index("region")
                         .to_dict()[self.AGG_BY]
                     )
@@ -2811,7 +2811,7 @@ class Transmission(PlotDataStoreAndProcessor):
 
             if self.AGG_BY != "region" and self.AGG_BY != "zone":
                 agg_region_mapping = (
-                    self.Region_Mapping[["region", self.AGG_BY]]
+                    self.region_mapping[["region", self.AGG_BY]]
                     .set_index("region")
                     .to_dict()[self.AGG_BY]
                 )

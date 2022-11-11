@@ -47,7 +47,7 @@ class Sensitivities(PlotDataStoreAndProcessor):
         ordered_gen: List[str],
         marmot_solutions_folder: Path,
         marmot_color_dict: dict = None,
-        Region_Mapping: pd.DataFrame = pd.DataFrame(),
+        region_mapping: pd.DataFrame = pd.DataFrame(),
         **kwargs,
     ):
         """
@@ -61,7 +61,7 @@ class Sensitivities(PlotDataStoreAndProcessor):
             marmot_color_dict (dict, optional): Dictionary of colors to use for
                 generation technologies.
                 Defaults to None.
-            Region_Mapping (pd.DataFrame, optional): Mapping file to map
+            region_mapping (pd.DataFrame, optional): Mapping file to map
                 custom regions/zones to create custom aggregations.
                 Aggregations are created by grouping PLEXOS regions.
                 Defaults to pd.DataFrame().
@@ -77,7 +77,7 @@ class Sensitivities(PlotDataStoreAndProcessor):
             ).color_dict
         else:
             self.marmot_color_dict = marmot_color_dict
-        self.Region_Mapping = Region_Mapping
+        self.region_mapping = region_mapping
 
     def _process_ts(self, df, zone_input):
         oz = df.xs(zone_input, level=self.AGG_BY)
@@ -258,7 +258,7 @@ class Sensitivities(PlotDataStoreAndProcessor):
                 int_diff_all = int_diff_all.reset_index()
                 if self.AGG_BY not in int_diff_all.columns:
                     int_diff_all = merge_new_agg(
-                        self.Region_Mapping, int_diff_all, self.AGG_BY
+                        self.region_mapping, int_diff_all, self.AGG_BY
                     )
                 int_diff = int_diff_all[int_diff_all[self.AGG_BY] == zone_input]
                 int_diff = int_diff.groupby("timestamp").sum()
