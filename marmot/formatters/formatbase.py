@@ -68,32 +68,25 @@ class Process:
         input_folder: Path,
         output_file_path: Path,
         *_,
-        Region_Mapping: pd.DataFrame = pd.DataFrame(),
-        emit_names: pd.DataFrame = pd.DataFrame(),
+        region_mapping: pd.DataFrame = pd.DataFrame(),
+        emit_names_dict: dict = None,
         **__,
     ):
         """
         Args:
             input_folder (Path): Folder containing model input files.
             output_file_path (Path): Path to formatted h5 output file.
-            Region_Mapping (pd.DataFrame, optional): DataFrame to map custom
+            region_mapping (pd.DataFrame, optional): DataFrame to map custom
                 regions/zones to create custom aggregations.
                 Defaults to pd.DataFrame().
-            emit_names (pd.DataFrame, optional): DataFrame with 2 columns to rename
+            emit_names_dict (dict, optional): Dictionary to rename
                 emission names.
-                Defaults to pd.DataFrame().
+                Defaults to None.
         """
         self.input_folder = input_folder
         self.output_file_path = Path(output_file_path)
-        self.Region_Mapping = Region_Mapping.astype(str)
-        self.emit_names = emit_names
-
-        if not self.emit_names.empty:
-            self.emit_names_dict = (
-                self.emit_names[["Original", "New"]]
-                .set_index("Original")
-                .to_dict()["New"]
-            )
+        self.region_mapping = region_mapping.astype(str)
+        self.emit_names_dict = emit_names_dict
 
     @property
     def input_folder(self) -> Path:
