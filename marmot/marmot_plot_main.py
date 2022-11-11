@@ -151,6 +151,13 @@ class MarmotPlot(SetupLogger):
 
     @property
     def ordered_gen_list(self) -> list:
+        """ Returns List of ordered generator technolgies. 
+
+        Oder is specified in the ordered_gen_categories input.
+
+        Returns:
+            list: Ordered list of generator technolgies 
+        """
 
         if self._ordered_gen_list is None:
             # Subset ordered_gen to user desired generation
@@ -183,6 +190,13 @@ class MarmotPlot(SetupLogger):
 
     @property
     def gen_names_dict(self) -> dict:
+        """Returns dictionary of existing gen technology names to new names.
+
+        Used to rename technologies.
+
+        Returns:
+            dict: Keys: Existing names, Values: New names
+        """
         return self._gen_names_dict
 
     @gen_names_dict.setter
@@ -221,6 +235,14 @@ class MarmotPlot(SetupLogger):
 
     @property
     def ordered_gen_categories(self) -> pd.DataFrame:
+        """DataFrame containing generator order and category information 
+
+        Has at least one column named Ordered_Gen. 
+        Other columns define different generator technology category groupings.
+
+        Returns:
+            pd.DataFrame: ordered_gen_categories DataFrame
+        """
         return self._ordered_gen_categories
 
     @ordered_gen_categories.setter
@@ -246,7 +268,7 @@ class MarmotPlot(SetupLogger):
         else:
             msg = (
                 "Expected a DataFrame or a file path to csv for the ordered_gen_categories input but "
-                f"recieved a {type(input)}"
+                f"recieved a {type(ordered_gen_categories)}"
             )
             self.logger.error(msg)
             raise NotImplementedError(msg)
@@ -269,14 +291,19 @@ class MarmotPlot(SetupLogger):
 
     @property
     def color_dictionary(self) -> dict:
+        """Dictionary of gen technology names to plotting colors. 
+
+        Returns:
+            dict: Keys gen technologies, Values colors 
+        """
         return self._color_dictionary
 
     @color_dictionary.setter
-    def color_dictionary(self, input) -> None:
+    def color_dictionary(self, color_dictionary) -> None:
 
-        if isinstance(input, (str, Path)):
+        if isinstance(color_dictionary, (str, Path)):
             try:
-                input = pd.read_csv(input)
+                color_dictionary = pd.read_csv(color_dictionary)
             except FileNotFoundError:
                 msg = (
                     "Could not find specified color dictionary csv file; "
@@ -285,30 +312,35 @@ class MarmotPlot(SetupLogger):
                 self.logger.error(msg)
                 raise FileNotFoundError(msg)
 
-        if isinstance(input, pd.DataFrame):
-            if len(input.axes[1]) == 2:
+        if isinstance(color_dictionary, pd.DataFrame):
+            if len(color_dictionary.axes[1]) == 2:
                 self._color_dictionary = GeneratorColorDict.set_colors_from_df(
-                    input
+                    color_dictionary
                 ).color_dict
             else:
                 msg = (
                     "Expected exactly 2 columns for color_dictionary input, "
-                    f"{len(input.axes[1])} columns were in the DataFrame."
+                    f"{len(color_dictionary.axes[1])} columns were in the DataFrame."
                 )
                 self.logger.error(msg)
                 raise ValueError(msg)
-        elif isinstance(input, dict):
-            self._color_dictionary = GeneratorColorDict(input).color_dict
+        elif isinstance(color_dictionary, dict):
+            self._color_dictionary = GeneratorColorDict(color_dictionary).color_dict
         else:
             msg = (
                 "Expected a DataFrame a dict or a file path to csv for the color_dictionary input but "
-                f"recieved a {type(input)}"
+                f"recieved a {type(color_dictionary)}"
             )
             self.logger.error(msg)
             raise NotImplementedError(msg)
 
     @property
     def marmot_plot_select(self) -> pd.DataFrame:
+        """DataFrame containing information on plots to create and certain settings. 
+
+        Returns:
+            pd.DataFrame: 
+        """
         return self._marmot_plot_select
 
     @marmot_plot_select.setter
@@ -337,6 +369,11 @@ class MarmotPlot(SetupLogger):
 
     @property
     def region_mapping(self) -> pd.DataFrame:
+        """Region mapping Dataframe to map custom aggregations. 
+
+        Returns:
+            pd.DataFrame: 
+        """
         return self._region_mapping
 
     @region_mapping.setter
@@ -359,14 +396,38 @@ class MarmotPlot(SetupLogger):
                 self._region_mapping = self._region_mapping.drop(["category"], axis=1)
 
     @staticmethod
-    def convert_str_to_list(string_object) -> list:
+    def convert_str_to_list(string_object: str) -> list:
+        """Converts a comma separated string to a list.
+
+        Args:
+            string_object (str): A comma separated string
+
+        Returns:
+            list: list of strings. 
+        """
         if isinstance(string_object, str):
             list_obj = [x.strip() for x in string_object.split(",")]
         else:
             list_obj = string_object
         return list_obj
 
-    def get_geographic_regions(self, meta: MetaData):
+    def get_geographic_regions(self, meta: MetaData) -> list:
+        """Gets the geographic regions to plot based on the geographic aggregation.
+
+        The aggregation is determined with the AGG_BY attribute.
+        
+        region and zone (PLEXOS) will pull model defined aggregations. 
+        Other aggregations will use values from the region mapping file. 
+
+        The zone_region_sublist attribute can be used to reduce the set of geographic regions 
+        to plot. 
+
+        Args:
+            meta (MetaData): instance of MetaData class 
+
+        Returns:
+            list: List of geographic regions to plot 
+        """
 
         if self.AGG_BY in {"zone", "zones", "Zone", "Zones"}:
             self.AGG_BY = "zone"
