@@ -59,7 +59,7 @@ class GenerationStack(PlotDataStoreAndProcessor):
         marmot_solutions_folder: Path,
         gen_categories: GenCategories = GenCategories(),
         marmot_color_dict: dict = None,
-        Scenario_Diff: List[str] = None,
+        scenario_diff: List[str] = None,
         ylabels: List[str] = None,
         xlabels: List[str] = None,
         **kwargs,
@@ -78,7 +78,7 @@ class GenerationStack(PlotDataStoreAndProcessor):
             marmot_color_dict (dict, optional): Dictionary of colors to use for
                 generation technologies.
                 Defaults to None.
-            Scenario_Diff (List[str], optional): 2 value list, used to compare 2
+            scenario_diff (List[str], optional): 2 value list, used to compare 2
                 scenarios.
                 Defaults to None.
             ylabels (List[str], optional): y-axis labels for facet plots.
@@ -100,10 +100,10 @@ class GenerationStack(PlotDataStoreAndProcessor):
             self.marmot_color_dict = marmot_color_dict
         self.ylabels = ylabels
         self.xlabels = xlabels
-        if Scenario_Diff is None:
-            self.Scenario_Diff = [""]
+        if scenario_diff is None:
+            self.scenario_diff = [""]
         else:
-            self.Scenario_Diff = Scenario_Diff
+            self.scenario_diff = scenario_diff
 
     def committed_stack(
         self,
@@ -677,10 +677,10 @@ class GenerationStack(PlotDataStoreAndProcessor):
 
             Total_Gen_Stack_1: pd.DataFrame = self[
                 f"generator_Generation{data_resolution}"
-            ].get(self.Scenario_Diff[0])
+            ].get(self.scenario_diff[0])
             if Total_Gen_Stack_1 is None:
                 logger.warning(
-                    f"Scenario_Diff '{self.Scenario_Diff[0]}'' is not in data. "
+                    f"scenario_diff '{self.scenario_diff[0]}'' is not in data. "
                     "Ensure User Input Sheet is set up correctly!"
                 )
                 outputs = InputSheetError()
@@ -702,10 +702,10 @@ class GenerationStack(PlotDataStoreAndProcessor):
 
             Total_Gen_Stack_2: pd.DataFrame = self[
                 f"generator_Generation{data_resolution}"
-            ].get(self.Scenario_Diff[1])
+            ].get(self.scenario_diff[1])
             if Total_Gen_Stack_2 is None:
                 logger.warning(
-                    f"Scenario_Diff '{self.Scenario_Diff[1]}' is not in data. "
+                    f"scenario_diff '{self.scenario_diff[1]}' is not in data. "
                     "Ensure User Input Sheet is set up correctly!"
                 )
                 outputs = InputSheetError()
@@ -718,8 +718,8 @@ class GenerationStack(PlotDataStoreAndProcessor):
                 Total_Gen_Stack_2, columns=self.ordered_gen
             ).fillna(0)
 
-            logger.info(f"Scenario 1 = {self.Scenario_Diff[0]}")
-            logger.info(f"Scenario 2 = {self.Scenario_Diff[1]}")
+            logger.info(f"Scenario 1 = {self.scenario_diff[0]}")
+            logger.info(f"Scenario 2 = {self.scenario_diff[1]}")
             Gen_Stack_Out = Total_Gen_Stack_1 - Total_Gen_Stack_2
 
             if pd.notna(start_date_range):
@@ -760,7 +760,7 @@ class GenerationStack(PlotDataStoreAndProcessor):
                     label=column,
                 )
 
-            mplt.add_main_title(f"{self.Scenario_Diff[0]} vs. {self.Scenario_Diff[1]}")
+            mplt.add_main_title(f"{self.scenario_diff[0]} vs. {self.scenario_diff[1]}")
             ax.set_ylabel(
                 f"Generation Difference ({unitconversion['units']})",
                 color="black",

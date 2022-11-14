@@ -17,7 +17,7 @@ import importlib
 import sys
 import time
 from pathlib import Path
-from typing import Union
+from typing import Union, List
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -72,13 +72,13 @@ class MarmotPlot(SetupLogger):
         color_dictionary: Union[str, Path, pd.DataFrame, dict],
         marmot_plot_select: Union[str, Path, pd.DataFrame],
         marmot_solutions_folder: Union[str, Path] = None,
-        Scenario_Diff: Union[str, list] = None,
+        scenario_diff: Union[str, list] = None,
         zone_region_sublist: Union[str, list] = None,
         xlabels: Union[str, list] = None,
         ylabels: Union[str, list] = None,
         ticklabels: Union[str, list] = None,
         region_mapping: Union[str, Path, pd.DataFrame] = pd.DataFrame(),
-        TECH_SUBSET: Union[str, list] = None,
+        tech_subset: Union[str, list] = None,
         **kwargs,
     ):
         """
@@ -100,7 +100,7 @@ class MarmotPlot(SetupLogger):
             marmot_solutions_folder (Union[str, Path], optional): Directory to save
                 Marmot solution files.
                 Defaults to None.
-            Scenario_Diff (Union[str, list], optional): 2 value string
+            scenario_diff (Union[str, list], optional): 2 value string
                 or list, used to compare 2 scenarios.
                 Defaults to None.
             zone_region_sublist (Union[str, list], optional): Subset of regions
@@ -117,8 +117,8 @@ class MarmotPlot(SetupLogger):
                 to map custom regions/zones to create custom aggregations.
                 Aggregations are created by grouping PLEXOS regions.
                 Defaults to pd.DataFrame().
-            TECH_SUBSET (Union[str, list], optional): Tech subset category to plot.
-                The TECH_SUBSET value should be a column in the
+            tech_subset (Union[str, list], optional): Tech subset category to plot.
+                The tech_subset value should be a column in the
                 ordered_gen_categories.csv. If left None all techs will be plotted
                 Defaults to None.
             **kwargs
@@ -140,31 +140,31 @@ class MarmotPlot(SetupLogger):
         else:
             self.marmot_solutions_folder = Path(marmot_solutions_folder)
 
-        self.Scenario_Diff = self.convert_str_to_list(Scenario_Diff)
+        self.scenario_diff = self.convert_str_to_list(scenario_diff)
         self.zone_region_sublist = self.convert_str_to_list(zone_region_sublist)
         self.xlabels = self.convert_str_to_list(xlabels)
         self.ylabels = self.convert_str_to_list(ylabels)
         self.custom_xticklabels = self.convert_str_to_list(ticklabels)
         self.region_mapping = region_mapping
-        self.TECH_SUBSET = TECH_SUBSET
+        self.tech_subset = tech_subset
         self._ordered_gen_list = None
 
     @property
-    def ordered_gen_list(self) -> list:
+    def ordered_gen_list(self) -> List[str]:
         """List of ordered generator technolgies.
 
         Oder is specified in the ordered_gen_categories input.
 
         Returns:
-            list: Ordered list of generator technolgies
+            List[str]: Ordered list of generator technolgies
         """
 
         if self._ordered_gen_list is None:
             # Subset ordered_gen to user desired generation
-            if self.TECH_SUBSET:
-                if self.TECH_SUBSET not in self.ordered_gen_categories.columns:
+            if self.tech_subset:
+                if self.tech_subset not in self.ordered_gen_categories.columns:
                     self.logger.warning(
-                        f"{self.TECH_SUBSET} column was not found "
+                        f"{self.tech_subset} column was not found "
                         "in the ordered_gen_categories.csv. "
                         "All generator technologies will be plotted"
                     )
@@ -173,12 +173,12 @@ class MarmotPlot(SetupLogger):
                     )
                 else:
                     ordered_gen = self.ordered_gen_categories.loc[
-                        self.ordered_gen_categories[self.TECH_SUBSET] == True
+                        self.ordered_gen_categories[self.tech_subset] == True
                     ]
                     self._ordered_gen_list = (
                         ordered_gen["Ordered_Gen"].str.strip().tolist()
                     )
-                    self.logger.info(f"Tech Aggregation selected: {self.TECH_SUBSET}")
+                    self.logger.info(f"Tech Aggregation selected: {self.tech_subset}")
             else:
                 self._ordered_gen_list = (
                     self.ordered_gen_categories["Ordered_Gen"].str.strip().tolist()
@@ -407,14 +407,14 @@ class MarmotPlot(SetupLogger):
             raise NotImplementedError(msg)
 
     @staticmethod
-    def convert_str_to_list(string_object: str) -> list:
+    def convert_str_to_list(string_object: str) -> List[str]:
         """Converts a comma separated string to a list.
 
         Args:
             string_object (str): A comma separated string
 
         Returns:
-            list: list of strings.
+            List[str]: list of strings.
         """
         if isinstance(string_object, str):
             list_obj = [x.strip() for x in string_object.split(",")]
@@ -422,7 +422,7 @@ class MarmotPlot(SetupLogger):
             list_obj = string_object
         return list_obj
 
-    def get_geographic_regions(self, meta: MetaData) -> list:
+    def get_geographic_regions(self, meta: MetaData) -> List[str]:
         """Gets the geographic regions to plot based on the geographic aggregation.
 
         The aggregation is determined with the AGG_BY attribute.
@@ -437,7 +437,7 @@ class MarmotPlot(SetupLogger):
             meta (MetaData): instance of MetaData class
 
         Returns:
-            list: List of geographic regions to plot
+            List[str]: List of geographic regions to plot
         """
 
         if self.AGG_BY in {"zone", "zones", "Zone", "Zones"}:
@@ -603,14 +603,14 @@ class MarmotPlot(SetupLogger):
                     self.ordered_gen_categories
                 ),
                 "marmot_color_dict": self.color_dictionary,
-                "Scenario_Diff": self.Scenario_Diff,
+                "scenario_diff": self.scenario_diff,
                 "ylabels": self.ylabels,
                 "xlabels": self.xlabels,
                 "custom_xticklabels": self.custom_xticklabels,
                 "color_list": ColorList().colors,
                 "marker_style": PlotMarkers().markers,
                 "region_mapping": self.region_mapping,
-                "TECH_SUBSET": self.TECH_SUBSET,
+                "tech_subset": self.tech_subset,
             }
 
             # Import plot module from plottingmodules package
@@ -808,9 +808,9 @@ def main():
     if pd.isna(
         Marmot_user_defined_inputs.loc["Scenario_Diff_plot", "User_defined_value"]
     ):
-        Scenario_Diff = None
+        scenario_diff = None
     else:
-        Scenario_Diff = Marmot_user_defined_inputs.loc[
+        scenario_diff = Marmot_user_defined_inputs.loc[
             "Scenario_Diff_plot", "User_defined_value"
         ]
 
@@ -843,11 +843,11 @@ def main():
     AGG_BY = Marmot_user_defined_inputs.loc["AGG_BY", "User_defined_value"].strip()
 
     if pd.notna(Marmot_user_defined_inputs.loc["TECH_SUBSET", "User_defined_value"]):
-        TECH_SUBSET = Marmot_user_defined_inputs.loc[
+        tech_subset = Marmot_user_defined_inputs.loc[
             "TECH_SUBSET", "User_defined_value"
         ].strip()
     else:
-        TECH_SUBSET = None
+        tech_subset = None
 
     # Facet Grid Labels (Based on Scenarios)
     if pd.isna(
@@ -884,13 +884,13 @@ def main():
         color_dictionary,
         marmot_plot_select,
         marmot_solutions_folder=marmot_solutions_folder,
-        Scenario_Diff=Scenario_Diff,
+        scenario_diff=scenario_diff,
         zone_region_sublist=zone_region_sublist,
         xlabels=xlabels,
         ylabels=ylabels,
         ticklabels=ticklabels,
         region_mapping=region_mapping,
-        TECH_SUBSET=TECH_SUBSET,
+        tech_subset=tech_subset,
     )
 
     initiate.run_plotter()

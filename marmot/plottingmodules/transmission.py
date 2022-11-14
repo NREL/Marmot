@@ -69,7 +69,7 @@ class Transmission(PlotDataStoreAndProcessor):
         ordered_gen: List[str],
         marmot_solutions_folder: Path,
         gen_categories: GenCategories = GenCategories(),
-        Scenario_Diff: List[str] = None,
+        scenario_diff: List[str] = None,
         ylabels: List[str] = None,
         xlabels: List[str] = None,
         custom_xticklabels: List[str] = None,
@@ -88,7 +88,7 @@ class Transmission(PlotDataStoreAndProcessor):
             gen_categories (GenCategories): Instance of GenCategories class, groups generator technologies
                 into defined categories.
                 Deafults to GenCategories.
-            Scenario_Diff (List[str], optional): 2 value list, used to compare 2
+            scenario_diff (List[str], optional): 2 value list, used to compare 2
                 scenarios.
                 Defaults to None.
             ylabels (List[str], optional): y-axis labels for facet plots.
@@ -111,10 +111,10 @@ class Transmission(PlotDataStoreAndProcessor):
         self.Zones = Zones
         self.Scenarios = Scenarios
         self.gen_categories = gen_categories
-        if Scenario_Diff is None:
-            self.Scenario_Diff = [""]
+        if scenario_diff is None:
+            self.scenario_diff = [""]
         else:
-            self.Scenario_Diff = Scenario_Diff
+            self.scenario_diff = scenario_diff
         self.ylabels = ylabels
         self.xlabels = xlabels
         self.custom_xticklabels = custom_xticklabels
@@ -854,7 +854,7 @@ class Transmission(PlotDataStoreAndProcessor):
 
         This method plots the hourly difference in interface flow between two scenarios for
         individual interfaces, with a facet for each interface.
-        The two scenarios are defined in the "Scenario_Diff" row of Marmot_user_defined_inputs.
+        The two scenarios are defined in the "scenario_diff" row of Marmot_user_defined_inputs.
         The interfaces are specified in the plot properties field of Marmot_plot_select.csv (column 4).
         The figure and data tables are saved within the module.
 
@@ -1428,9 +1428,9 @@ class Transmission(PlotDataStoreAndProcessor):
 
         logger.info("Plotting only lines specified in Marmot_plot_select.csv")
         logger.info(select_lines)
-        flow_diff = self["line_Flow"].get(self.Scenario_Diff[1]) - self[
+        flow_diff = self["line_Flow"].get(self.scenario_diff[1]) - self[
             "line_Flow"
-        ].get(self.Scenario_Diff[0])
+        ].get(self.scenario_diff[0])
 
         xdim, ydim = set_x_y_dimension(len(select_lines))
         grid_size = xdim * ydim
@@ -1465,7 +1465,7 @@ class Transmission(PlotDataStoreAndProcessor):
                 if duration_curve:
                     single_line = sort_duration(single_line, line)
 
-                # mplt.lineplot(single_line,line, label = self.Scenario_Diff[1] + ' - \n' + self.Scenario_Diff[0] + '\n line flow', sub_pos = n)
+                # mplt.lineplot(single_line,line, label = self.scenario_diff[1] + ' - \n' + self.scenario_diff[0] + '\n line flow', sub_pos = n)
                 mplt.lineplot(
                     single_line, line, label="BESS - no BESS \n line flow", sub_pos=n
                 )
