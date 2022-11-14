@@ -57,7 +57,7 @@ class ProcessReEDS(Process):
         output_file_path: Path,
         *args,
         process_subset_years: list = None,
-        Region_Mapping: pd.DataFrame = pd.DataFrame(),
+        region_mapping: pd.DataFrame = pd.DataFrame(),
         **kwargs,
     ):
         """
@@ -66,7 +66,7 @@ class ProcessReEDS(Process):
             output_file_path (Path): Path to formatted h5 output file.
             process_subset_years (list, optional): If provided only process
                 years specified. Defaults to None.
-            Region_Mapping (pd.DataFrame, optional): DataFrame to map custom
+            region_mapping (pd.DataFrame, optional): DataFrame to map custom
                 regions/zones to create custom aggregations.
                 Defaults to pd.DataFrame().
             **kwargs
@@ -78,7 +78,7 @@ class ProcessReEDS(Process):
             input_folder,
             output_file_path,
             *args,
-            Region_Mapping=Region_Mapping,
+            region_mapping=region_mapping,
             **kwargs,
         )
         # Internal cached data is saved to the following variables.
@@ -89,7 +89,7 @@ class ProcessReEDS(Process):
         self.metadata = MetaData(
             output_file_path.parent,
             read_from_formatted_h5=True,
-            Region_Mapping=Region_Mapping,
+            region_mapping=region_mapping,
         )
 
         if process_subset_years:
@@ -241,9 +241,9 @@ class ProcessReEDS(Process):
         df = self.reeds_prop_cols.assign_column_names(df, prop)
         if "region" in df.columns:
             df.region = df.region.map(lambda x: self.wind_resource_to_pca.get(x, x))
-            if not self.Region_Mapping.empty:
+            if not self.region_mapping.empty:
                 # Merge in region mapping, drop any na columns
-                df = df.merge(self.Region_Mapping, how="left", on="region")
+                df = df.merge(self.region_mapping, how="left", on="region")
                 df.dropna(axis=1, how="all", inplace=True)
         # Get desired method, used for extra processing if needed
         process_att = getattr(self, f"df_process_{prop_class}", None)

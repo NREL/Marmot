@@ -879,7 +879,6 @@ class Curtailment(PlotDataStoreAndProcessor):
             )
 
             # Change to a diff on the first scenario.
-            print(Total_Curtailment_out)
             Total_Curtailment_out = Total_Curtailment_out - Total_Curtailment_out.xs(
                 self.Scenarios[0]
             )
@@ -942,8 +941,6 @@ class Curtailment(PlotDataStoreAndProcessor):
             )
 
             curt_totals = Total_Curtailment_out.sum(axis=1)
-            print(Total_Curtailment_out)
-            print(curt_totals)
             # inserts total bar value above each bar
             k = 0
             for i in ax.patches:

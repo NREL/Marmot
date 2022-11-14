@@ -43,14 +43,14 @@ class ProcessSIIP(Process):
         input_folder: Path,
         output_file_path: Path,
         *args,
-        Region_Mapping: pd.DataFrame = pd.DataFrame(),
+        region_mapping: pd.DataFrame = pd.DataFrame(),
         **kwargs,
     ):
         """
         Args:
             input_folder (Path): Folder containing csv files.
             output_file_path (Path): Path to formatted h5 output file.
-            Region_Mapping (pd.DataFrame, optional): DataFrame to map custom
+            region_mapping (pd.DataFrame, optional): DataFrame to map custom
                 regions/zones to create custom aggregations.
                 Defaults to pd.DataFrame().
             **kwargs
@@ -62,14 +62,14 @@ class ProcessSIIP(Process):
             input_folder,
             output_file_path,
             *args,
-            Region_Mapping=Region_Mapping,
+            region_mapping=region_mapping,
             **kwargs,
         )
 
         self.metadata = MetaData(
             self.output_file_path.parent,
             read_from_formatted_h5=True,
-            Region_Mapping=Region_Mapping,
+            region_mapping=region_mapping,
         )
 
     @property
@@ -139,8 +139,8 @@ class ProcessSIIP(Process):
         # Process attribute and return to df
         df = process_att(df)
         # Add region mapping
-        if "region" in df.columns and not self.Region_Mapping.empty:
-            df = df.merge(self.Region_Mapping, how="left", on="region")
+        if "region" in df.columns and not self.region_mapping.empty:
+            df = df.merge(self.region_mapping, how="left", on="region")
         # Set multiindex
         df_idx_col = list(df.columns)
         df_idx_col.pop(df_idx_col.index("values"))
