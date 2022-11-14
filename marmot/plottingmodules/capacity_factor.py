@@ -189,7 +189,12 @@ class CapacityFactor(MPlotDataHelper):
                             cf = np.average(cfs, weights=caps)
                             CF[tech_name] = cf
                             #ww added
-                            CF["DAC&CCS-off"] = CF["DAC&CCS-off"] - CF["DAC&CCS-on"]
+                            ##PCC
+                            #CF["CCS off"] = CF["CCS off"] - CF["CCS on"]
+                            ##storage
+                            CF["Gas-CC CCS-flex-storage off"] = CF["Gas-CC CCS-flex-storage off"] - CF["Gas-CC CCS-flex-storage on"]
+                            ##DAC
+                            #CF["DAC&CCS-off"] = CF["DAC&CCS-off"] - CF["DAC&CCS-on"]
                     cf_chunks.append(CF)
 
             if cf_chunks:
