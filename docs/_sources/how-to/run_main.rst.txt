@@ -85,13 +85,13 @@ pip install Marmot
 Open a cmd window that is setup with python and change directory to your desired install location.
 Type the following::
    
-   pip3 install -e git+https://github.com/NREL/Marmot.git#egg=marmot 
+   pip3 install git+https://github.com/NREL/Marmot.git#egg=marmot 
    
 This will install Marmot from the current master branch, however this can be changed to a specific commit or 
 tagged release if desired by adding ``@comit_id`` after ``Marmot.git`` and before the # symbol. 
-For example, the following can be used to install Marmot release v0.9.0::
+For example, the following can be used to install Marmot release v0.11.0::
 
-   git+https://github.com/NREL/Marmot.git@v0.9.0#egg=marmot 
+   git+https://github.com/NREL/Marmot.git@v0.11.0#egg=marmot 
    
 If no error messages appeared, Marmot has been installed correctly. 
 

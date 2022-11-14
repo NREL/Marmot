@@ -238,7 +238,7 @@
         <span class="n">marmot_solutions_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
         <span class="n">gen_categories</span><span class="p">:</span> <span class="n">GenCategories</span> <span class="o">=</span> <span class="n">GenCategories</span><span class="p">(),</span>
         <span class="n">marmot_color_dict</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">Scenario_Diff</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">scenario_diff</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">ylabels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">xlabels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
@@ -257,7 +257,7 @@
 <span class="sd">            marmot_color_dict (dict, optional): Dictionary of colors to use for</span>
 <span class="sd">                generation technologies.</span>
 <span class="sd">                Defaults to None.</span>
-<span class="sd">            Scenario_Diff (List[str], optional): 2 value list, used to compare 2</span>
+<span class="sd">            scenario_diff (List[str], optional): 2 value list, used to compare 2</span>
 <span class="sd">                scenarios.</span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            ylabels (List[str], optional): y-axis labels for facet plots.</span>
@@ -279,10 +279,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span> <span class="o">=</span> <span class="n">marmot_color_dict</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span> <span class="o">=</span> <span class="n">ylabels</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span> <span class="o">=</span> <span class="n">xlabels</span>
-        <span class="k">if</span> <span class="n">Scenario_Diff</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">scenario_diff</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span> <span class="o">=</span> <span class="n">Scenario_Diff</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span> <span class="o">=</span> <span class="n">scenario_diff</span>
 
 <div class="viewcode-block" id="GenerationStack.committed_stack"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.generation_stack.GenerationStack.html#marmot.plottingmodules.generation_stack.GenerationStack.committed_stack">[docs]</a>    <span class="k">def</span> <span class="nf">committed_stack</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -856,10 +856,10 @@
 
             <span class="n">Total_Gen_Stack_1</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span>
                 <span class="sa">f</span><span class="s2">&quot;generator_Generation</span><span class="si">{</span><span class="n">data_resolution</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">Total_Gen_Stack_1</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Scenario_Diff &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;&#39; is not in data. &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;scenario_diff &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;&#39; is not in data. &quot;</span>
                     <span class="s2">&quot;Ensure User Input Sheet is set up correctly!&quot;</span>
                 <span class="p">)</span>
                 <span class="n">outputs</span> <span class="o">=</span> <span class="n">InputSheetError</span><span class="p">()</span>
@@ -881,10 +881,10 @@
 
             <span class="n">Total_Gen_Stack_2</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span>
                 <span class="sa">f</span><span class="s2">&quot;generator_Generation</span><span class="si">{</span><span class="n">data_resolution</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">Total_Gen_Stack_2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Scenario_Diff &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39; is not in data. &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;scenario_diff &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39; is not in data. &quot;</span>
                     <span class="s2">&quot;Ensure User Input Sheet is set up correctly!&quot;</span>
                 <span class="p">)</span>
                 <span class="n">outputs</span> <span class="o">=</span> <span class="n">InputSheetError</span><span class="p">()</span>
@@ -897,8 +897,8 @@
                 <span class="n">Total_Gen_Stack_2</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen</span>
             <span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Scenario 1 = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Scenario 2 = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Scenario 1 = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Scenario 2 = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">Gen_Stack_Out</span> <span class="o">=</span> <span class="n">Total_Gen_Stack_1</span> <span class="o">-</span> <span class="n">Total_Gen_Stack_2</span>
 
             <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">start_date_range</span><span class="p">):</span>
@@ -939,7 +939,7 @@
                     <span class="n">label</span><span class="o">=</span><span class="n">column</span><span class="p">,</span>
                 <span class="p">)</span>
 
-            <span class="n">mplt</span><span class="o">.</span><span class="n">add_main_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> vs. </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">mplt</span><span class="o">.</span><span class="n">add_main_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> vs. </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Generation Difference (</span><span class="si">{</span><span class="n">unitconversion</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
                 <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>

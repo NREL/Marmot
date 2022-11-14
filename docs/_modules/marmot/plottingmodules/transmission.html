@@ -248,12 +248,12 @@
         <span class="n">ordered_gen</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">marmot_solutions_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
         <span class="n">gen_categories</span><span class="p">:</span> <span class="n">GenCategories</span> <span class="o">=</span> <span class="n">GenCategories</span><span class="p">(),</span>
-        <span class="n">Scenario_Diff</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">scenario_diff</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">ylabels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">xlabels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">custom_xticklabels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">color_list</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="n">ColorList</span><span class="p">()</span><span class="o">.</span><span class="n">colors</span><span class="p">,</span>
-        <span class="n">Region_Mapping</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(),</span>
+        <span class="n">region_mapping</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(),</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -267,7 +267,7 @@
 <span class="sd">            gen_categories (GenCategories): Instance of GenCategories class, groups generator technologies</span>
 <span class="sd">                into defined categories.</span>
 <span class="sd">                Deafults to GenCategories.</span>
-<span class="sd">            Scenario_Diff (List[str], optional): 2 value list, used to compare 2</span>
+<span class="sd">            scenario_diff (List[str], optional): 2 value list, used to compare 2</span>
 <span class="sd">                scenarios.</span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            ylabels (List[str], optional): y-axis labels for facet plots.</span>
@@ -279,7 +279,7 @@
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            color_list (list, optional): List of colors to apply to non-gen plots.</span>
 <span class="sd">                Defaults to ColorList().colors.</span>
-<span class="sd">            Region_Mapping (pd.DataFrame, optional): Mapping file to map</span>
+<span class="sd">            region_mapping (pd.DataFrame, optional): Mapping file to map</span>
 <span class="sd">                custom regions/zones to create custom aggregations.</span>
 <span class="sd">                Aggregations are created by grouping PLEXOS regions.</span>
 <span class="sd">                Defaults to pd.DataFrame().</span>
@@ -290,18 +290,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">Zones</span> <span class="o">=</span> <span class="n">Zones</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span> <span class="o">=</span> <span class="n">Scenarios</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gen_categories</span> <span class="o">=</span> <span class="n">gen_categories</span>
-        <span class="k">if</span> <span class="n">Scenario_Diff</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">scenario_diff</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span> <span class="o">=</span> <span class="n">Scenario_Diff</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span> <span class="o">=</span> <span class="n">scenario_diff</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span> <span class="o">=</span> <span class="n">ylabels</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span> <span class="o">=</span> <span class="n">xlabels</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">custom_xticklabels</span> <span class="o">=</span> <span class="n">custom_xticklabels</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">color_list</span> <span class="o">=</span> <span class="n">color_list</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span> <span class="o">=</span> <span class="n">Region_Mapping</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span> <span class="o">=</span> <span class="n">region_mapping</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">processed_hdf5_folder</span><span class="p">,</span> <span class="n">Region_Mapping</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">processed_hdf5_folder</span><span class="p">,</span> <span class="n">region_mapping</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span>
         <span class="p">)</span>
 
 <div class="viewcode-block" id="Transmission.line_util"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.transmission.Transmission.html#marmot.plottingmodules.transmission.Transmission.line_util">[docs]</a>    <span class="k">def</span> <span class="nf">line_util</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -1033,7 +1033,7 @@
 
 <span class="sd">        This method plots the hourly difference in interface flow between two scenarios for</span>
 <span class="sd">        individual interfaces, with a facet for each interface.</span>
-<span class="sd">        The two scenarios are defined in the &quot;Scenario_Diff&quot; row of Marmot_user_defined_inputs.</span>
+<span class="sd">        The two scenarios are defined in the &quot;scenario_diff&quot; row of Marmot_user_defined_inputs.</span>
 <span class="sd">        The interfaces are specified in the plot properties field of Marmot_plot_select.csv (column 4).</span>
 <span class="sd">        The figure and data tables are saved within the module.</span>
 
@@ -1607,9 +1607,9 @@
 
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Plotting only lines specified in Marmot_plot_select.csv&quot;</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">select_lines</span><span class="p">)</span>
-        <span class="n">flow_diff</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;line_Flow&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="bp">self</span><span class="p">[</span>
+        <span class="n">flow_diff</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;line_Flow&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="bp">self</span><span class="p">[</span>
             <span class="s2">&quot;line_Flow&quot;</span>
-        <span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
         <span class="n">xdim</span><span class="p">,</span> <span class="n">ydim</span> <span class="o">=</span> <span class="n">set_x_y_dimension</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">select_lines</span><span class="p">))</span>
         <span class="n">grid_size</span> <span class="o">=</span> <span class="n">xdim</span> <span class="o">*</span> <span class="n">ydim</span>
@@ -1644,7 +1644,7 @@
                 <span class="k">if</span> <span class="n">duration_curve</span><span class="p">:</span>
                     <span class="n">single_line</span> <span class="o">=</span> <span class="n">sort_duration</span><span class="p">(</span><span class="n">single_line</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
 
-                <span class="c1"># mplt.lineplot(single_line,line, label = self.Scenario_Diff[1] + &#39; - \n&#39; + self.Scenario_Diff[0] + &#39;\n line flow&#39;, sub_pos = n)</span>
+                <span class="c1"># mplt.lineplot(single_line,line, label = self.scenario_diff[1] + &#39; - \n&#39; + self.scenario_diff[0] + &#39;\n line flow&#39;, sub_pos = n)</span>
                 <span class="n">mplt</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span>
                     <span class="n">single_line</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;BESS - no BESS </span><span class="se">\n</span><span class="s2"> line flow&quot;</span><span class="p">,</span> <span class="n">sub_pos</span><span class="o">=</span><span class="n">n</span>
                 <span class="p">)</span>
@@ -2155,7 +2155,7 @@
 
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span> <span class="o">!=</span> <span class="s2">&quot;region&quot;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span> <span class="o">!=</span> <span class="s2">&quot;zone&quot;</span><span class="p">:</span>
                     <span class="n">agg_region_mapping</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">[[</span><span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">]]</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span><span class="p">[[</span><span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">]]</span>
                         <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;region&quot;</span><span class="p">)</span>
                         <span class="o">.</span><span class="n">to_dict</span><span class="p">()[</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">]</span>
                     <span class="p">)</span>
@@ -2810,7 +2810,7 @@
 
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span> <span class="o">!=</span> <span class="s2">&quot;region&quot;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span> <span class="o">!=</span> <span class="s2">&quot;zone&quot;</span><span class="p">:</span>
                     <span class="n">agg_region_mapping</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">[[</span><span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">]]</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span><span class="p">[[</span><span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">]]</span>
                         <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;region&quot;</span><span class="p">)</span>
                         <span class="o">.</span><span class="n">to_dict</span><span class="p">()[</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">]</span>
                     <span class="p">)</span>
@@ -2990,7 +2990,7 @@
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span> <span class="o">!=</span> <span class="s2">&quot;region&quot;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span> <span class="o">!=</span> <span class="s2">&quot;zone&quot;</span><span class="p">:</span>
                 <span class="n">agg_region_mapping</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">[[</span><span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">]]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span><span class="p">[[</span><span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">]]</span>
                     <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;region&quot;</span><span class="p">)</span>
                     <span class="o">.</span><span class="n">to_dict</span><span class="p">()[</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">]</span>
                 <span class="p">)</span>

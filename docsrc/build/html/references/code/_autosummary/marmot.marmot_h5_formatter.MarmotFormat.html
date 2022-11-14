@@ -789,7 +789,7 @@
 <h1>marmot.marmot_h5_formatter.MarmotFormat<a class="headerlink" href="#marmot-marmot-h5-formatter-marmotformat" title="Permalink to this headline">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="marmot.marmot_h5_formatter.MarmotFormat">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MarmotFormat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Scenario_name:</span> <span class="pre">str,</span> <span class="pre">Model_Solutions_folder:</span> <span class="pre">typing.Union[str,</span> <span class="pre">pathlib.Path],</span> <span class="pre">Properties_File:</span> <span class="pre">typing.Union[str,</span> <span class="pre">pathlib.Path,</span> <span class="pre">pandas.core.frame.DataFrame],</span> <span class="pre">Marmot_Solutions_folder:</span> <span class="pre">typing.Optional[typing.Union[str,</span> <span class="pre">pathlib.Path]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">Region_Mapping:</span> <span class="pre">typing.Union[str,</span> <span class="pre">pathlib.Path,</span> <span class="pre">pandas.core.frame.DataFrame]</span> <span class="pre">=</span> <span class="pre">Empty</span> <span class="pre">DataFrame</span> <span class="pre">Columns:</span> <span class="pre">[]</span> <span class="pre">Index:</span> <span class="pre">[],</span> <span class="pre">emit_names:</span> <span class="pre">typing.Union[str,</span> <span class="pre">pathlib.Path,</span> <span class="pre">pandas.core.frame.DataFrame]</span> <span class="pre">=</span> <span class="pre">Empty</span> <span class="pre">DataFrame</span> <span class="pre">Columns:</span> <span class="pre">[]</span> <span class="pre">Index:</span> <span class="pre">[],</span> <span class="pre">**kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#MarmotFormat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.MarmotFormat" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MarmotFormat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Scenario_name:</span> <span class="pre">str,</span> <span class="pre">model_solutions_folder:</span> <span class="pre">typing.Union[str,</span> <span class="pre">pathlib.Path],</span> <span class="pre">properties_file:</span> <span class="pre">typing.Union[str,</span> <span class="pre">pathlib.Path,</span> <span class="pre">pandas.core.frame.DataFrame],</span> <span class="pre">marmot_solutions_folder:</span> <span class="pre">typing.Optional[typing.Union[str,</span> <span class="pre">pathlib.Path]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">region_mapping:</span> <span class="pre">typing.Union[str,</span> <span class="pre">pathlib.Path,</span> <span class="pre">pandas.core.frame.DataFrame]</span> <span class="pre">=</span> <span class="pre">Empty</span> <span class="pre">DataFrame</span> <span class="pre">Columns:</span> <span class="pre">[]</span> <span class="pre">Index:</span> <span class="pre">[],</span> <span class="pre">emit_names_dict:</span> <span class="pre">typing.Optional[typing.Union[str,</span> <span class="pre">pathlib.Path,</span> <span class="pre">pandas.core.frame.DataFrame,</span> <span class="pre">dict]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">**kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#MarmotFormat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.MarmotFormat" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="marmot.utils.loggersetup.SetupLogger.html#marmot.utils.loggersetup.SetupLogger" title="marmot.utils.loggersetup.SetupLogger"><code class="xref py py-class docutils literal notranslate"><span class="pre">marmot.utils.loggersetup.SetupLogger</span></code></a></p>
 <p>Main module class to be instantiated to run the formatter.</p>
 <p>MarmotFormat handles the passing on information to the various
@@ -800,20 +800,20 @@ which can then be read into the Marmot plotting code</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>Scenario_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – Name of scenario to process.</p></li>
-<li><p><strong>Model_Solutions_folder</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Path</em><em>]</em>) – Folder containing model simulation
+<li><p><strong>model_solutions_folder</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Path</em><em>]</em>) – Directory containing model simulation
 results subfolders and their files.</p></li>
-<li><p><strong>Properties_File</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Path</em><em>, </em><em>pd.DataFrame</em><em>]</em>) – Properties
-to process, must follow format seen in Marmot directory.</p></li>
-<li><p><strong>Marmot_Solutions_folder</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Path</em><em>]</em><em>, </em><em>optional</em>) – Folder to save Marmot
+<li><p><strong>properties_file</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Path</em><em>, </em><em>pd.DataFrame</em><em>]</em>) – Path to or DataFrame of properties
+to process.</p></li>
+<li><p><strong>marmot_solutions_folder</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Path</em><em>]</em><em>, </em><em>optional</em>) – Direcrory to save Marmot
 solution files.
 Defaults to None.</p></li>
-<li><p><strong>Region_Mapping</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Path</em><em>, </em><em>pd.DataFrame</em><em>]</em><em>, </em><em>optional</em>) – Mapping file
+<li><p><strong>region_mapping</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Path</em><em>, </em><em>pd.DataFrame</em><em>]</em><em>, </em><em>optional</em>) – Path to or Dataframe
 to map custom regions/zones to create custom aggregations.
 Aggregations are created by grouping PLEXOS regions.
 Defaults to pd.DataFrame().</p></li>
-<li><p><strong>emit_names</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Path</em><em>, </em><em>pd.DataFrame</em><em>]</em><em>, </em><em>optional</em>) – Mapping file
+<li><p><strong>emit_names_dict</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Path</em><em>, </em><em>pd.DataFrame</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>]</em><em>, </em><em>optional</em>) – Path to, DataFrame or dict
 to rename emissions types.
-Defaults to pd.DataFrame().</p></li>
+Defaults to None.</p></li>
 <li><p><strong>**kwargs</strong> – These parameters will be passed to the
 marmot.utils.loggersetup.SetupLogger class.</p></li>
 </ul>
@@ -844,8 +844,53 @@ marmot.utils.loggersetup.SetupLogger class.</p></li>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">LOG_CONFIG_FILE</span></code></p></td>
 <td><p>Name of default logging config file located in utils package</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.MarmotFormat.emit_names_dict" title="marmot.marmot_h5_formatter.MarmotFormat.emit_names_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">emit_names_dict</span></code></a></p></td>
+<td><p>Dictionary of existing emissions names to new names.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.MarmotFormat.properties_file" title="marmot.marmot_h5_formatter.MarmotFormat.properties_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">properties_file</span></code></a></p></td>
+<td><p>DataFrame containing information on model properties to process.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.MarmotFormat.region_mapping" title="marmot.marmot_h5_formatter.MarmotFormat.region_mapping"><code class="xref py py-obj docutils literal notranslate"><span class="pre">region_mapping</span></code></a></p></td>
+<td><p>Region mapping Dataframe to map custom aggregations.</p></td>
+</tr>
 </tbody>
 </table>
+<dl class="py property">
+<dt class="sig sig-object py" id="marmot.marmot_h5_formatter.MarmotFormat.properties_file">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">properties_file</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="http://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.0.0.dev0+653.g2e55bff66d)"><span class="pre">pandas.core.frame.DataFrame</span></a></em><a class="headerlink" href="#marmot.marmot_h5_formatter.MarmotFormat.properties_file" title="Permalink to this definition">#</a></dt>
+<dd><p>DataFrame containing information on model properties to process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marmot.marmot_h5_formatter.MarmotFormat.region_mapping">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">region_mapping</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="http://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.0.0.dev0+653.g2e55bff66d)"><span class="pre">pandas.core.frame.DataFrame</span></a></em><a class="headerlink" href="#marmot.marmot_h5_formatter.MarmotFormat.region_mapping" title="Permalink to this definition">#</a></dt>
+<dd><p>Region mapping Dataframe to map custom aggregations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marmot.marmot_h5_formatter.MarmotFormat.emit_names_dict">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">emit_names_dict</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a></em><a class="headerlink" href="#marmot.marmot_h5_formatter.MarmotFormat.emit_names_dict" title="Permalink to this definition">#</a></dt>
+<dd><p>Dictionary of existing emissions names to new names.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Keys Existing names, Values: New names</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.marmot_h5_formatter.MarmotFormat.run_formatter">
 <span class="sig-name descname"><span class="pre">run_formatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'PLEXOS'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plexos_block</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ST'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">append_block_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">process_subset_years</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><span class="pre">list</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#MarmotFormat.run_formatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.MarmotFormat.run_formatter" title="Permalink to this definition">#</a></dt>

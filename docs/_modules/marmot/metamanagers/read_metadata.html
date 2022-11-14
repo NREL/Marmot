@@ -209,7 +209,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">HDF5_folder_in</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
         <span class="n">read_from_formatted_h5</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">Region_Mapping</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(),</span>
+        <span class="n">region_mapping</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(),</span>
         <span class="n">partition_number</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -218,13 +218,13 @@
 <span class="sd">            read_from_formatted_h5 (bool, optional): Boolean for whether the metadata is</span>
 <span class="sd">                being read from the formatted hdf5 file or the original PLEXOS solution file.</span>
 <span class="sd">                Defaults to True.</span>
-<span class="sd">            Region_Mapping (pd.DataFrame, optional): DataFrame of extra regions to map.</span>
+<span class="sd">            region_mapping (pd.DataFrame, optional): DataFrame of extra regions to map.</span>
 <span class="sd">                Defaults to pd.DataFrame().</span>
 <span class="sd">            partition_number (int, optional): Which temporal partition of h5 data to retrieve</span>
 <span class="sd">                metadata from in the formatted h5 file. Defaults to 0.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">HDF5_folder_in</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">HDF5_folder_in</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span> <span class="o">=</span> <span class="n">Region_Mapping</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span> <span class="o">=</span> <span class="n">region_mapping</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">read_from_formatted_h5</span> <span class="o">=</span> <span class="n">read_from_formatted_h5</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">partition_number</span> <span class="o">=</span> <span class="n">partition_number</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">start_index</span> <span class="o">=</span> <span class="kc">None</span>
@@ -474,10 +474,10 @@
             <span class="p">)</span>  <span class="c1"># For batteries which belong to more than 1 region, drop duplicates.</span>
 
             <span class="c1"># Merge in region mapping.</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
                 <span class="n">region_batt</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
                     <span class="n">region_batt</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span><span class="p">,</span>
                     <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
                     <span class="n">on</span><span class="o">=</span><span class="s2">&quot;region&quot;</span><span class="p">,</span>
                 <span class="p">)</span>
@@ -794,10 +794,10 @@
             <span class="n">region_interregionallines</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
                 <span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;parent&quot;</span><span class="p">:</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;child&quot;</span><span class="p">:</span> <span class="s2">&quot;line_name&quot;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
                 <span class="n">region_interregionallines</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
                     <span class="n">region_interregionallines</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span><span class="p">,</span>
                     <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
                     <span class="n">on</span><span class="o">=</span><span class="s2">&quot;region&quot;</span><span class="p">,</span>
                 <span class="p">)</span>
@@ -850,10 +850,10 @@
             <span class="n">region_intraregionallines</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
                 <span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;parent&quot;</span><span class="p">:</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;child&quot;</span><span class="p">:</span> <span class="s2">&quot;line_name&quot;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
                 <span class="n">region_intraregionallines</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
                     <span class="n">region_intraregionallines</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span><span class="p">,</span>
                     <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
                     <span class="n">on</span><span class="o">=</span><span class="s2">&quot;region&quot;</span><span class="p">,</span>
                 <span class="p">)</span>
@@ -892,9 +892,9 @@
             <span class="n">region_exportinglines</span> <span class="o">=</span> <span class="n">region_exportinglines</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
                 <span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;parent&quot;</span><span class="p">:</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;child&quot;</span><span class="p">:</span> <span class="s2">&quot;line_name&quot;</span><span class="p">}</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
                 <span class="n">region_exportinglines</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
-                    <span class="n">region_exportinglines</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;region&quot;</span>
+                    <span class="n">region_exportinglines</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;region&quot;</span>
                 <span class="p">)</span>
                 <span class="n">region_exportinglines</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
@@ -930,9 +930,9 @@
             <span class="n">region_importinglines</span> <span class="o">=</span> <span class="n">region_importinglines</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
                 <span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;parent&quot;</span><span class="p">:</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;child&quot;</span><span class="p">:</span> <span class="s2">&quot;line_name&quot;</span><span class="p">}</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
                 <span class="n">region_importinglines</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
-                    <span class="n">region_importinglines</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;region&quot;</span>
+                    <span class="n">region_importinglines</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;region&quot;</span>
                 <span class="p">)</span>
                 <span class="n">region_importinglines</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
@@ -1203,9 +1203,9 @@
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Reserves Region data not available in h5plexos results&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
             <span class="n">reserves_regions</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
-                <span class="n">reserves_regions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;region&quot;</span>
+                <span class="n">reserves_regions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;region&quot;</span>
             <span class="p">)</span>
             <span class="n">reserves_regions</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">reserves_regions</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;gen_name&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>

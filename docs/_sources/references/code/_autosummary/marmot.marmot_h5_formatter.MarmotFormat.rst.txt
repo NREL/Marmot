@@ -36,5 +36,8 @@ marmot.marmot\_h5\_formatter.MarmotFormat
    
       ~MarmotFormat.DEFAULT_LOG_CONFIG
       ~MarmotFormat.LOG_CONFIG_FILE
+      ~MarmotFormat.emit_names_dict
+      ~MarmotFormat.properties_file
+      ~MarmotFormat.region_mapping
    
    

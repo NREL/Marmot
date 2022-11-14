@@ -24,6 +24,8 @@ marmot.marmot\_plot\_main.MarmotPlot
 
    .. autosummary::
    
+        ~MarmotPlot.convert_str_to_list
+        ~MarmotPlot.get_geographic_regions
         ~MarmotPlot.run_plotter
    
    
@@ -36,5 +38,11 @@ marmot.marmot\_plot\_main.MarmotPlot
    
       ~MarmotPlot.DEFAULT_LOG_CONFIG
       ~MarmotPlot.LOG_CONFIG_FILE
+      ~MarmotPlot.color_dictionary
+      ~MarmotPlot.gen_names_dict
+      ~MarmotPlot.marmot_plot_select
+      ~MarmotPlot.ordered_gen_categories
+      ~MarmotPlot.ordered_gen_list
+      ~MarmotPlot.region_mapping
    
    

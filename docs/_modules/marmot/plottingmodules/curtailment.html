@@ -1058,7 +1058,6 @@
             <span class="p">)</span>
 
             <span class="c1"># Change to a diff on the first scenario.</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">Total_Curtailment_out</span><span class="p">)</span>
             <span class="n">Total_Curtailment_out</span> <span class="o">=</span> <span class="n">Total_Curtailment_out</span> <span class="o">-</span> <span class="n">Total_Curtailment_out</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="p">)</span>
@@ -1121,8 +1120,6 @@
             <span class="p">)</span>
 
             <span class="n">curt_totals</span> <span class="o">=</span> <span class="n">Total_Curtailment_out</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">Total_Curtailment_out</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">curt_totals</span><span class="p">)</span>
             <span class="c1"># inserts total bar value above each bar</span>
             <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ax</span><span class="o">.</span><span class="n">patches</span><span class="p">:</span>

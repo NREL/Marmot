@@ -226,7 +226,8 @@
         <span class="n">ordered_gen</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">marmot_solutions_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
         <span class="n">marmot_color_dict</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">Region_Mapping</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(),</span>
+        <span class="n">scenario_diff</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">region_mapping</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(),</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -240,7 +241,10 @@
 <span class="sd">            marmot_color_dict (dict, optional): Dictionary of colors to use for</span>
 <span class="sd">                generation technologies.</span>
 <span class="sd">                Defaults to None.</span>
-<span class="sd">            Region_Mapping (pd.DataFrame, optional): Mapping file to map</span>
+<span class="sd">            scenario_diff (List[str], optional): 2 value list, used to compare 2</span>
+<span class="sd">                scenarios.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            region_mapping (pd.DataFrame, optional): Mapping file to map</span>
 <span class="sd">                custom regions/zones to create custom aggregations.</span>
 <span class="sd">                Aggregations are created by grouping PLEXOS regions.</span>
 <span class="sd">                Defaults to pd.DataFrame().</span>
@@ -256,7 +260,8 @@
             <span class="p">)</span><span class="o">.</span><span class="n">color_dict</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span> <span class="o">=</span> <span class="n">marmot_color_dict</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span> <span class="o">=</span> <span class="n">Region_Mapping</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span> <span class="o">=</span> <span class="n">scenario_diff</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span> <span class="o">=</span> <span class="n">region_mapping</span>
 
     <span class="k">def</span> <span class="nf">_process_ts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">zone_input</span><span class="p">):</span>
         <span class="n">oz</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">zone_input</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span>
@@ -301,15 +306,15 @@
 
         <span class="n">outputs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="s2">&quot;Scenario_Diff field is empty. Ensure User Input Sheet is set up correctly!&quot;</span>
+                <span class="s2">&quot;scenario_diff field is empty. Ensure User Input Sheet is set up correctly!&quot;</span>
             <span class="p">)</span>
             <span class="n">outputs</span> <span class="o">=</span> <span class="n">InputSheetError</span><span class="p">()</span>
             <span class="k">return</span> <span class="n">outputs</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="s2">&quot;Scenario_Diff field only contains 1 entry, two are required. Ensure User Input Sheet is set up correctly!&quot;</span>
+                <span class="s2">&quot;scenario_diff field only contains 1 entry, two are required. Ensure User Input Sheet is set up correctly!&quot;</span>
             <span class="p">)</span>
             <span class="n">outputs</span> <span class="o">=</span> <span class="n">InputSheetError</span><span class="p">()</span>
             <span class="k">return</span> <span class="n">outputs</span>
@@ -318,9 +323,9 @@
         <span class="c1"># contain 3 parts: required True/False, property name and scenarios required,</span>
         <span class="c1"># scenarios must be a list.</span>
         <span class="n">properties</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;generator_Generation&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">),</span>
-            <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;generator_</span><span class="si">{</span><span class="n">curtailment_prop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">),</span>
-            <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;region_Net_Interchange&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">),</span>
+            <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;generator_Generation&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">),</span>
+            <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;generator_</span><span class="si">{</span><span class="n">curtailment_prop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">),</span>
+            <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;region_Net_Interchange&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">),</span>
         <span class="p">]</span>
 
         <span class="c1"># Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary</span>
@@ -332,12 +337,12 @@
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">bc</span> <span class="o">=</span> <span class="n">adjust_for_leapday</span><span class="p">(</span>
-                <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;generator_Generation&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;generator_Generation&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="s1">&#39;Scenario_Diff &quot;</span><span class="si">%s</span><span class="s1">&quot; is not in data. Ensure User Input Sheet is set up correctly!&#39;</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="s1">&#39;scenario_diff &quot;</span><span class="si">%s</span><span class="s1">&quot; is not in data. Ensure User Input Sheet is set up correctly!&#39;</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
             <span class="p">)</span>
             <span class="n">outputs</span> <span class="o">=</span> <span class="n">InputSheetError</span><span class="p">()</span>
             <span class="k">return</span> <span class="n">outputs</span>
@@ -347,12 +352,12 @@
         <span class="n">bc_CC</span> <span class="o">=</span> <span class="n">bc</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s2">&quot;Gas-CC&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;tech&quot;</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">scen</span> <span class="o">=</span> <span class="n">adjust_for_leapday</span><span class="p">(</span>
-                <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;generator_Generation&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;generator_Generation&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="s1">&#39;Scenario_Diff &quot;</span><span class="si">%s</span><span class="s1">&quot; is not in data. Ensure User Input Sheet is set up correctly!&#39;</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="s1">&#39;scenario_diff &quot;</span><span class="si">%s</span><span class="s1">&quot; is not in data. Ensure User Input Sheet is set up correctly!&#39;</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
             <span class="p">)</span>
             <span class="n">outputs</span> <span class="o">=</span> <span class="n">InputSheetError</span><span class="p">()</span>
             <span class="k">return</span> <span class="n">outputs</span>
@@ -362,10 +367,10 @@
         <span class="n">scen_CC</span> <span class="o">=</span> <span class="n">scen</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s2">&quot;Gas-CC&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;tech&quot;</span><span class="p">)</span>
 
         <span class="n">curt_bc</span> <span class="o">=</span> <span class="n">adjust_for_leapday</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;generator_</span><span class="si">{</span><span class="n">curtailment_prop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;generator_</span><span class="si">{</span><span class="n">curtailment_prop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="p">)</span>
         <span class="n">curt_scen</span> <span class="o">=</span> <span class="n">adjust_for_leapday</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;generator_</span><span class="si">{</span><span class="n">curtailment_prop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="bp">self</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;generator_</span><span class="si">{</span><span class="n">curtailment_prop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
         <span class="p">)</span>
         <span class="n">curt_diff_all</span> <span class="o">=</span> <span class="n">curt_scen</span> <span class="o">-</span> <span class="n">curt_bc</span>
 
@@ -387,15 +392,15 @@
         <span class="c1"># Add net interchange difference to icing plot.</span>
         <span class="n">bc_int</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_hdf</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">processed_hdf5_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_formatted.h5&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_formatted.h5&quot;</span>
             <span class="p">),</span>
             <span class="s2">&quot;region_Net_Interchange&quot;</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">bc_int</span> <span class="o">=</span> <span class="n">adjust_for_leapday</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;region_Net_Interchange&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;region_Net_Interchange&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="p">)</span>
         <span class="n">scen_int</span> <span class="o">=</span> <span class="n">adjust_for_leapday</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;region_Net_Interchange&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;region_Net_Interchange&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
         <span class="p">)</span>
 
         <span class="n">int_diff_all</span> <span class="o">=</span> <span class="n">scen_int</span> <span class="o">-</span> <span class="n">bc_int</span>
@@ -413,8 +418,8 @@
                 <span class="n">icing_diff</span> <span class="o">=</span> <span class="n">oz_scen</span> <span class="o">-</span> <span class="n">oz_bc</span>
                 <span class="n">icing_diff_perc</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">icing_diff</span> <span class="o">/</span> <span class="n">oz_bc</span>
 
-                <span class="n">oz_bc</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">prop</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
-                <span class="n">oz_scen</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+                <span class="n">oz_bc</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">prop</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+                <span class="n">oz_scen</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
 
                 <span class="n">Data_Out_List</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="n">Data_Out_List</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">oz_bc</span><span class="p">)</span>
@@ -437,7 +442,7 @@
                 <span class="n">int_diff_all</span> <span class="o">=</span> <span class="n">int_diff_all</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">int_diff_all</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
                     <span class="n">int_diff_all</span> <span class="o">=</span> <span class="n">merge_new_agg</span><span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">,</span> <span class="n">int_diff_all</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span><span class="p">,</span> <span class="n">int_diff_all</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span>
                     <span class="p">)</span>
                 <span class="n">int_diff</span> <span class="o">=</span> <span class="n">int_diff_all</span><span class="p">[</span><span class="n">int_diff_all</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">]</span> <span class="o">==</span> <span class="n">zone_input</span><span class="p">]</span>
                 <span class="n">int_diff</span> <span class="o">=</span> <span class="n">int_diff</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
@@ -461,8 +466,8 @@
 
                 <span class="n">custom_color_dict</span> <span class="o">=</span> <span class="p">{</span>
                     <span class="s2">&quot;Curtailment difference&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span><span class="p">[</span><span class="s2">&quot;Curtailment&quot;</span><span class="p">],</span>
-                    <span class="n">prop</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span><span class="p">[</span><span class="n">prop</span><span class="p">],</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span><span class="p">[</span><span class="n">prop</span><span class="p">],</span>
+                    <span class="n">prop</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span><span class="p">[</span><span class="n">prop</span><span class="p">],</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span><span class="p">[</span><span class="n">prop</span><span class="p">],</span>
                     <span class="s2">&quot;Gas-CC difference&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span><span class="p">[</span><span class="s2">&quot;Gas-CC&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;Gas-CT difference&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">marmot_color_dict</span><span class="p">[</span><span class="s2">&quot;Gas-CT&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;Net export difference&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">,</span>
@@ -470,8 +475,8 @@
 
                 <span class="n">ls_dict</span> <span class="o">=</span> <span class="p">{</span>
                     <span class="s2">&quot;Curtailment difference&quot;</span><span class="p">:</span> <span class="s2">&quot;solid&quot;</span><span class="p">,</span>
-                    <span class="n">prop</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="s2">&quot;solid&quot;</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="s2">&quot;:&quot;</span><span class="p">,</span>
+                    <span class="n">prop</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="s2">&quot;solid&quot;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="s2">&quot;:&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;Gas-CC difference&quot;</span><span class="p">:</span> <span class="s2">&quot;solid&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;Gas-CT difference&quot;</span><span class="p">:</span> <span class="s2">&quot;solid&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;Net export difference&quot;</span><span class="p">:</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span>
@@ -490,15 +495,15 @@
 
                 <span class="c1"># Make two hatches: blue for when scenario &gt; basecase, and red for when scenario &lt; basecase.</span>
                 <span class="k">if</span> <span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;Icing&quot;</span>
-                    <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;DryHydro&quot;</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;Icing&quot;</span>
+                    <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;DryHydro&quot;</span>
                 <span class="p">):</span>
                     <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
                         <span class="n">diffs</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
-                        <span class="n">diffs</span><span class="p">[</span><span class="n">prop</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])],</span>
-                        <span class="n">diffs</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])],</span>
-                        <span class="n">where</span><span class="o">=</span><span class="n">diffs</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
-                        <span class="o">&gt;</span> <span class="n">diffs</span><span class="p">[</span><span class="n">prop</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])],</span>
+                        <span class="n">diffs</span><span class="p">[</span><span class="n">prop</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])],</span>
+                        <span class="n">diffs</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])],</span>
+                        <span class="n">where</span><span class="o">=</span><span class="n">diffs</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+                        <span class="o">&gt;</span> <span class="n">diffs</span><span class="p">[</span><span class="n">prop</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])],</span>
                         <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Increased &quot;</span> <span class="o">+</span> <span class="n">prop</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot; generation&quot;</span><span class="p">,</span>
                         <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span>
                         <span class="n">hatch</span><span class="o">=</span><span class="s2">&quot;///&quot;</span><span class="p">,</span>
@@ -506,10 +511,10 @@
                     <span class="p">)</span>
                 <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
                     <span class="n">diffs</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
-                    <span class="n">diffs</span><span class="p">[</span><span class="n">prop</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])],</span>
-                    <span class="n">diffs</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])],</span>
-                    <span class="n">where</span><span class="o">=</span><span class="n">diffs</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
-                    <span class="o">&lt;</span> <span class="n">diffs</span><span class="p">[</span><span class="n">prop</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])],</span>
+                    <span class="n">diffs</span><span class="p">[</span><span class="n">prop</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])],</span>
+                    <span class="n">diffs</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])],</span>
+                    <span class="n">where</span><span class="o">=</span><span class="n">diffs</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+                    <span class="o">&lt;</span> <span class="n">diffs</span><span class="p">[</span><span class="n">prop</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])],</span>
                     <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Decreased &quot;</span> <span class="o">+</span> <span class="n">prop</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot; generation&quot;</span><span class="p">,</span>
                     <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
                     <span class="n">hatch</span><span class="o">=</span><span class="s2">&quot;///&quot;</span><span class="p">,</span>

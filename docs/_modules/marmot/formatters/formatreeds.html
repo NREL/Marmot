@@ -236,7 +236,7 @@
         <span class="n">output_file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
         <span class="o">*</span><span class="n">args</span><span class="p">,</span>
         <span class="n">process_subset_years</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">Region_Mapping</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(),</span>
+        <span class="n">region_mapping</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(),</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -245,7 +245,7 @@
 <span class="sd">            output_file_path (Path): Path to formatted h5 output file.</span>
 <span class="sd">            process_subset_years (list, optional): If provided only process</span>
 <span class="sd">                years specified. Defaults to None.</span>
-<span class="sd">            Region_Mapping (pd.DataFrame, optional): DataFrame to map custom</span>
+<span class="sd">            region_mapping (pd.DataFrame, optional): DataFrame to map custom</span>
 <span class="sd">                regions/zones to create custom aggregations.</span>
 <span class="sd">                Defaults to pd.DataFrame().</span>
 <span class="sd">            **kwargs</span>
@@ -257,7 +257,7 @@
             <span class="n">input_folder</span><span class="p">,</span>
             <span class="n">output_file_path</span><span class="p">,</span>
             <span class="o">*</span><span class="n">args</span><span class="p">,</span>
-            <span class="n">Region_Mapping</span><span class="o">=</span><span class="n">Region_Mapping</span><span class="p">,</span>
+            <span class="n">region_mapping</span><span class="o">=</span><span class="n">region_mapping</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="c1"># Internal cached data is saved to the following variables.</span>
@@ -268,7 +268,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">(</span>
             <span class="n">output_file_path</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span>
             <span class="n">read_from_formatted_h5</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">Region_Mapping</span><span class="o">=</span><span class="n">Region_Mapping</span><span class="p">,</span>
+            <span class="n">region_mapping</span><span class="o">=</span><span class="n">region_mapping</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">process_subset_years</span><span class="p">:</span>
@@ -420,9 +420,9 @@
         <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reeds_prop_cols</span><span class="o">.</span><span class="n">assign_column_names</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">prop</span><span class="p">)</span>
         <span class="k">if</span> <span class="s2">&quot;region&quot;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
             <span class="n">df</span><span class="o">.</span><span class="n">region</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">region</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">wind_resource_to_pca</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
                 <span class="c1"># Merge in region mapping, drop any na columns</span>
-                <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;region&quot;</span><span class="p">)</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;region&quot;</span><span class="p">)</span>
                 <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="c1"># Get desired method, used for extra processing if needed</span>
         <span class="n">process_att</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;df_process_</span><span class="si">{</span><span class="n">prop_class</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>

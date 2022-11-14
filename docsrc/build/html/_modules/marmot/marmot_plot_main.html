@@ -196,7 +196,7 @@
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -245,19 +245,19 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">Scenarios</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span>
         <span class="n">AGG_BY</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">Model_Solutions_folder</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
-        <span class="n">gen_names</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span>
+        <span class="n">model_solutions_folder</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+        <span class="n">gen_names_dict</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
         <span class="n">ordered_gen_categories</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span>
-        <span class="n">color_dictionary_file</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span>
-        <span class="n">Marmot_plot_select</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span>
+        <span class="n">color_dictionary</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
+        <span class="n">marmot_plot_select</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span>
         <span class="n">marmot_solutions_folder</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">Scenario_Diff</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">scenario_diff</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">zone_region_sublist</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">xlabels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">ylabels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">ticklabels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">Region_Mapping</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(),</span>
-        <span class="n">TECH_SUBSET</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">region_mapping</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(),</span>
+        <span class="n">tech_subset</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -266,20 +266,20 @@
 <span class="sd">                to process.</span>
 <span class="sd">            AGG_BY (str): Informs region type to aggregate by</span>
 <span class="sd">                when creating plots.</span>
-<span class="sd">            Model_Solutions_folder (Union[str, Path]): Folder containing model</span>
-<span class="sd">                simulation results subfolders and their files.</span>
-<span class="sd">            gen_names (Union[str, Path, pd.DataFrame]): Mapping file to rename</span>
-<span class="sd">                generator technologies.</span>
+<span class="sd">            model_solutions_folder (Union[str, Path]): Directory containing model simulation</span>
+<span class="sd">                results subfolders and their files.</span>
+<span class="sd">            gen_names_dict (Union[str, Path, pd.DataFrame, dict]): Path to, Dataframe or dict</span>
+<span class="sd">                of generator technologies to rename.</span>
 <span class="sd">            ordered_gen_categories (Union[str, Path, pd.DataFrame]): Path to or Dataframe</span>
 <span class="sd">                containing ordered generation and columns to specify technology subsets.</span>
-<span class="sd">            color_dictionary_file (Union[str, Path, pd.DataFrame]): Path to or Dataframe</span>
-<span class="sd">                containing list of colors to assign to each generator category..</span>
-<span class="sd">            Marmot_plot_select (Union[str, Path, pd.DataFrame]): Selection of plots</span>
-<span class="sd">                to plot.</span>
-<span class="sd">            marmot_solutions_folder (Union[str, Path], optional): Folder to save</span>
+<span class="sd">            color_dictionary (Union[str, Path, pd.DataFrame, dict]): Path to, Dataframe or dict</span>
+<span class="sd">                containing list of colors to assign to each generator category.</span>
+<span class="sd">            marmot_plot_select (Union[str, Path, pd.DataFrame]): Path to or DataFrame</span>
+<span class="sd">                containing information on plots to create and certain settings.</span>
+<span class="sd">            marmot_solutions_folder (Union[str, Path], optional): Directory to save</span>
 <span class="sd">                Marmot solution files.</span>
 <span class="sd">                Defaults to None.</span>
-<span class="sd">            Scenario_Diff (Union[str, list], optional): 2 value string</span>
+<span class="sd">            scenario_diff (Union[str, list], optional): 2 value string</span>
 <span class="sd">                or list, used to compare 2 scenarios.</span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            zone_region_sublist (Union[str, list], optional): Subset of regions</span>
@@ -292,12 +292,12 @@
 <span class="sd">            ticklabels (Union[str, list], optional): custom ticklabels for plots,</span>
 <span class="sd">                not available for every plot type.</span>
 <span class="sd">                Defaults to None.</span>
-<span class="sd">            Region_Mapping (Union[str, Path, pd.DataFrame], optional): Mapping file</span>
+<span class="sd">            region_mapping (Union[str, Path, pd.DataFrame], optional): Path to or Dataframe</span>
 <span class="sd">                to map custom regions/zones to create custom aggregations.</span>
 <span class="sd">                Aggregations are created by grouping PLEXOS regions.</span>
 <span class="sd">                Defaults to pd.DataFrame().</span>
-<span class="sd">            TECH_SUBSET (Union[str, list], optional): Tech subset category to plot.</span>
-<span class="sd">                The TECH_SUBSET value should be a column in the</span>
+<span class="sd">            tech_subset (Union[str, list], optional): Tech subset category to plot.</span>
+<span class="sd">                The tech_subset value should be a column in the</span>
 <span class="sd">                ordered_gen_categories.csv. If left None all techs will be plotted</span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            **kwargs</span>
@@ -306,224 +306,318 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;plotter&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># Instantiation of SetupLogger</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Scenarios</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">Scenarios</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Scenarios</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span> <span class="o">=</span> <span class="n">Scenarios</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_str_to_list</span><span class="p">(</span><span class="n">Scenarios</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span> <span class="o">=</span> <span class="n">AGG_BY</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">TECH_SUBSET</span> <span class="o">=</span> <span class="n">TECH_SUBSET</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Model_Solutions_folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">Model_Solutions_folder</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gen_names</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">gen_names</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">gen_names</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">gen_names</span> <span class="o">=</span> <span class="n">gen_names</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
-                    <span class="n">columns</span><span class="o">=</span><span class="p">{</span>
-                        <span class="n">gen_names</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="s2">&quot;Original&quot;</span><span class="p">,</span>
-                        <span class="n">gen_names</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="s2">&quot;New&quot;</span><span class="p">,</span>
-                    <span class="p">}</span>
-                <span class="p">)</span>
-            <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="s2">&quot;Could not find specified gen_names file; &quot;</span>
-                    <span class="s2">&quot;check file name. This is required to run Marmot, &quot;</span>
-                    <span class="s2">&quot;system will now exit&quot;</span>
-                <span class="p">)</span>
-                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gen_names</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">gen_names</span> <span class="o">=</span> <span class="n">gen_names</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
-                <span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="n">gen_names</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="s2">&quot;Original&quot;</span><span class="p">,</span> <span class="n">gen_names</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="s2">&quot;New&quot;</span><span class="p">}</span>
-            <span class="p">)</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ordered_gen_categories</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen_categories</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">ordered_gen_categories</span><span class="p">)</span>
-
-            <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="s2">&quot;Could not find &quot;</span>
-                    <span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">ordered_gen_categories</span><span class="si">}</span><span class="s1">&quot;; &#39;</span>
-                    <span class="s2">&quot;Check file name. This is required to &quot;</span>
-                    <span class="s2">&quot;run Marmot, system will now exit&quot;</span>
-                <span class="p">)</span>
-                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ordered_gen_categories</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen_categories</span> <span class="o">=</span> <span class="n">ordered_gen_categories</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">color_dictionary_file</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">color_dictionary_file</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">color_dictionary_file</span><span class="p">)</span>
-
-            <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">color_dictionary_file</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">color_dictionary_file</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">color_dictionary_file</span> <span class="o">=</span> <span class="n">color_dictionary_file</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Marmot_plot_select</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">Marmot_plot_select</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">Marmot_plot_select</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="s2">&quot;Could not find specified Marmot_plot_select file; &quot;</span>
-                    <span class="s2">&quot;check file name. This is required to run Marmot, &quot;</span>
-                    <span class="s2">&quot;system will now exit&quot;</span>
-                <span class="p">)</span>
-                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Marmot_plot_select</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Marmot_plot_select</span> <span class="o">=</span> <span class="n">Marmot_plot_select</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_solutions_folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">model_solutions_folder</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gen_names_dict</span> <span class="o">=</span> <span class="n">gen_names_dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen_categories</span> <span class="o">=</span> <span class="n">ordered_gen_categories</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">color_dictionary</span> <span class="o">=</span> <span class="n">color_dictionary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">marmot_plot_select</span> <span class="o">=</span> <span class="n">marmot_plot_select</span>
 
         <span class="k">if</span> <span class="n">marmot_solutions_folder</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">marmot_solutions_folder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Model_Solutions_folder</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">marmot_solutions_folder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_solutions_folder</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">marmot_solutions_folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">marmot_solutions_folder</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Scenario_Diff</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">Scenario_Diff</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span> <span class="o">=</span> <span class="n">Scenario_Diff</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_str_to_list</span><span class="p">(</span><span class="n">scenario_diff</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zone_region_sublist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_str_to_list</span><span class="p">(</span><span class="n">zone_region_sublist</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_str_to_list</span><span class="p">(</span><span class="n">xlabels</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_str_to_list</span><span class="p">(</span><span class="n">ylabels</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">custom_xticklabels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_str_to_list</span><span class="p">(</span><span class="n">ticklabels</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span> <span class="o">=</span> <span class="n">region_mapping</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tech_subset</span> <span class="o">=</span> <span class="n">tech_subset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ordered_gen_list</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">zone_region_sublist</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">zone_region_sublist</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">zone_region_sublist</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">zone_region_sublist</span> <span class="o">=</span> <span class="n">zone_region_sublist</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ordered_gen_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;List of ordered generator technolgies.</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">xlabels</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">xlabels</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span> <span class="o">=</span> <span class="n">xlabels</span>
+<span class="sd">        Oder is specified in the ordered_gen_categories input.</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ylabels</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">ylabels</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span> <span class="o">=</span> <span class="n">ylabels</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ticklabels</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">custom_xticklabels</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">ticklabels</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">custom_xticklabels</span> <span class="o">=</span> <span class="n">ticklabels</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Region_Mapping</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">Region_Mapping</span><span class="p">)</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="s2">&quot;Could not find specified Region Mapping file; &quot;</span> <span class="s2">&quot;check file name</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Region_Mapping</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span> <span class="o">=</span> <span class="n">Region_Mapping</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># delete category columns if exists</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s2">&quot;category&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">pass</span>
-
-<div class="viewcode-block" id="MarmotPlot.run_plotter"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.marmot_plot_main.MarmotPlot.html#marmot.marmot_plot_main.MarmotPlot.run_plotter">[docs]</a>    <span class="k">def</span> <span class="nf">run_plotter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Main method to call to begin plotting figures.</span>
-
-<span class="sd">        This method takes no input variables, all required</span>
-<span class="sd">        variables are passed in via the __init__ method.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            List[str]: Ordered list of generator technolgies</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Area Aggregation selected: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ordered_gen_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Subset ordered_gen to user desired generation</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tech_subset</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tech_subset</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen_categories</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tech_subset</span><span class="si">}</span><span class="s2"> column was not found &quot;</span>
+                        <span class="s2">&quot;in the ordered_gen_categories.csv. &quot;</span>
+                        <span class="s2">&quot;All generator technologies will be plotted&quot;</span>
+                    <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_ordered_gen_list</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen_categories</span><span class="p">[</span><span class="s2">&quot;Ordered_Gen&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ordered_gen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen_categories</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen_categories</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tech_subset</span><span class="p">]</span> <span class="o">==</span> <span class="kc">True</span>
+                    <span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_ordered_gen_list</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">ordered_gen</span><span class="p">[</span><span class="s2">&quot;Ordered_Gen&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                    <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Tech Aggregation selected: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tech_subset</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ordered_gen_list</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen_categories</span><span class="p">[</span><span class="s2">&quot;Ordered_Gen&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="p">)</span>
+            <span class="c1"># If Other category does not exist in ordered_gen, create entry</span>
+            <span class="k">if</span> <span class="s2">&quot;Other&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ordered_gen_list</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ordered_gen_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Other&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ordered_gen_list</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">zone_region_sublist</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Only plotting </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="si">}</span><span class="s2">: &quot;</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">zone_region_sublist</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">gen_names_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Dictionary of existing gen technology names to new names.</span>
+
+<span class="sd">        Used to rename technologies.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Keys: Existing names, Values: New names</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gen_names_dict</span>
+
+    <span class="nd">@gen_names_dict</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">gen_names_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gen_names_dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gen_names_dict</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">gen_names_dict</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">gen_names_dict</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s2">&quot;Could not find specified gen_names_dict csv file; &quot;</span>
+                    <span class="s2">&quot;check file name and path.&quot;</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gen_names_dict</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">gen_names_dict</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_gen_names_dict</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">gen_names_dict</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">gen_names_dict</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+                    <span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s2">&quot;Expected exactly 2 columns for gen_names_dict input, &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="nb">input</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="si">}</span><span class="s2"> columns were in the DataFrame.&quot;</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gen_names_dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_gen_names_dict</span> <span class="o">=</span> <span class="n">gen_names_dict</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;Expected a DataFrame, dict, or a file path to csv for the gen_names_dict input but &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;recieved a </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">gen_names_dict</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-        <span class="n">processed_hdf5_folder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">marmot_solutions_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span>
-            <span class="s2">&quot;Processed_HDF5_folder&quot;</span>
-        <span class="p">)</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ordered_gen_categories</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;DataFrame containing generator order and category information</span>
 
-        <span class="n">figure_format</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;figure_file_format&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">figure_format</span> <span class="o">==</span> <span class="s2">&quot;nan&quot;</span><span class="p">:</span>
-            <span class="n">figure_format</span> <span class="o">=</span> <span class="s2">&quot;png&quot;</span>
+<span class="sd">        Has at least one column named Ordered_Gen.</span>
+<span class="sd">        Other columns define different generator technology category groupings.</span>
 
-        <span class="c1"># ================================================================================</span>
-        <span class="c1"># Standard Generation Order, Gen Categorization Lists, Plotting Colors</span>
-        <span class="c1"># ================================================================================</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: ordered_gen_categories DataFrame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ordered_gen_categories</span>
 
+    <span class="nd">@ordered_gen_categories</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">ordered_gen_categories</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ordered_gen_categories</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ordered_gen_categories</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">ordered_gen_categories</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">ordered_gen_categories</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s2">&quot;Could not find specified ordered_gen_categories csv file; &quot;</span>
+                    <span class="s2">&quot;check file name and path.&quot;</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ordered_gen_categories</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+            <span class="k">if</span> <span class="s2">&quot;Ordered_Gen&quot;</span> <span class="ow">in</span> <span class="n">ordered_gen_categories</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ordered_gen_categories</span> <span class="o">=</span> <span class="n">ordered_gen_categories</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Misssing &#39;Ordered_Gen&#39; column from ordered_gen_categories input.&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;Expected a DataFrame or a file path to csv for the ordered_gen_categories input but &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;recieved a </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">ordered_gen_categories</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="c1"># Compare gen_names_dict to ordered_gen_categories</span>
         <span class="k">if</span> <span class="p">(</span>
-            <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gen_names</span><span class="p">[</span><span class="s2">&quot;New&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen_categories</span><span class="p">[</span><span class="s2">&quot;Ordered_Gen&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gen_names_dict</span><span class="o">.</span><span class="n">values</span><span class="p">())</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ordered_gen_categories</span><span class="p">[</span><span class="s2">&quot;Ordered_Gen&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
             <span class="p">)</span>
         <span class="p">)</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="n">missing_gen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gen_names</span><span class="o">.</span><span class="n">New</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span> <span class="o">-</span> <span class="p">(</span>
-                <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen_categories</span><span class="p">[</span><span class="s2">&quot;Ordered_Gen&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+            <span class="n">missing_gen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gen_names_dict</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">-</span> <span class="p">(</span>
+                <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ordered_gen_categories</span><span class="p">[</span><span class="s2">&quot;Ordered_Gen&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                 <span class="s2">&quot;The following tech categories from the &quot;</span>
-                <span class="s2">&quot;gen_names csv do not exist in &quot;</span>
-                <span class="s2">&quot;ordered_gen_categories.csv!: &quot;</span>
+                <span class="s2">&quot;gen_names_dict input do not exist in &quot;</span>
+                <span class="s2">&quot;ordered_gen_categorie input!: &quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">missing_gen</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
 
-        <span class="c1"># Subset ordered_gen to user desired generation</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">TECH_SUBSET</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">TECH_SUBSET</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen_categories</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">TECH_SUBSET</span><span class="si">}</span><span class="s2"> column was not found &quot;</span>
-                    <span class="s2">&quot;in the ordered_gen_categories.csv. &quot;</span>
-                    <span class="s2">&quot;All generator technologies will be plotted&quot;</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">color_dictionary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Dictionary of gen technology names to plotting colors.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Keys gen technologies, Values colors</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_color_dictionary</span>
+
+    <span class="nd">@color_dictionary</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">color_dictionary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color_dictionary</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">color_dictionary</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">color_dictionary</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">color_dictionary</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s2">&quot;Could not find specified color dictionary csv file; &quot;</span>
+                    <span class="s2">&quot;check file name and path.&quot;</span>
                 <span class="p">)</span>
-                <span class="n">ordered_gen</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen_categories</span><span class="p">[</span><span class="s2">&quot;Ordered_Gen&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">color_dictionary</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">color_dictionary</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_color_dictionary</span> <span class="o">=</span> <span class="n">GeneratorColorDict</span><span class="o">.</span><span class="n">set_colors_from_df</span><span class="p">(</span>
+                    <span class="n">color_dictionary</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">color_dict</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">ordered_gen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen_categories</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen_categories</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">TECH_SUBSET</span><span class="p">]</span> <span class="o">==</span> <span class="kc">True</span>
-                <span class="p">]</span>
-                <span class="n">ordered_gen</span> <span class="o">=</span> <span class="n">ordered_gen</span><span class="p">[</span><span class="s2">&quot;Ordered_Gen&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Tech Aggregation selected: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">TECH_SUBSET</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s2">&quot;Expected exactly 2 columns for color_dictionary input, &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">color_dictionary</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="si">}</span><span class="s2"> columns were in the DataFrame.&quot;</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">color_dictionary</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_color_dictionary</span> <span class="o">=</span> <span class="n">GeneratorColorDict</span><span class="p">(</span><span class="n">color_dictionary</span><span class="p">)</span><span class="o">.</span><span class="n">color_dict</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">ordered_gen</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen_categories</span><span class="p">[</span><span class="s2">&quot;Ordered_Gen&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;Expected a DataFrame, dict, or file path to csv for the color_dictionary input but &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;recieved a </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">color_dictionary</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-        <span class="n">gen_categories</span> <span class="o">=</span> <span class="n">GenCategories</span><span class="p">()</span><span class="o">.</span><span class="n">set_categories</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen_categories</span><span class="p">)</span>
-        <span class="c1"># If Other category does not exist in ordered_gen, create entry</span>
-        <span class="k">if</span> <span class="s2">&quot;Other&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ordered_gen</span><span class="p">:</span>
-            <span class="n">ordered_gen</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Other&quot;</span><span class="p">)</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">marmot_plot_select</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;DataFrame containing information on plots to create and certain settings.</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">color_dictionary_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">marmot_color_dict</span> <span class="o">=</span> <span class="n">GeneratorColorDict</span><span class="o">.</span><span class="n">set_colors_from_df</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">color_dictionary_file</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">color_dict</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_marmot_plot_select</span>
+
+    <span class="nd">@marmot_plot_select</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">marmot_plot_select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">marmot_plot_select</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">marmot_plot_select</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_marmot_plot_select</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">marmot_plot_select</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s2">&quot;Could not find specified marmot_plot_select csv file; &quot;</span>
+                    <span class="s2">&quot;check file name and path.&quot;</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">marmot_plot_select</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_marmot_plot_select</span> <span class="o">=</span> <span class="n">marmot_plot_select</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="s2">&quot;&#39;Color dictionary&#39; not passed! Random colors will now be used.&quot;</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;Expected a DataFrame or a file path to csv for the marmot_plot_select input but &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;recieved a </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">marmot_plot_select</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
-            <span class="n">marmot_color_dict</span> <span class="o">=</span> <span class="n">GeneratorColorDict</span><span class="o">.</span><span class="n">set_random_colors</span><span class="p">(</span>
-                <span class="n">ordered_gen</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">color_dict</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-        <span class="n">gen_names_dict</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">gen_names</span><span class="p">[[</span><span class="s2">&quot;Original&quot;</span><span class="p">,</span> <span class="s2">&quot;New&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;Original&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()[</span><span class="s2">&quot;New&quot;</span><span class="p">]</span>
-        <span class="p">)</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">region_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Region mapping Dataframe to map custom aggregations.</span>
 
-        <span class="c1"># If curtailment category does not exist in ordered_gen, create entry</span>
-        <span class="n">curtailment_name</span> <span class="o">=</span> <span class="n">gen_names_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Curtailment&quot;</span><span class="p">,</span> <span class="s2">&quot;Curtailment&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">curtailment_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ordered_gen</span><span class="p">:</span>
-            <span class="n">ordered_gen</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">curtailment_name</span><span class="p">)</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_region_mapping</span>
 
-        <span class="c1"># ================================================================================</span>
-        <span class="c1"># Set aggregation</span>
-        <span class="c1"># ================================================================================</span>
+    <span class="nd">@region_mapping</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">region_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">region_mapping</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">region_mapping</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">region_mapping</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">region_mapping</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s2">&quot;Could not find specified region_mapping csv file; &quot;</span>
+                    <span class="s2">&quot;check file name and path.&quot;</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-        <span class="c1"># Create an instance of MetaData.</span>
-        <span class="n">meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">(</span><span class="n">processed_hdf5_folder</span><span class="p">,</span> <span class="n">Region_Mapping</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">region_mapping</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_region_mapping</span> <span class="o">=</span> <span class="n">region_mapping</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;category&quot;</span> <span class="ow">in</span> <span class="n">region_mapping</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="c1"># delete category columns if exists</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_region_mapping</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_region_mapping</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s2">&quot;category&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;Expected a DataFrame or a file path to csv for the region_mapping input but &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;recieved a </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">region_mapping</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MarmotPlot.convert_str_to_list"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.marmot_plot_main.MarmotPlot.html#marmot.marmot_plot_main.MarmotPlot.convert_str_to_list">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">convert_str_to_list</span><span class="p">(</span><span class="n">string_object</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Converts a comma separated string to a list.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            string_object (str): A comma separated string</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[str]: list of strings.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">string_object</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">list_obj</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">string_object</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">list_obj</span> <span class="o">=</span> <span class="n">string_object</span>
+        <span class="k">return</span> <span class="n">list_obj</span></div>
+
+<div class="viewcode-block" id="MarmotPlot.get_geographic_regions"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.marmot_plot_main.MarmotPlot.html#marmot.marmot_plot_main.MarmotPlot.get_geographic_regions">[docs]</a>    <span class="k">def</span> <span class="nf">get_geographic_regions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meta</span><span class="p">:</span> <span class="n">MetaData</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Gets the geographic regions to plot based on the geographic aggregation.</span>
+
+<span class="sd">        The aggregation is determined with the AGG_BY attribute.</span>
+
+<span class="sd">        region and zone (PLEXOS) will pull model defined aggregations.</span>
+<span class="sd">        Other aggregations will use values from the region mapping file.</span>
+
+<span class="sd">        The zone_region_sublist attribute can be used to reduce the set of geographic regions</span>
+<span class="sd">        to plot.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            meta (MetaData): instance of MetaData class</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[str]: List of geographic regions to plot</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;zone&quot;</span><span class="p">,</span> <span class="s2">&quot;zones&quot;</span><span class="p">,</span> <span class="s2">&quot;Zone&quot;</span><span class="p">,</span> <span class="s2">&quot;Zones&quot;</span><span class="p">}:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span> <span class="o">=</span> <span class="s2">&quot;zone&quot;</span>
@@ -582,22 +676,22 @@
                         <span class="s2">&quot;in model Regions. Plotting all Regions&quot;</span>
                     <span class="p">)</span>
 
-        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="s2">&quot;Plotting Custom region aggregation from &quot;</span> <span class="s2">&quot;Region_Mapping File&quot;</span>
+                <span class="s2">&quot;Plotting Custom region aggregation from &quot;</span> <span class="s2">&quot;region_mapping File&quot;</span>
             <span class="p">)</span>
             <span class="n">regions</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">meta</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="n">scenario</span><span class="p">)</span> <span class="k">for</span> <span class="n">scenario</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span> <span class="o">=</span> <span class="n">regions</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;region&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span> <span class="o">=</span> <span class="n">regions</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;region&quot;</span>
             <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">Zones</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+                <span class="n">Zones</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;AGG_BY = &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="si">}</span><span class="s2">&#39; is not in the &quot;</span>
-                    <span class="s2">&quot;Region_Mapping File, enter a different aggregation&quot;</span>
+                    <span class="s2">&quot;region_mapping File, enter a different aggregation&quot;</span>
                 <span class="p">)</span>
                 <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
 
@@ -611,7 +705,7 @@
                         <span class="n">zsub</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">region</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                            <span class="s2">&quot;Region_Mapping File does not contain region: &quot;</span>
+                            <span class="s2">&quot;region_mapping File does not contain region: &quot;</span>
                             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">region</span><span class="si">}</span><span class="s2">, SKIPPING REGION&quot;</span>
                         <span class="p">)</span>
                 <span class="k">if</span> <span class="n">zsub</span><span class="p">:</span>
@@ -619,7 +713,7 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;None of: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">zone_region_sublist</span><span class="si">}</span><span class="s2"> &quot;</span>
-                        <span class="s2">&quot;in Region_Mapping File. Plotting all &quot;</span>
+                        <span class="s2">&quot;in region_mapping File. Plotting all &quot;</span>
                         <span class="sa">f</span><span class="s2">&quot;Regions of aggregation &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
                     <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -628,14 +722,41 @@
                 <span class="s2">&quot;specified was not found, system will now exit&quot;</span>
             <span class="p">)</span>
             <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">Zones</span></div>
+
+<div class="viewcode-block" id="MarmotPlot.run_plotter"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.marmot_plot_main.MarmotPlot.html#marmot.marmot_plot_main.MarmotPlot.run_plotter">[docs]</a>    <span class="k">def</span> <span class="nf">run_plotter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Main method to call to begin plotting figures.</span>
+
+<span class="sd">        This method takes no input variables, all required</span>
+<span class="sd">        variables are passed in via the __init__ method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Area Aggregation selected: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">zone_region_sublist</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Only plotting </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="si">}</span><span class="s2">: &quot;</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">zone_region_sublist</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">processed_hdf5_folder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">marmot_solutions_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span>
+            <span class="s2">&quot;Processed_HDF5_folder&quot;</span>
+        <span class="p">)</span>
+
+        <span class="n">figure_format</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;figure_file_format&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">figure_format</span> <span class="o">==</span> <span class="s2">&quot;nan&quot;</span><span class="p">:</span>
+            <span class="n">figure_format</span> <span class="o">=</span> <span class="s2">&quot;png&quot;</span>
+
+        <span class="c1"># Create an instance of MetaData.</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">(</span><span class="n">processed_hdf5_folder</span><span class="p">,</span> <span class="n">region_mapping</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span><span class="p">)</span>
+        <span class="n">Zones</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_geographic_regions</span><span class="p">(</span><span class="n">meta</span><span class="p">)</span>
 
         <span class="c1"># ================================================================================</span>
         <span class="c1"># Start Main plotting loop</span>
         <span class="c1"># ================================================================================</span>
 
         <span class="c1"># Filter for chosen figures to plot</span>
-        <span class="n">plot_selection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Marmot_plot_select</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Marmot_plot_select</span><span class="p">[</span><span class="s2">&quot;Plot Graph&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">True</span>
+        <span class="n">plot_selection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">marmot_plot_select</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">marmot_plot_select</span><span class="p">[</span><span class="s2">&quot;Plot Graph&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">True</span>
         <span class="p">]</span>
         <span class="n">plot_selection</span> <span class="o">=</span> <span class="n">plot_selection</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Marmot Module&quot;</span><span class="p">,</span> <span class="s2">&quot;Method&quot;</span><span class="p">])</span>
 
@@ -650,23 +771,25 @@
                 <span class="n">Zones</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">,</span>
-                <span class="n">ordered_gen</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen_list</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">marmot_solutions_folder</span><span class="p">,</span>
             <span class="p">]</span>
             <span class="c1"># dictionary of keyword arguments passed to plotting modules;</span>
             <span class="c1"># key names match the instance variables in each module</span>
             <span class="n">argument_dict</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;gen_names_dict&quot;</span><span class="p">:</span> <span class="n">gen_names_dict</span><span class="p">,</span>
-                <span class="s2">&quot;gen_categories&quot;</span><span class="p">:</span> <span class="n">gen_categories</span><span class="p">,</span>
-                <span class="s2">&quot;marmot_color_dict&quot;</span><span class="p">:</span> <span class="n">marmot_color_dict</span><span class="p">,</span>
-                <span class="s2">&quot;Scenario_Diff&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">,</span>
+                <span class="s2">&quot;gen_names_dict&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">gen_names_dict</span><span class="p">,</span>
+                <span class="s2">&quot;gen_categories&quot;</span><span class="p">:</span> <span class="n">GenCategories</span><span class="p">()</span><span class="o">.</span><span class="n">set_categories</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen_categories</span>
+                <span class="p">),</span>
+                <span class="s2">&quot;marmot_color_dict&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">color_dictionary</span><span class="p">,</span>
+                <span class="s2">&quot;scenario_diff&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario_diff</span><span class="p">,</span>
                 <span class="s2">&quot;ylabels&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span><span class="p">,</span>
                 <span class="s2">&quot;xlabels&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span><span class="p">,</span>
                 <span class="s2">&quot;custom_xticklabels&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom_xticklabels</span><span class="p">,</span>
                 <span class="s2">&quot;color_list&quot;</span><span class="p">:</span> <span class="n">ColorList</span><span class="p">()</span><span class="o">.</span><span class="n">colors</span><span class="p">,</span>
                 <span class="s2">&quot;marker_style&quot;</span><span class="p">:</span> <span class="n">PlotMarkers</span><span class="p">()</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
-                <span class="s2">&quot;Region_Mapping&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">,</span>
-                <span class="s2">&quot;TECH_SUBSET&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">TECH_SUBSET</span><span class="p">,</span>
+                <span class="s2">&quot;region_mapping&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span><span class="p">,</span>
+                <span class="s2">&quot;tech_subset&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">tech_subset</span><span class="p">,</span>
             <span class="p">}</span>
 
             <span class="c1"># Import plot module from plottingmodules package</span>
@@ -838,7 +961,7 @@
         <span class="n">skipinitialspace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="n">Marmot_plot_select</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+    <span class="n">marmot_plot_select</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
         <span class="n">INPUT_DIR</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;plot_select_file&quot;</span><span class="p">))</span>
     <span class="p">)</span>
 
@@ -848,65 +971,43 @@
     <span class="p">):</span>
         <span class="n">marmot_solutions_folder</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">marmot_solutions_folder</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Marmot_Solutions_folder&quot;</span><span class="p">]</span>
-            <span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="p">)</span>
+        <span class="n">marmot_solutions_folder</span> <span class="o">=</span> <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+            <span class="s2">&quot;Marmot_Solutions_folder&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
-    <span class="n">Scenarios</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Scenarios&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">))</span>
-        <span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-    <span class="p">)</span>
+    <span class="n">Scenarios</span> <span class="o">=</span> <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Scenarios&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span><span class="p">]</span>
 
-    <span class="c1"># These variables (along with Region_Mapping) are used to initialize MetaData</span>
-    <span class="n">Model_Solutions_folder</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Model_Solutions_folder&quot;</span><span class="p">]</span>
-        <span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-    <span class="p">)</span>
+    <span class="c1"># These variables (along with region_mapping) are used to initialize MetaData</span>
+    <span class="n">model_solutions_folder</span> <span class="o">=</span> <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+        <span class="s2">&quot;Model_Solutions_folder&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span>
+    <span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
     <span class="c1"># For plots using the difference of the values between two scenarios.</span>
     <span class="c1"># Max two entries, the second scenario is subtracted from the first.</span>
     <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span>
         <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Scenario_Diff_plot&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span><span class="p">]</span>
     <span class="p">):</span>
-        <span class="n">Scenario_Diff</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">scenario_diff</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">Scenario_Diff</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
-                <span class="nb">str</span><span class="p">(</span>
-                    <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Scenario_Diff_plot&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
-                <span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
-            <span class="p">)</span>
-            <span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        <span class="p">)</span>
+        <span class="n">scenario_diff</span> <span class="o">=</span> <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+            <span class="s2">&quot;Scenario_Diff_plot&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span>
+        <span class="p">]</span>
 
     <span class="n">Mapping_folder</span> <span class="o">=</span> <span class="n">INPUT_DIR</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;mapping_folder&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span>
         <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Region_Mapping.csv_name&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span><span class="p">]</span>
     <span class="p">):</span>
-        <span class="n">Region_Mapping</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="n">region_mapping</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">Region_Mapping</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
-            <span class="n">Mapping_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span>
-                <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Region_Mapping.csv_name&quot;</span><span class="p">]</span>
-                <span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-                <span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="p">)</span>
+        <span class="n">region_mapping</span> <span class="o">=</span> <span class="n">Mapping_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span>
+            <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+                <span class="s2">&quot;Region_Mapping.csv_name&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span>
+            <span class="p">]</span>
         <span class="p">)</span>
 
-        <span class="n">Region_Mapping</span> <span class="o">=</span> <span class="n">Region_Mapping</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
-
-    <span class="n">gen_names</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
-        <span class="n">Mapping_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span>
-            <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;gen_names.csv_name&quot;</span><span class="p">]</span>
-            <span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="p">)</span>
+    <span class="n">gen_names_dict</span> <span class="o">=</span> <span class="n">Mapping_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span>
+        <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;gen_names.csv_name&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span><span class="p">]</span>
     <span class="p">)</span>
 
     <span class="n">ordered_gen_cat_file</span> <span class="o">=</span> <span class="n">Mapping_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span>
@@ -914,18 +1015,18 @@
             <span class="s2">&quot;ordered_gen_categories_file&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span>
         <span class="p">]</span>
     <span class="p">)</span>
-    <span class="n">color_dictionary_file</span> <span class="o">=</span> <span class="n">Mapping_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span>
+    <span class="n">color_dictionary</span> <span class="o">=</span> <span class="n">Mapping_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span>
         <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;color_dictionary_file&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span><span class="p">]</span>
     <span class="p">)</span>
 
     <span class="n">AGG_BY</span> <span class="o">=</span> <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;AGG_BY&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;TECH_SUBSET&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span><span class="p">]):</span>
-        <span class="n">TECH_SUBSET</span> <span class="o">=</span> <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+        <span class="n">tech_subset</span> <span class="o">=</span> <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
             <span class="s2">&quot;TECH_SUBSET&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span>
         <span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">TECH_SUBSET</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">tech_subset</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># Facet Grid Labels (Based on Scenarios)</span>
     <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span>
@@ -933,70 +1034,42 @@
     <span class="p">):</span>
         <span class="n">zone_region_sublist</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">zone_region_sublist</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
-                <span class="nb">str</span><span class="p">(</span>
-                    <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;zone_region_sublist&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
-                <span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
-            <span class="p">)</span>
-            <span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        <span class="p">)</span>
+        <span class="n">zone_region_sublist</span> <span class="o">=</span> <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+            <span class="s2">&quot;zone_region_sublist&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span>
+        <span class="p">]</span>
 
     <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Facet_ylabels&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span><span class="p">]):</span>
         <span class="n">ylabels</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">ylabels</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
-                <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
-                    <span class="s2">&quot;Facet_ylabels&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span>
-                <span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
-            <span class="p">)</span>
-            <span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        <span class="p">)</span>
+        <span class="n">ylabels</span> <span class="o">=</span> <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Facet_ylabels&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Facet_xlabels&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span><span class="p">]):</span>
         <span class="n">xlabels</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">xlabels</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
-                <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
-                    <span class="s2">&quot;Facet_xlabels&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span>
-                <span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
-            <span class="p">)</span>
-            <span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        <span class="p">)</span>
+        <span class="n">xlabels</span> <span class="o">=</span> <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Facet_xlabels&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span><span class="p">]</span>
 
     <span class="c1"># option to change tick labels on plot</span>
     <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Tick_labels&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span><span class="p">]):</span>
         <span class="n">ticklabels</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">ticklabels</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
-                <span class="nb">str</span><span class="p">(</span><span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Tick_labels&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">())</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
-            <span class="p">)</span>
-            <span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        <span class="p">)</span>
+        <span class="n">ticklabels</span> <span class="o">=</span> <span class="n">Marmot_user_defined_inputs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Tick_labels&quot;</span><span class="p">,</span> <span class="s2">&quot;User_defined_value&quot;</span><span class="p">]</span>
 
     <span class="n">initiate</span> <span class="o">=</span> <span class="n">MarmotPlot</span><span class="p">(</span>
         <span class="n">Scenarios</span><span class="p">,</span>
         <span class="n">AGG_BY</span><span class="p">,</span>
-        <span class="n">Model_Solutions_folder</span><span class="p">,</span>
-        <span class="n">gen_names</span><span class="p">,</span>
+        <span class="n">model_solutions_folder</span><span class="p">,</span>
+        <span class="n">gen_names_dict</span><span class="p">,</span>
         <span class="n">ordered_gen_cat_file</span><span class="p">,</span>
-        <span class="n">color_dictionary_file</span><span class="p">,</span>
-        <span class="n">Marmot_plot_select</span><span class="p">,</span>
+        <span class="n">color_dictionary</span><span class="p">,</span>
+        <span class="n">marmot_plot_select</span><span class="p">,</span>
         <span class="n">marmot_solutions_folder</span><span class="o">=</span><span class="n">marmot_solutions_folder</span><span class="p">,</span>
-        <span class="n">Scenario_Diff</span><span class="o">=</span><span class="n">Scenario_Diff</span><span class="p">,</span>
+        <span class="n">scenario_diff</span><span class="o">=</span><span class="n">scenario_diff</span><span class="p">,</span>
         <span class="n">zone_region_sublist</span><span class="o">=</span><span class="n">zone_region_sublist</span><span class="p">,</span>
         <span class="n">xlabels</span><span class="o">=</span><span class="n">xlabels</span><span class="p">,</span>
         <span class="n">ylabels</span><span class="o">=</span><span class="n">ylabels</span><span class="p">,</span>
         <span class="n">ticklabels</span><span class="o">=</span><span class="n">ticklabels</span><span class="p">,</span>
-        <span class="n">Region_Mapping</span><span class="o">=</span><span class="n">Region_Mapping</span><span class="p">,</span>
-        <span class="n">TECH_SUBSET</span><span class="o">=</span><span class="n">TECH_SUBSET</span><span class="p">,</span>
+        <span class="n">region_mapping</span><span class="o">=</span><span class="n">region_mapping</span><span class="p">,</span>
+        <span class="n">tech_subset</span><span class="o">=</span><span class="n">tech_subset</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">initiate</span><span class="o">.</span><span class="n">run_plotter</span><span class="p">()</span></div>

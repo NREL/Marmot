@@ -222,14 +222,14 @@
         <span class="n">input_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
         <span class="n">output_file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
         <span class="o">*</span><span class="n">args</span><span class="p">,</span>
-        <span class="n">Region_Mapping</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(),</span>
+        <span class="n">region_mapping</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(),</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            input_folder (Path): Folder containing csv files.</span>
 <span class="sd">            output_file_path (Path): Path to formatted h5 output file.</span>
-<span class="sd">            Region_Mapping (pd.DataFrame, optional): DataFrame to map custom</span>
+<span class="sd">            region_mapping (pd.DataFrame, optional): DataFrame to map custom</span>
 <span class="sd">                regions/zones to create custom aggregations.</span>
 <span class="sd">                Defaults to pd.DataFrame().</span>
 <span class="sd">            **kwargs</span>
@@ -241,14 +241,14 @@
             <span class="n">input_folder</span><span class="p">,</span>
             <span class="n">output_file_path</span><span class="p">,</span>
             <span class="o">*</span><span class="n">args</span><span class="p">,</span>
-            <span class="n">Region_Mapping</span><span class="o">=</span><span class="n">Region_Mapping</span><span class="p">,</span>
+            <span class="n">region_mapping</span><span class="o">=</span><span class="n">region_mapping</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">output_file_path</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span>
             <span class="n">read_from_formatted_h5</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">Region_Mapping</span><span class="o">=</span><span class="n">Region_Mapping</span><span class="p">,</span>
+            <span class="n">region_mapping</span><span class="o">=</span><span class="n">region_mapping</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="nd">@property</span>
@@ -318,8 +318,8 @@
         <span class="c1"># Process attribute and return to df</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">process_att</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
         <span class="c1"># Add region mapping</span>
-        <span class="k">if</span> <span class="s2">&quot;region&quot;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;region&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;region&quot;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;region&quot;</span><span class="p">)</span>
         <span class="c1"># Set multiindex</span>
         <span class="n">df_idx_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
         <span class="n">df_idx_col</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">df_idx_col</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;values&quot;</span><span class="p">))</span>

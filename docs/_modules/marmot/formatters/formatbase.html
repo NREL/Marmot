@@ -247,32 +247,25 @@
         <span class="n">input_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
         <span class="n">output_file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
         <span class="o">*</span><span class="n">_</span><span class="p">,</span>
-        <span class="n">Region_Mapping</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(),</span>
-        <span class="n">emit_names</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(),</span>
+        <span class="n">region_mapping</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(),</span>
+        <span class="n">emit_names_dict</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">__</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            input_folder (Path): Folder containing model input files.</span>
 <span class="sd">            output_file_path (Path): Path to formatted h5 output file.</span>
-<span class="sd">            Region_Mapping (pd.DataFrame, optional): DataFrame to map custom</span>
+<span class="sd">            region_mapping (pd.DataFrame, optional): DataFrame to map custom</span>
 <span class="sd">                regions/zones to create custom aggregations.</span>
 <span class="sd">                Defaults to pd.DataFrame().</span>
-<span class="sd">            emit_names (pd.DataFrame, optional): DataFrame with 2 columns to rename</span>
+<span class="sd">            emit_names_dict (dict, optional): Dictionary to rename</span>
 <span class="sd">                emission names.</span>
-<span class="sd">                Defaults to pd.DataFrame().</span>
+<span class="sd">                Defaults to None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span> <span class="o">=</span> <span class="n">input_folder</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_file_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">output_file_path</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span> <span class="o">=</span> <span class="n">Region_Mapping</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">emit_names</span> <span class="o">=</span> <span class="n">emit_names</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">emit_names</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">emit_names_dict</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">emit_names</span><span class="p">[[</span><span class="s2">&quot;Original&quot;</span><span class="p">,</span> <span class="s2">&quot;New&quot;</span><span class="p">]]</span>
-                <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;Original&quot;</span><span class="p">)</span>
-                <span class="o">.</span><span class="n">to_dict</span><span class="p">()[</span><span class="s2">&quot;New&quot;</span><span class="p">]</span>
-            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">region_mapping</span> <span class="o">=</span> <span class="n">region_mapping</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">emit_names_dict</span> <span class="o">=</span> <span class="n">emit_names_dict</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">input_folder</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>

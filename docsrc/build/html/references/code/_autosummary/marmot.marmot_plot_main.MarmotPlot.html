@@ -789,7 +789,7 @@
 <h1>marmot.marmot_plot_main.MarmotPlot<a class="headerlink" href="#marmot-marmot-plot-main-marmotplot" title="Permalink to this headline">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="marmot.marmot_plot_main.MarmotPlot">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MarmotPlot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Scenarios:</span> <span class="pre">typing.Union[str,</span> <span class="pre">list],</span> <span class="pre">AGG_BY:</span> <span class="pre">str,</span> <span class="pre">Model_Solutions_folder:</span> <span class="pre">typing.Union[str,</span> <span class="pre">pathlib.Path],</span> <span class="pre">gen_names:</span> <span class="pre">typing.Union[str,</span> <span class="pre">pathlib.Path,</span> <span class="pre">pandas.core.frame.DataFrame],</span> <span class="pre">ordered_gen_categories:</span> <span class="pre">typing.Union[str,</span> <span class="pre">pathlib.Path,</span> <span class="pre">pandas.core.frame.DataFrame],</span> <span class="pre">color_dictionary_file:</span> <span class="pre">typing.Union[str,</span> <span class="pre">pathlib.Path,</span> <span class="pre">pandas.core.frame.DataFrame],</span> <span class="pre">Marmot_plot_select:</span> <span class="pre">typing.Union[str,</span> <span class="pre">pathlib.Path,</span> <span class="pre">pandas.core.frame.DataFrame],</span> <span class="pre">marmot_solutions_folder:</span> <span class="pre">typing.Optional[typing.Union[str,</span> <span class="pre">pathlib.Path]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">Scenario_Diff:</span> <span class="pre">typing.Optional[typing.Union[str,</span> <span class="pre">list]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">zone_region_sublist:</span> <span class="pre">typing.Optional[typing.Union[str,</span> <span class="pre">list]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">xlabels:</span> <span class="pre">typing.Optional[typing.Union[str,</span> <span class="pre">list]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">ylabels:</span> <span class="pre">typing.Optional[typing.Union[str,</span> <span class="pre">list]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">ticklabels:</span> <span class="pre">typing.Optional[typing.Union[str,</span> <span class="pre">list]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">Region_Mapping:</span> <span class="pre">typing.Union[str,</span> <span class="pre">pathlib.Path,</span> <span class="pre">pandas.core.frame.DataFrame]</span> <span class="pre">=</span> <span class="pre">Empty</span> <span class="pre">DataFrame</span> <span class="pre">Columns:</span> <span class="pre">[]</span> <span class="pre">Index:</span> <span class="pre">[],</span> <span class="pre">TECH_SUBSET:</span> <span class="pre">typing.Optional[typing.Union[str,</span> <span class="pre">list]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">**kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/marmot_plot_main.html#MarmotPlot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_plot_main.MarmotPlot" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MarmotPlot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Scenarios:</span> <span class="pre">typing.Union[str,</span> <span class="pre">list],</span> <span class="pre">AGG_BY:</span> <span class="pre">str,</span> <span class="pre">model_solutions_folder:</span> <span class="pre">typing.Union[str,</span> <span class="pre">pathlib.Path],</span> <span class="pre">gen_names_dict:</span> <span class="pre">typing.Union[str,</span> <span class="pre">pathlib.Path,</span> <span class="pre">pandas.core.frame.DataFrame,</span> <span class="pre">dict],</span> <span class="pre">ordered_gen_categories:</span> <span class="pre">typing.Union[str,</span> <span class="pre">pathlib.Path,</span> <span class="pre">pandas.core.frame.DataFrame],</span> <span class="pre">color_dictionary:</span> <span class="pre">typing.Union[str,</span> <span class="pre">pathlib.Path,</span> <span class="pre">pandas.core.frame.DataFrame,</span> <span class="pre">dict],</span> <span class="pre">marmot_plot_select:</span> <span class="pre">typing.Union[str,</span> <span class="pre">pathlib.Path,</span> <span class="pre">pandas.core.frame.DataFrame],</span> <span class="pre">marmot_solutions_folder:</span> <span class="pre">typing.Optional[typing.Union[str,</span> <span class="pre">pathlib.Path]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">scenario_diff:</span> <span class="pre">typing.Optional[typing.Union[str,</span> <span class="pre">list]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">zone_region_sublist:</span> <span class="pre">typing.Optional[typing.Union[str,</span> <span class="pre">list]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">xlabels:</span> <span class="pre">typing.Optional[typing.Union[str,</span> <span class="pre">list]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">ylabels:</span> <span class="pre">typing.Optional[typing.Union[str,</span> <span class="pre">list]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">ticklabels:</span> <span class="pre">typing.Optional[typing.Union[str,</span> <span class="pre">list]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">region_mapping:</span> <span class="pre">typing.Union[str,</span> <span class="pre">pathlib.Path,</span> <span class="pre">pandas.core.frame.DataFrame]</span> <span class="pre">=</span> <span class="pre">Empty</span> <span class="pre">DataFrame</span> <span class="pre">Columns:</span> <span class="pre">[]</span> <span class="pre">Index:</span> <span class="pre">[],</span> <span class="pre">tech_subset:</span> <span class="pre">typing.Optional[typing.Union[str,</span> <span class="pre">list]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">**kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/marmot_plot_main.html#MarmotPlot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_plot_main.MarmotPlot" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="marmot.utils.loggersetup.SetupLogger.html#marmot.utils.loggersetup.SetupLogger" title="marmot.utils.loggersetup.SetupLogger"><code class="xref py py-class docutils literal notranslate"><span class="pre">marmot.utils.loggersetup.SetupLogger</span></code></a></p>
 <p>Main module class to be instantiated to run the plotter.</p>
 <p>MarmotPlot handles the selection of plotting module to
@@ -802,20 +802,20 @@ It also handles the area aggregation selection</p>
 to process.</p></li>
 <li><p><strong>AGG_BY</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – Informs region type to aggregate by
 when creating plots.</p></li>
-<li><p><strong>Model_Solutions_folder</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Path</em><em>]</em>) – Folder containing model
-simulation results subfolders and their files.</p></li>
-<li><p><strong>gen_names</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Path</em><em>, </em><em>pd.DataFrame</em><em>]</em>) – Mapping file to rename
-generator technologies.</p></li>
+<li><p><strong>model_solutions_folder</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Path</em><em>]</em>) – Directory containing model simulation
+results subfolders and their files.</p></li>
+<li><p><strong>gen_names_dict</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Path</em><em>, </em><em>pd.DataFrame</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>]</em>) – Path to, Dataframe or dict
+of generator technologies to rename.</p></li>
 <li><p><strong>ordered_gen_categories</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Path</em><em>, </em><em>pd.DataFrame</em><em>]</em>) – Path to or Dataframe
 containing ordered generation and columns to specify technology subsets.</p></li>
-<li><p><strong>color_dictionary_file</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Path</em><em>, </em><em>pd.DataFrame</em><em>]</em>) – Path to or Dataframe
-containing list of colors to assign to each generator category..</p></li>
-<li><p><strong>Marmot_plot_select</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Path</em><em>, </em><em>pd.DataFrame</em><em>]</em>) – Selection of plots
-to plot.</p></li>
-<li><p><strong>marmot_solutions_folder</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Path</em><em>]</em><em>, </em><em>optional</em>) – Folder to save
+<li><p><strong>color_dictionary</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Path</em><em>, </em><em>pd.DataFrame</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>]</em>) – Path to, Dataframe or dict
+containing list of colors to assign to each generator category.</p></li>
+<li><p><strong>marmot_plot_select</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Path</em><em>, </em><em>pd.DataFrame</em><em>]</em>) – Path to or DataFrame
+containing information on plots to create and certain settings.</p></li>
+<li><p><strong>marmot_solutions_folder</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Path</em><em>]</em><em>, </em><em>optional</em>) – Directory to save
 Marmot solution files.
 Defaults to None.</p></li>
-<li><p><strong>Scenario_Diff</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a><em>]</em><em>, </em><em>optional</em>) – 2 value string
+<li><p><strong>scenario_diff</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a><em>]</em><em>, </em><em>optional</em>) – 2 value string
 or list, used to compare 2 scenarios.
 Defaults to None.</p></li>
 <li><p><strong>zone_region_sublist</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a><em>]</em><em>, </em><em>optional</em>) – Subset of regions
@@ -828,12 +828,12 @@ Defaults to None.</p></li>
 <li><p><strong>ticklabels</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a><em>]</em><em>, </em><em>optional</em>) – custom ticklabels for plots,
 not available for every plot type.
 Defaults to None.</p></li>
-<li><p><strong>Region_Mapping</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Path</em><em>, </em><em>pd.DataFrame</em><em>]</em><em>, </em><em>optional</em>) – Mapping file
+<li><p><strong>region_mapping</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Path</em><em>, </em><em>pd.DataFrame</em><em>]</em><em>, </em><em>optional</em>) – Path to or Dataframe
 to map custom regions/zones to create custom aggregations.
 Aggregations are created by grouping PLEXOS regions.
 Defaults to pd.DataFrame().</p></li>
-<li><p><strong>TECH_SUBSET</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a><em>]</em><em>, </em><em>optional</em>) – Tech subset category to plot.
-The TECH_SUBSET value should be a column in the
+<li><p><strong>tech_subset</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a><em>]</em><em>, </em><em>optional</em>) – Tech subset category to plot.
+The tech_subset value should be a column in the
 ordered_gen_categories.csv. If left None all techs will be plotted
 Defaults to None.</p></li>
 <li><p><strong>**kwargs</strong> – These parameters will be passed to the
@@ -848,6 +848,12 @@ marmot.utils.loggersetup.SetupLogger class.</p></li>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.marmot_plot_main.MarmotPlot.convert_str_to_list" title="marmot.marmot_plot_main.MarmotPlot.convert_str_to_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_str_to_list</span></code></a>(string_object)</p></td>
+<td><p>Converts a comma separated string to a list.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.marmot_plot_main.MarmotPlot.get_geographic_regions" title="marmot.marmot_plot_main.MarmotPlot.get_geographic_regions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_geographic_regions</span></code></a>(meta)</p></td>
+<td><p>Gets the geographic regions to plot based on the geographic aggregation.</p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#marmot.marmot_plot_main.MarmotPlot.run_plotter" title="marmot.marmot_plot_main.MarmotPlot.run_plotter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_plotter</span></code></a>()</p></td>
 <td><p>Main method to call to begin plotting figures.</p></td>
 </tr>
@@ -866,8 +872,147 @@ marmot.utils.loggersetup.SetupLogger class.</p></li>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">LOG_CONFIG_FILE</span></code></p></td>
 <td><p>Name of default logging config file located in utils package</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.marmot_plot_main.MarmotPlot.color_dictionary" title="marmot.marmot_plot_main.MarmotPlot.color_dictionary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">color_dictionary</span></code></a></p></td>
+<td><p>Dictionary of gen technology names to plotting colors.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.marmot_plot_main.MarmotPlot.gen_names_dict" title="marmot.marmot_plot_main.MarmotPlot.gen_names_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gen_names_dict</span></code></a></p></td>
+<td><p>Dictionary of existing gen technology names to new names.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.marmot_plot_main.MarmotPlot.marmot_plot_select" title="marmot.marmot_plot_main.MarmotPlot.marmot_plot_select"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot_plot_select</span></code></a></p></td>
+<td><p>DataFrame containing information on plots to create and certain settings.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.marmot_plot_main.MarmotPlot.ordered_gen_categories" title="marmot.marmot_plot_main.MarmotPlot.ordered_gen_categories"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ordered_gen_categories</span></code></a></p></td>
+<td><p>DataFrame containing generator order and category information</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.marmot_plot_main.MarmotPlot.ordered_gen_list" title="marmot.marmot_plot_main.MarmotPlot.ordered_gen_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ordered_gen_list</span></code></a></p></td>
+<td><p>List of ordered generator technolgies.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.marmot_plot_main.MarmotPlot.region_mapping" title="marmot.marmot_plot_main.MarmotPlot.region_mapping"><code class="xref py py-obj docutils literal notranslate"><span class="pre">region_mapping</span></code></a></p></td>
+<td><p>Region mapping Dataframe to map custom aggregations.</p></td>
+</tr>
 </tbody>
 </table>
+<dl class="py property">
+<dt class="sig sig-object py" id="marmot.marmot_plot_main.MarmotPlot.ordered_gen_list">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ordered_gen_list</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#marmot.marmot_plot_main.MarmotPlot.ordered_gen_list" title="Permalink to this definition">#</a></dt>
+<dd><p>List of ordered generator technolgies.</p>
+<p>Oder is specified in the ordered_gen_categories input.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Ordered list of generator technolgies</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marmot.marmot_plot_main.MarmotPlot.gen_names_dict">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gen_names_dict</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a></em><a class="headerlink" href="#marmot.marmot_plot_main.MarmotPlot.gen_names_dict" title="Permalink to this definition">#</a></dt>
+<dd><p>Dictionary of existing gen technology names to new names.</p>
+<p>Used to rename technologies.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Keys: Existing names, Values: New names</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marmot.marmot_plot_main.MarmotPlot.ordered_gen_categories">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ordered_gen_categories</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="http://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.0.0.dev0+653.g2e55bff66d)"><span class="pre">pandas.core.frame.DataFrame</span></a></em><a class="headerlink" href="#marmot.marmot_plot_main.MarmotPlot.ordered_gen_categories" title="Permalink to this definition">#</a></dt>
+<dd><p>DataFrame containing generator order and category information</p>
+<p>Has at least one column named Ordered_Gen.
+Other columns define different generator technology category groupings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>ordered_gen_categories DataFrame</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marmot.marmot_plot_main.MarmotPlot.color_dictionary">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">color_dictionary</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a></em><a class="headerlink" href="#marmot.marmot_plot_main.MarmotPlot.color_dictionary" title="Permalink to this definition">#</a></dt>
+<dd><p>Dictionary of gen technology names to plotting colors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Keys gen technologies, Values colors</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marmot.marmot_plot_main.MarmotPlot.marmot_plot_select">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">marmot_plot_select</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="http://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.0.0.dev0+653.g2e55bff66d)"><span class="pre">pandas.core.frame.DataFrame</span></a></em><a class="headerlink" href="#marmot.marmot_plot_main.MarmotPlot.marmot_plot_select" title="Permalink to this definition">#</a></dt>
+<dd><p>DataFrame containing information on plots to create and certain settings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marmot.marmot_plot_main.MarmotPlot.region_mapping">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">region_mapping</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="http://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.0.0.dev0+653.g2e55bff66d)"><span class="pre">pandas.core.frame.DataFrame</span></a></em><a class="headerlink" href="#marmot.marmot_plot_main.MarmotPlot.region_mapping" title="Permalink to this definition">#</a></dt>
+<dd><p>Region mapping Dataframe to map custom aggregations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.marmot_plot_main.MarmotPlot.convert_str_to_list">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_str_to_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string_object</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/marmot/marmot_plot_main.html#MarmotPlot.convert_str_to_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_plot_main.MarmotPlot.convert_str_to_list" title="Permalink to this definition">#</a></dt>
+<dd><p>Converts a comma separated string to a list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>string_object</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – A comma separated string</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of strings.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.marmot_plot_main.MarmotPlot.get_geographic_regions">
+<span class="sig-name descname"><span class="pre">get_geographic_regions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="marmot.metamanagers.read_metadata.MetaData.html#marmot.metamanagers.read_metadata.MetaData" title="marmot.metamanagers.read_metadata.MetaData"><span class="pre">marmot.metamanagers.read_metadata.MetaData</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/marmot/marmot_plot_main.html#MarmotPlot.get_geographic_regions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_plot_main.MarmotPlot.get_geographic_regions" title="Permalink to this definition">#</a></dt>
+<dd><p>Gets the geographic regions to plot based on the geographic aggregation.</p>
+<p>The aggregation is determined with the AGG_BY attribute.</p>
+<p>region and zone (PLEXOS) will pull model defined aggregations.
+Other aggregations will use values from the region mapping file.</p>
+<p>The zone_region_sublist attribute can be used to reduce the set of geographic regions
+to plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>meta</strong> (<a class="reference internal" href="marmot.metamanagers.read_metadata.MetaData.html#marmot.metamanagers.read_metadata.MetaData" title="marmot.metamanagers.read_metadata.MetaData"><em>MetaData</em></a>) – instance of MetaData class</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of geographic regions to plot</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.marmot_plot_main.MarmotPlot.run_plotter">
 <span class="sig-name descname"><span class="pre">run_plotter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/marmot_plot_main.html#MarmotPlot.run_plotter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_plot_main.MarmotPlot.run_plotter" title="Permalink to this definition">#</a></dt>

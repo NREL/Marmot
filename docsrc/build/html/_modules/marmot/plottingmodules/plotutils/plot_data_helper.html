@@ -204,7 +204,7 @@
 <span class="n">curtailment_prop</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;plot_data&quot;</span><span class="p">,</span> <span class="s2">&quot;curtailment_property&quot;</span><span class="p">)</span>
 
 
-<span class="nd">@dataclass</span>
+<div class="viewcode-block" id="GenCategories"><a class="viewcode-back" href="../../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.GenCategories.html#marmot.plottingmodules.plotutils.plot_data_helper.GenCategories">[docs]</a><span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">GenCategories</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Defines various generator categories.&quot;&quot;&quot;</span>
 
@@ -221,7 +221,7 @@
     <span class="sd">&quot;&quot;&quot;thermal (List[str]): List of thermal technologies.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="GenCategories.set_categories"><a class="viewcode-back" href="../../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.GenCategories.html#marmot.plottingmodules.plotutils.plot_data_helper.GenCategories.set_categories">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">set_categories</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GenCategories&quot;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Set generator categories from a dataframe</span>
 
@@ -262,7 +262,7 @@
                         <span class="s2">&quot;&#39;vre&#39; generator categories not set, &quot;</span>
                         <span class="s2">&quot;curtailment will not be defined!&quot;</span>
                     <span class="p">)</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="n">gen_cat_dict</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="n">gen_cat_dict</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="PlotDataStoreAndProcessor"><a class="viewcode-back" href="../../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.PlotDataStoreAndProcessor.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataStoreAndProcessor">[docs]</a><span class="k">class</span> <span class="nc">PlotDataStoreAndProcessor</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
@@ -282,7 +282,7 @@
         <span class="n">ordered_gen</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">marmot_solutions_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
         <span class="n">gen_names_dict</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">TECH_SUBSET</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">tech_subset</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">_</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -294,8 +294,8 @@
 <span class="sd">            gen_names_dict (dict, optional): Mapping dictionary to rename generator</span>
 <span class="sd">                technologies.</span>
 <span class="sd">                Default is None.</span>
-<span class="sd">            TECH_SUBSET (List[str], optional): Tech subset category to plot.</span>
-<span class="sd">                The TECH_SUBSET value should be a column in the</span>
+<span class="sd">            tech_subset (List[str], optional): Tech subset category to plot.</span>
+<span class="sd">                The tech_subset value should be a column in the</span>
 <span class="sd">                ordered_gen_categories.csv. If left None all techs will be plotted</span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -319,7 +319,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">gen_names_dict</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">gen_names_dict</span> <span class="o">=</span> <span class="n">gen_names_dict</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">TECH_SUBSET</span> <span class="o">=</span> <span class="n">TECH_SUBSET</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tech_subset</span> <span class="o">=</span> <span class="n">tech_subset</span>
 
 <div class="viewcode-block" id="PlotDataStoreAndProcessor.get_formatted_data"><a class="viewcode-back" href="../../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.PlotDataStoreAndProcessor.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataStoreAndProcessor.get_formatted_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_formatted_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">tuple</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Get data from formatted h5 file or csv property input files.</span>
@@ -511,11 +511,23 @@
 <span class="sd">            pd.DataFrame: Processed DataFrame.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">index_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
             <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">)</span>
             <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">set_categories</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen</span><span class="p">)</span>
+            <span class="n">categorical_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">index_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
             <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">)</span>
             <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">set_categories</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen</span><span class="p">)</span>
+            <span class="n">categorical_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">categorical_names</span><span class="p">:</span>
+            <span class="n">categorical_names</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">missing_categoricals</span> <span class="o">=</span> <span class="n">index_names</span> <span class="o">-</span> <span class="n">categorical_names</span>
+        <span class="k">if</span> <span class="n">missing_categoricals</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;WARNING! The following entries are missing from the ordered_gen_categories input: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">missing_categoricals</span><span class="si">}</span><span class="s2">, nan values will appear in plot!&quot;</span>
+            <span class="p">)</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">df</span></div>
 
@@ -539,7 +551,7 @@
 <span class="sd">            pd.DataFrame: Dataframe with net imports included</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Do not calculate net imports if using a subset of techs</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">TECH_SUBSET</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tech_subset</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Net Imports can not be calculated when using TECH_SUBSET&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">gen_df</span>
         <span class="n">curtailment_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gen_names_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Curtailment&quot;</span><span class="p">,</span> <span class="s2">&quot;Curtailment&quot;</span><span class="p">)</span>
@@ -918,7 +930,7 @@
 
 
 <span class="k">def</span> <span class="nf">merge_new_agg</span><span class="p">(</span>
-    <span class="n">Region_Mapping</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">AGG_BY</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">region_mapping</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">AGG_BY</span><span class="p">:</span> <span class="nb">str</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Adds new region aggregation in the plotting step.</span>
 
@@ -929,7 +941,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        pd.DataFrame: Same dataframe, with new aggregation level added.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">agg_new</span> <span class="o">=</span> <span class="n">Region_Mapping</span><span class="p">[[</span><span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="n">AGG_BY</span><span class="p">]]</span>
+    <span class="n">agg_new</span> <span class="o">=</span> <span class="n">region_mapping</span><span class="p">[[</span><span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="n">AGG_BY</span><span class="p">]]</span>
     <span class="n">agg_new</span> <span class="o">=</span> <span class="n">agg_new</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;region&quot;</span><span class="p">)</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">agg_new</span><span class="p">,</span> <span class="n">left_on</span><span class="o">=</span><span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">df</span>
