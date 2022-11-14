@@ -47,7 +47,7 @@ class ProcessPLEXOS(Process):
         output_file_path: Path,
         *args,
         plexos_block: str = "ST",
-        Region_Mapping: pd.DataFrame = pd.DataFrame(),
+        region_mapping: pd.DataFrame = pd.DataFrame(),
         **kwargs,
     ):
         """
@@ -55,7 +55,7 @@ class ProcessPLEXOS(Process):
             input_folder (Path): Folder containing h5plexos h5 files.
             output_file_path (Path): Path to formatted h5 output file.
             plexos_block (str, optional): PLEXOS results type. Defaults to 'ST'.
-            Region_Mapping (pd.DataFrame, optional): DataFrame to map custom
+            region_mapping (pd.DataFrame, optional): DataFrame to map custom
                 regions/zones to create custom aggregations.
                 Defaults to pd.DataFrame().
             **kwargs
@@ -67,14 +67,14 @@ class ProcessPLEXOS(Process):
             input_folder,
             output_file_path,
             *args,
-            Region_Mapping=Region_Mapping,
+            region_mapping=region_mapping,
             **kwargs,
         )
         self.plexos_block = plexos_block
         self.metadata = MetaData(
             self.input_folder,
             read_from_formatted_h5=False,
-            Region_Mapping=Region_Mapping,
+            region_mapping=region_mapping,
         )
 
     @property
@@ -115,12 +115,12 @@ class ProcessPLEXOS(Process):
                     raise MissingH5PLEXOSDataError(file)
 
                 self._data_collection[file] = plx_file
-                if not self.Region_Mapping.empty:
+                if not self.region_mapping.empty:
                     regions.update(list(self.metadata.regions(file)["region"]))
 
-            if not self.Region_Mapping.empty:
-                if regions.issubset(self.Region_Mapping["region"]) is False:
-                    missing_regions = list(regions - set(self.Region_Mapping["region"]))
+            if not self.region_mapping.empty:
+                if regions.issubset(self.region_mapping["region"]) is False:
+                    missing_regions = list(regions - set(self.region_mapping["region"]))
                     logger.warning(
                         "The Following PLEXOS REGIONS are missing from "
                         "the 'region' column of your mapping file: "
@@ -320,9 +320,9 @@ class ProcessPLEXOS(Process):
         else:
             idx_zone = idx_region
 
-        if not self.Region_Mapping.empty:
+        if not self.region_mapping.empty:
             region_gen_mapping = (
-                region_gen_cat_meta.merge(self.Region_Mapping, how="left", on="region")
+                region_gen_cat_meta.merge(self.region_mapping, how="left", on="region")
                 .sort_values(by=["tech", "gen_name"])
                 .drop(["region", "tech", "gen_name"], axis=1)
             )
@@ -367,11 +367,11 @@ class ProcessPLEXOS(Process):
 
         timeseries_len = len(df.index.get_level_values("timestamp").unique())
 
-        # checks if Region_Mapping contains data to merge, skips if empty
-        if not self.Region_Mapping.empty:
+        # checks if region_mapping contains data to merge, skips if empty
+        if not self.region_mapping.empty:
             region_gen_mapping = (
                 self.metadata.regions(model_name)
-                .merge(self.Region_Mapping, how="left", on="region")
+                .merge(self.region_mapping, how="left", on="region")
                 .drop(["region", "category"], axis=1)
             )
             region_gen_mapping.dropna(axis=1, how="all", inplace=True)
@@ -644,39 +644,36 @@ class ProcessPLEXOS(Process):
                 on=["gen_name", "tech"],
             )
 
-        if not self.Region_Mapping.empty:
-            df = df.merge(self.Region_Mapping, how="left", on="region")
+        if not self.region_mapping.empty:
+            df = df.merge(self.region_mapping, how="left", on="region")
             df.dropna(axis=1, how="all", inplace=True)
 
-        if not self.emit_names.empty:
+        if self.emit_names_dict:
             # reclassify emissions as specified by user in mapping
             df["pollutant"] = pd.Categorical(
                 df["pollutant"].map(lambda x: self.emit_names_dict.get(x, x))
             )
-
         # remove categoricals (otherwise h5 save will fail)
         df = df.astype({"tech": "object", "pollutant": "object"})
 
         # Checks if all emissions categories have been identified and matched.
         # If not, lists categories that need a match
-        if not self.emit_names.empty:
-            if (
-                self.emit_names_dict != {}
-                and (
-                    set(df["pollutant"].unique()).issubset(
-                        self.emit_names["New"].unique()
-                    )
+        if (
+            self.emit_names_dict
+            and (
+                set(df["pollutant"].unique()).issubset(
+                    set(self.emit_names_dict.values())
                 )
-                is False
-            ):
-                missing_emit_cat = list(
-                    (set(df["pollutant"].unique()))
-                    - (set(self.emit_names["New"].unique()))
-                )
-                logger.warning(
-                    "The following emission objects do not have a "
-                    f"correct category mapping: {missing_emit_cat}\n"
-                )
+            )
+            is False
+        ):
+            missing_emit_cat = list(
+                (set(df["pollutant"].unique())) - (set(self.emit_names_dict.values()))
+            )
+            logger.warning(
+                "The following emission objects do not have a "
+                f"correct category mapping: {missing_emit_cat}\n"
+            )
 
         df_col = list(df.columns)
         df_col.remove(0)
@@ -716,9 +713,9 @@ class ProcessPLEXOS(Process):
                 self.metadata.zone_generators(model_name), how="left", on="gen_name"
             )
         # checks if Region_Maping contains data to merge, skips if empty (Default)
-        if not self.Region_Mapping.empty:
+        if not self.region_mapping.empty:
             # Merges in all Region Mappings
-            df = df.merge(self.Region_Mapping, how="left", on="region")
+            df = df.merge(self.region_mapping, how="left", on="region")
             df.dropna(axis=1, how="all", inplace=True)
 
         df.rename(columns={"name": "storage_resource"}, inplace=True)
@@ -797,9 +794,9 @@ class ProcessPLEXOS(Process):
         else:
             idx_zone = idx_region
 
-        if not self.Region_Mapping.empty:
+        if not self.region_mapping.empty:
             region_mapping = node_region_meta.merge(
-                self.Region_Mapping, how="left", on="region"
+                self.region_mapping, how="left", on="region"
             ).drop(["region", "node"], axis=1)
             region_mapping.dropna(axis=1, how="all", inplace=True)
 

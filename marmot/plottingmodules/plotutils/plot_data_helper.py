@@ -103,7 +103,7 @@ class PlotDataStoreAndProcessor(dict):
         ordered_gen: List[str],
         marmot_solutions_folder: Path,
         gen_names_dict: dict = None,
-        TECH_SUBSET: List[str] = None,
+        tech_subset: List[str] = None,
         **_,
     ) -> None:
         """
@@ -115,8 +115,8 @@ class PlotDataStoreAndProcessor(dict):
             gen_names_dict (dict, optional): Mapping dictionary to rename generator
                 technologies.
                 Default is None.
-            TECH_SUBSET (List[str], optional): Tech subset category to plot.
-                The TECH_SUBSET value should be a column in the
+            tech_subset (List[str], optional): Tech subset category to plot.
+                The tech_subset value should be a column in the
                 ordered_gen_categories.csv. If left None all techs will be plotted
                 Defaults to None.
         """
@@ -140,7 +140,7 @@ class PlotDataStoreAndProcessor(dict):
             self.gen_names_dict = {}
         else:
             self.gen_names_dict = gen_names_dict
-        self.TECH_SUBSET = TECH_SUBSET
+        self.tech_subset = tech_subset
 
     def get_formatted_data(self, properties: List[tuple]) -> list:
         """Get data from formatted h5 file or csv property input files.
@@ -332,11 +332,23 @@ class PlotDataStoreAndProcessor(dict):
             pd.DataFrame: Processed DataFrame.
         """
         if axis == 0:
+            index_names = set(df.index)
             df.index = df.index.astype("category")
             df.index = df.index.set_categories(self.ordered_gen)
+            categorical_names = set(df.index)
         elif axis == 1:
+            index_names = set(df.columns)
             df.columns = df.columns.astype("category")
             df.columns = df.columns.set_categories(self.ordered_gen)
+            categorical_names = set(df.columns)
+        if None in categorical_names:
+            categorical_names.remove(None)
+        missing_categoricals = index_names - categorical_names
+        if missing_categoricals:
+            logger.warning(
+                "WARNING! The following entries are missing from the ordered_gen_categories input: "
+                f"{missing_categoricals}, nan values will appear in plot!"
+            )
         df = df.sort_index(axis=axis)
         return df
 
@@ -360,7 +372,7 @@ class PlotDataStoreAndProcessor(dict):
             pd.DataFrame: Dataframe with net imports included
         """
         # Do not calculate net imports if using a subset of techs
-        if self.TECH_SUBSET:
+        if self.tech_subset:
             logger.info("Net Imports can not be calculated when using TECH_SUBSET")
             return gen_df
         curtailment_name = self.gen_names_dict.get("Curtailment", "Curtailment")
@@ -739,7 +751,7 @@ class PlotDataStoreAndProcessor(dict):
 
 
 def merge_new_agg(
-    Region_Mapping: pd.DataFrame, df: pd.DataFrame, AGG_BY: str
+    region_mapping: pd.DataFrame, df: pd.DataFrame, AGG_BY: str
 ) -> pd.DataFrame:
     """Adds new region aggregation in the plotting step.
 
@@ -750,7 +762,7 @@ def merge_new_agg(
     Returns:
         pd.DataFrame: Same dataframe, with new aggregation level added.
     """
-    agg_new = Region_Mapping[["region", AGG_BY]]
+    agg_new = region_mapping[["region", AGG_BY]]
     agg_new = agg_new.set_index("region")
     df = df.merge(agg_new, left_on="region", right_index=True)
     return df

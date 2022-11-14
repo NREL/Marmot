@@ -47,7 +47,8 @@ class Sensitivities(PlotDataStoreAndProcessor):
         ordered_gen: List[str],
         marmot_solutions_folder: Path,
         marmot_color_dict: dict = None,
-        Region_Mapping: pd.DataFrame = pd.DataFrame(),
+        scenario_diff: List[str] = None,
+        region_mapping: pd.DataFrame = pd.DataFrame(),
         **kwargs,
     ):
         """
@@ -61,7 +62,10 @@ class Sensitivities(PlotDataStoreAndProcessor):
             marmot_color_dict (dict, optional): Dictionary of colors to use for
                 generation technologies.
                 Defaults to None.
-            Region_Mapping (pd.DataFrame, optional): Mapping file to map
+            scenario_diff (List[str], optional): 2 value list, used to compare 2
+                scenarios.
+                Defaults to None.
+            region_mapping (pd.DataFrame, optional): Mapping file to map
                 custom regions/zones to create custom aggregations.
                 Aggregations are created by grouping PLEXOS regions.
                 Defaults to pd.DataFrame().
@@ -77,7 +81,8 @@ class Sensitivities(PlotDataStoreAndProcessor):
             ).color_dict
         else:
             self.marmot_color_dict = marmot_color_dict
-        self.Region_Mapping = Region_Mapping
+        self.scenario_diff = scenario_diff
+        self.region_mapping = region_mapping
 
     def _process_ts(self, df, zone_input):
         oz = df.xs(zone_input, level=self.AGG_BY)
@@ -122,15 +127,15 @@ class Sensitivities(PlotDataStoreAndProcessor):
 
         outputs: dict = {}
 
-        if self.Scenario_Diff == [""]:
+        if self.scenario_diff == [""]:
             logger.warning(
-                "Scenario_Diff field is empty. Ensure User Input Sheet is set up correctly!"
+                "scenario_diff field is empty. Ensure User Input Sheet is set up correctly!"
             )
             outputs = InputSheetError()
             return outputs
-        if len(self.Scenario_Diff) == 1:
+        if len(self.scenario_diff) == 1:
             logger.warning(
-                "Scenario_Diff field only contains 1 entry, two are required. Ensure User Input Sheet is set up correctly!"
+                "scenario_diff field only contains 1 entry, two are required. Ensure User Input Sheet is set up correctly!"
             )
             outputs = InputSheetError()
             return outputs
@@ -139,9 +144,9 @@ class Sensitivities(PlotDataStoreAndProcessor):
         # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
-            (True, "generator_Generation", self.Scenario_Diff),
-            (True, f"generator_{curtailment_prop}", self.Scenario_Diff),
-            (True, "region_Net_Interchange", self.Scenario_Diff),
+            (True, "generator_Generation", self.scenario_diff),
+            (True, f"generator_{curtailment_prop}", self.scenario_diff),
+            (True, "region_Net_Interchange", self.scenario_diff),
         ]
 
         # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
@@ -153,12 +158,12 @@ class Sensitivities(PlotDataStoreAndProcessor):
 
         try:
             bc = adjust_for_leapday(
-                self["generator_Generation"].get(self.Scenario_Diff[0])
+                self["generator_Generation"].get(self.scenario_diff[0])
             )
         except IndexError:
             logger.warning(
-                'Scenario_Diff "%s" is not in data. Ensure User Input Sheet is set up correctly!',
-                self.Scenario_Diff[0],
+                'scenario_diff "%s" is not in data. Ensure User Input Sheet is set up correctly!',
+                self.scenario_diff[0],
             )
             outputs = InputSheetError()
             return outputs
@@ -168,12 +173,12 @@ class Sensitivities(PlotDataStoreAndProcessor):
         bc_CC = bc.xs("Gas-CC", level="tech")
         try:
             scen = adjust_for_leapday(
-                self["generator_Generation"].get(self.Scenario_Diff[1])
+                self["generator_Generation"].get(self.scenario_diff[1])
             )
         except IndexError:
             logger.warning(
-                'Scenario_Diff "%s" is not in data. Ensure User Input Sheet is set up correctly!',
-                self.Scenario_Diff[0],
+                'scenario_diff "%s" is not in data. Ensure User Input Sheet is set up correctly!',
+                self.scenario_diff[0],
             )
             outputs = InputSheetError()
             return outputs
@@ -183,10 +188,10 @@ class Sensitivities(PlotDataStoreAndProcessor):
         scen_CC = scen.xs("Gas-CC", level="tech")
 
         curt_bc = adjust_for_leapday(
-            self[f"generator_{curtailment_prop}"].get(self.Scenario_Diff[0])
+            self[f"generator_{curtailment_prop}"].get(self.scenario_diff[0])
         )
         curt_scen = adjust_for_leapday(
-            self[f"generator_{curtailment_prop}"].get(self.Scenario_Diff[1])
+            self[f"generator_{curtailment_prop}"].get(self.scenario_diff[1])
         )
         curt_diff_all = curt_scen - curt_bc
 
@@ -208,15 +213,15 @@ class Sensitivities(PlotDataStoreAndProcessor):
         # Add net interchange difference to icing plot.
         bc_int = pd.read_hdf(
             self.processed_hdf5_folder.joinpath(
-                self.Scenario_Diff[0] + "_formatted.h5"
+                self.scenario_diff[0] + "_formatted.h5"
             ),
             "region_Net_Interchange",
         )
         bc_int = adjust_for_leapday(
-            self["region_Net_Interchange"].get(self.Scenario_Diff[0])
+            self["region_Net_Interchange"].get(self.scenario_diff[0])
         )
         scen_int = adjust_for_leapday(
-            self["region_Net_Interchange"].get(self.Scenario_Diff[1])
+            self["region_Net_Interchange"].get(self.scenario_diff[1])
         )
 
         int_diff_all = scen_int - bc_int
@@ -234,8 +239,8 @@ class Sensitivities(PlotDataStoreAndProcessor):
                 icing_diff = oz_scen - oz_bc
                 icing_diff_perc = 100 * icing_diff / oz_bc
 
-                oz_bc.columns = [prop + " " + str(self.Scenario_Diff[0])]
-                oz_scen.columns = [str(self.Scenario_Diff[1])]
+                oz_bc.columns = [prop + " " + str(self.scenario_diff[0])]
+                oz_scen.columns = [str(self.scenario_diff[1])]
 
                 Data_Out_List = []
                 Data_Out_List.append(oz_bc)
@@ -258,7 +263,7 @@ class Sensitivities(PlotDataStoreAndProcessor):
                 int_diff_all = int_diff_all.reset_index()
                 if self.AGG_BY not in int_diff_all.columns:
                     int_diff_all = merge_new_agg(
-                        self.Region_Mapping, int_diff_all, self.AGG_BY
+                        self.region_mapping, int_diff_all, self.AGG_BY
                     )
                 int_diff = int_diff_all[int_diff_all[self.AGG_BY] == zone_input]
                 int_diff = int_diff.groupby("timestamp").sum()
@@ -282,8 +287,8 @@ class Sensitivities(PlotDataStoreAndProcessor):
 
                 custom_color_dict = {
                     "Curtailment difference": self.marmot_color_dict["Curtailment"],
-                    prop + " " + self.Scenario_Diff[0]: self.marmot_color_dict[prop],
-                    self.Scenario_Diff[1]: self.marmot_color_dict[prop],
+                    prop + " " + self.scenario_diff[0]: self.marmot_color_dict[prop],
+                    self.scenario_diff[1]: self.marmot_color_dict[prop],
                     "Gas-CC difference": self.marmot_color_dict["Gas-CC"],
                     "Gas-CT difference": self.marmot_color_dict["Gas-CT"],
                     "Net export difference": "black",
@@ -291,8 +296,8 @@ class Sensitivities(PlotDataStoreAndProcessor):
 
                 ls_dict = {
                     "Curtailment difference": "solid",
-                    prop + " " + self.Scenario_Diff[0]: "solid",
-                    self.Scenario_Diff[1]: ":",
+                    prop + " " + self.scenario_diff[0]: "solid",
+                    self.scenario_diff[1]: ":",
                     "Gas-CC difference": "solid",
                     "Gas-CT difference": "solid",
                     "Net export difference": "--",
@@ -311,15 +316,15 @@ class Sensitivities(PlotDataStoreAndProcessor):
 
                 # Make two hatches: blue for when scenario > basecase, and red for when scenario < basecase.
                 if (
-                    self.Scenario_Diff[1] != "Icing"
-                    and self.Scenario_Diff[1] != "DryHydro"
+                    self.scenario_diff[1] != "Icing"
+                    and self.scenario_diff[1] != "DryHydro"
                 ):
                     axs[0].fill_between(
                         diffs.index,
-                        diffs[prop + " " + str(self.Scenario_Diff[0])],
-                        diffs[str(self.Scenario_Diff[1])],
-                        where=diffs[str(self.Scenario_Diff[1])]
-                        > diffs[prop + " " + str(self.Scenario_Diff[0])],
+                        diffs[prop + " " + str(self.scenario_diff[0])],
+                        diffs[str(self.scenario_diff[1])],
+                        where=diffs[str(self.scenario_diff[1])]
+                        > diffs[prop + " " + str(self.scenario_diff[0])],
                         label="Increased " + prop.lower() + " generation",
                         facecolor="blue",
                         hatch="///",
@@ -327,10 +332,10 @@ class Sensitivities(PlotDataStoreAndProcessor):
                     )
                 axs[0].fill_between(
                     diffs.index,
-                    diffs[prop + " " + str(self.Scenario_Diff[0])],
-                    diffs[str(self.Scenario_Diff[1])],
-                    where=diffs[str(self.Scenario_Diff[1])]
-                    < diffs[prop + " " + str(self.Scenario_Diff[0])],
+                    diffs[prop + " " + str(self.scenario_diff[0])],
+                    diffs[str(self.scenario_diff[1])],
+                    where=diffs[str(self.scenario_diff[1])]
+                    < diffs[prop + " " + str(self.scenario_diff[0])],
                     label="Decreased " + prop.lower() + " generation",
                     facecolor="red",
                     hatch="///",

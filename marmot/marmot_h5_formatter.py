@@ -55,30 +55,30 @@ class MarmotFormat(SetupLogger):
     def __init__(
         self,
         Scenario_name: str,
-        Model_Solutions_folder: Union[str, Path],
-        Properties_File: Union[str, Path, pd.DataFrame],
-        Marmot_Solutions_folder: Union[str, Path] = None,
-        Region_Mapping: Union[str, Path, pd.DataFrame] = pd.DataFrame(),
-        emit_names: Union[str, Path, pd.DataFrame] = pd.DataFrame(),
+        model_solutions_folder: Union[str, Path],
+        properties_file: Union[str, Path, pd.DataFrame],
+        marmot_solutions_folder: Union[str, Path] = None,
+        region_mapping: Union[str, Path, pd.DataFrame] = pd.DataFrame(),
+        emit_names_dict: Union[str, Path, pd.DataFrame, dict] = None,
         **kwargs,
     ):
         """
         Args:
             Scenario_name (str): Name of scenario to process.
-            Model_Solutions_folder (Union[str, Path]): Folder containing model simulation
+            model_solutions_folder (Union[str, Path]): Directory containing model simulation
                 results subfolders and their files.
-            Properties_File (Union[str, Path, pd.DataFrame]): Properties
-                to process, must follow format seen in Marmot directory.
-            Marmot_Solutions_folder (Union[str, Path], optional): Folder to save Marmot
+            properties_file (Union[str, Path, pd.DataFrame]): Path to or DataFrame of properties
+                to process.
+            marmot_solutions_folder (Union[str, Path], optional): Direcrory to save Marmot
                 solution files.
                 Defaults to None.
-            Region_Mapping (Union[str, Path, pd.DataFrame], optional): Mapping file
+            region_mapping (Union[str, Path, pd.DataFrame], optional): Path to or Dataframe
                 to map custom regions/zones to create custom aggregations.
                 Aggregations are created by grouping PLEXOS regions.
                 Defaults to pd.DataFrame().
-            emit_names (Union[str, Path, pd.DataFrame], optional): Mapping file
+            emit_names_dict (Union[str, Path, pd.DataFrame, dict], optional): Path to, DataFrame or dict
                 to rename emissions types.
-                Defaults to pd.DataFrame().
+                Defaults to None.
             **kwargs
                 These parameters will be passed to the
                 marmot.utils.loggersetup.SetupLogger class.
@@ -86,78 +86,134 @@ class MarmotFormat(SetupLogger):
         super().__init__("formatter", **kwargs)  # Instantiation of SetupLogger
 
         self.Scenario_name = Scenario_name
-        self.Model_Solutions_folder = Path(Model_Solutions_folder)
+        self.model_solutions_folder = Path(model_solutions_folder)
 
-        if Marmot_Solutions_folder is None:
-            self.Marmot_Solutions_folder = self.Model_Solutions_folder
+        if marmot_solutions_folder is None:
+            self.marmot_solutions_folder = self.model_solutions_folder
         else:
-            self.Marmot_Solutions_folder = Path(Marmot_Solutions_folder)
-            self.Marmot_Solutions_folder.mkdir(exist_ok=True)
+            self.marmot_solutions_folder = Path(marmot_solutions_folder)
+            self.marmot_solutions_folder.mkdir(exist_ok=True)
 
-        if isinstance(Properties_File, (str, Path)):
-            try:
-                self.Properties_File = pd.read_csv(Properties_File)
-            except FileNotFoundError:
-                self.logger.error(
-                    "Could not find specified "
-                    "Properties_File; check file name. "
-                    "This is required to run Marmot, "
-                    "system will now exit"
-                )
-                sys.exit()
-        elif isinstance(Properties_File, pd.DataFrame):
-            self.Properties_File = Properties_File
+        self.properties_file = properties_file
+        self.region_mapping = region_mapping
+        self.emit_names_dict = emit_names_dict
 
-        if isinstance(Region_Mapping, (str, Path)):
-            try:
-                Region_Mapping = pd.read_csv(Region_Mapping)
-                if not Region_Mapping.empty:
-                    Region_Mapping = Region_Mapping.astype(object)
-            except FileNotFoundError:
-                self.logger.warning(
-                    "Could not find specified "
-                    "Region Mapping file; "
-                    "check file name\n"
-                )
-                Region_Mapping = pd.DataFrame()
-            self.Region_Mapping = Region_Mapping
-        elif isinstance(Region_Mapping, pd.DataFrame):
-            if not Region_Mapping.empty:
-                Region_Mapping = Region_Mapping.astype(object)
-            self.Region_Mapping = Region_Mapping
-        try:
-            # delete category columns if exists
-            self.Region_Mapping = self.Region_Mapping.drop(["category"], axis=1)
-        except KeyError:
-            pass
+    @property
+    def properties_file(self) -> pd.DataFrame:
+        """DataFrame containing information on model properties to process.
 
-        if isinstance(emit_names, (str, Path)):
+        Returns:
+            pd.DataFrame:
+        """
+        return self._properties_file
+
+    @properties_file.setter
+    def properties_file(self, properties_file) -> None:
+
+        if isinstance(properties_file, (str, Path)):
             try:
-                self.emit_names = pd.read_csv(emit_names)
-                if not self.emit_names.empty:
-                    self.emit_names.rename(
-                        columns={
-                            self.emit_names.columns[0]: "Original",
-                            self.emit_names.columns[1]: "New",
-                        },
-                        inplace=True,
-                    )
+                self._properties_file = pd.read_csv(properties_file)
             except FileNotFoundError:
-                self.logger.warning(
-                    "Could not find specified emissions "
-                    "mapping file; check file name\n"
+                msg = (
+                    "Could not find specified properties_file csv file; "
+                    "check file name and path."
                 )
-                self.emit_names = pd.DataFrame()
-        elif isinstance(emit_names, pd.DataFrame):
-            self.emit_names = emit_names
-            if not self.emit_names.empty:
-                self.emit_names.rename(
-                    columns={
-                        self.emit_names.columns[0]: "Original",
-                        self.emit_names.columns[1]: "New",
-                    },
-                    inplace=True,
+                self.logger.error(msg)
+                raise FileNotFoundError(msg)
+
+        elif isinstance(properties_file, pd.DataFrame):
+            self._properties_file = properties_file
+        else:
+            msg = (
+                "Expected a DataFrame or a file path to csv for the properties_file input but "
+                f"recieved a {type(properties_file)}"
+            )
+            self.logger.error(msg)
+            raise NotImplementedError(msg)
+
+    @property
+    def region_mapping(self) -> pd.DataFrame:
+        """Region mapping Dataframe to map custom aggregations.
+
+        Returns:
+            pd.DataFrame:
+        """
+        return self._region_mapping
+
+    @region_mapping.setter
+    def region_mapping(self, region_mapping) -> None:
+        if isinstance(region_mapping, (str, Path)):
+            try:
+                region_mapping = pd.read_csv(region_mapping)
+            except FileNotFoundError:
+                msg = (
+                    "Could not find specified region_mapping csv file; "
+                    "check file name and path."
                 )
+                self.logger.error(msg)
+                raise FileNotFoundError(msg)
+
+        if isinstance(region_mapping, pd.DataFrame):
+            self._region_mapping = region_mapping.astype(str)
+            if "category" in region_mapping.columns:
+                # delete category columns if exists
+                self._region_mapping = self._region_mapping.drop(["category"], axis=1)
+        else:
+            msg = (
+                "Expected a DataFrame or a file path to csv for the region_mapping input but "
+                f"recieved a {type(region_mapping)}"
+            )
+            self.logger.error(msg)
+            raise NotImplementedError(msg)
+
+    @property
+    def emit_names_dict(self) -> dict:
+        """Dictionary of existing emissions names to new names.
+
+        Returns:
+            dict: Keys Existing names, Values: New names
+        """
+        return self._emit_names_dict
+
+    @emit_names_dict.setter
+    def emit_names_dict(self, emit_names_dict) -> None:
+
+        if isinstance(emit_names_dict, (str, Path)):
+            try:
+                emit_names_dict = pd.read_csv(emit_names_dict)
+            except FileNotFoundError:
+                msg = (
+                    "Could not find specified emit_names dictionary csv file; "
+                    "check file name and path."
+                )
+                self.logger.error(msg)
+                raise FileNotFoundError(msg)
+
+        if isinstance(emit_names_dict, pd.DataFrame):
+            if len(emit_names_dict.axes[1]) == 2:
+                self._emit_names_dict = (
+                    emit_names_dict.set_index(emit_names_dict.columns[0])
+                    .squeeze()
+                    .to_dict()
+                )
+            else:
+                msg = (
+                    "Expected exactly 2 columns for emit_names_dict input, "
+                    f"{len(emit_names_dict.axes[1])} columns were in the DataFrame."
+                )
+                self.logger.error(msg)
+                raise ValueError(msg)
+        elif isinstance(emit_names_dict, dict):
+            self._emit_names_dict = emit_names_dict
+        elif emit_names_dict is None:
+            self._emit_names_dict = {}
+        else:
+            msg = (
+                "Expected a DataFrame a dict or a file path to csv for the emit_names_dict input but "
+                f"recieved a {type(emit_names_dict)}"
+            )
+            self.logger.error(msg)
+            raise NotImplementedError(msg)
 
     def run_formatter(
         self,
@@ -199,19 +255,19 @@ class MarmotFormat(SetupLogger):
         self.logger.info(f"#### Processing {scen_name} {sim_model} " "Results ####")
 
         hdf5_output_name = f"{scen_name}_formatted.h5"
-        input_folder = self.Model_Solutions_folder.joinpath(str(self.Scenario_name))
-        output_folder = self.Marmot_Solutions_folder.joinpath("Processed_HDF5_folder")
+        input_folder = self.model_solutions_folder.joinpath(str(self.Scenario_name))
+
+        output_folder = self.marmot_solutions_folder.joinpath("Processed_HDF5_folder")
         output_folder.mkdir(exist_ok=True)
 
         output_file_path = output_folder.joinpath(hdf5_output_name)
-
         process_sim_model: Process = process_class(
             input_folder,
             output_file_path,
             plexos_block=plexos_block,
             process_subset_years=process_subset_years,
-            Region_Mapping=self.Region_Mapping,
-            emit_names=self.emit_names,
+            region_mapping=self.region_mapping,
+            emit_names_dict=self.emit_names_dict,
         )
 
         files_list = process_sim_model.get_input_data_paths
@@ -250,8 +306,8 @@ class MarmotFormat(SetupLogger):
             f.close()
             process_sim_model.output_metadata(files_list)
 
-        process_properties = self.Properties_File.loc[
-            self.Properties_File["collect_data"] == True
+        process_properties = self.properties_file.loc[
+            self.properties_file["collect_data"] == True
         ]
 
         start = time.time()
@@ -409,30 +465,23 @@ def main():
         skipinitialspace=True,
     )
 
-    simulation_model = (
-        Marmot_user_defined_inputs.loc["Simulation_model"]
-        .to_string(index=False)
-        .strip()
-    )
+    simulation_model = Marmot_user_defined_inputs.loc[
+        "Simulation_model", "User_defined_value"
+    ].strip()
 
     if pd.isna(
         Marmot_user_defined_inputs.loc["PLEXOS_data_blocks", "User_defined_value"]
     ):
         plexos_data_blocks = ["ST"]
     else:
-        plexos_data_blocks = (
-            pd.Series(
-                Marmot_user_defined_inputs.loc["PLEXOS_data_blocks"]
-                .squeeze()
-                .split(",")
-            )
-            .str.strip()
-            .tolist()
-        )
+        plexos_data_blocks = Marmot_user_defined_inputs.loc[
+            "PLEXOS_data_blocks", "User_defined_value"
+        ]
+        plexos_data_blocks = [x.strip() for x in plexos_data_blocks.split(",")]
 
     # File which determiens which plexos properties to pull from the h5plexos results and
     # process, this file is in the repo
-    Properties_File = pd.read_csv(
+    properties_file = pd.read_csv(
         INPUT_DIR.joinpath(
             mconfig.parser(f"{simulation_model.lower()}_properties_file")
         )
@@ -440,32 +489,25 @@ def main():
 
     # Name of the Scenario(s) being run, must have the same name(s) as the folder
     # holding the runs HDF5 file
-    Scenario_List = (
-        pd.Series(
-            Marmot_user_defined_inputs.loc["Scenario_process_list"].squeeze().split(",")
-        )
-        .str.strip()
-        .tolist()
-    )
+    Scenario_List = Marmot_user_defined_inputs.loc[
+        "Scenario_process_list", "User_defined_value"
+    ]
+    Scenario_List = [x.strip() for x in Scenario_List.split(",")]
     # The folder that contains all the simulation model outputs - the files should
     # be contained in another folder with the Scenario_name
-    Model_Solutions_folder = (
-        Marmot_user_defined_inputs.loc["Model_Solutions_folder"]
-        .to_string(index=False)
-        .strip()
-    )
+    model_solutions_folder = Marmot_user_defined_inputs.loc[
+        "Model_Solutions_folder", "User_defined_value"
+    ].strip()
 
     # Folder to save your processed solutions
     if pd.isna(
         Marmot_user_defined_inputs.loc["Marmot_Solutions_folder", "User_defined_value"]
     ):
-        Marmot_Solutions_folder = None
+        marmot_solutions_folder = None
     else:
-        Marmot_Solutions_folder = (
-            Marmot_user_defined_inputs.loc["Marmot_Solutions_folder"]
-            .to_string(index=False)
-            .strip()
-        )
+        marmot_solutions_folder = Marmot_user_defined_inputs.loc[
+            "Marmot_Solutions_folder", "User_defined_value"
+        ].strip()
 
     # This folder contains all the csv required for mapping and selecting outputs
     # to process. Examples of these mapping files are within the Marmot repo, you
@@ -480,15 +522,12 @@ def main():
         )
         is True
     ):
-        Region_Mapping = pd.DataFrame()
+        region_mapping = pd.DataFrame()
     else:
-        Region_Mapping = pd.read_csv(
-            INPUT_DIR.joinpath(
-                Mapping_folder,
-                Marmot_user_defined_inputs.loc["Region_Mapping.csv_name"]
-                .to_string(index=False)
-                .strip(),
-            )
+        region_mapping = Mapping_folder.joinpath(
+            Marmot_user_defined_inputs.loc[
+                "Region_Mapping.csv_name", "User_defined_value"
+            ]
         )
 
     # Subset of years to process
@@ -497,24 +536,17 @@ def main():
     ):
         process_subset_years = None
     else:
-        process_subset_years = (
-            pd.Series(
-                Marmot_user_defined_inputs.loc["process_subset_years"]
-                .squeeze()
-                .split(",")
-            )
-            .str.strip()
-            .tolist()
-        )
+        process_subset_years = Marmot_user_defined_inputs.loc[
+            "process_subset_years", "User_defined_value"
+        ]
+
     # ===================================================================================
     # Standard Naming of Emissions types (optional)
     # ===================================================================================
 
-    emit_names = INPUT_DIR.joinpath(
+    emit_names_dict = INPUT_DIR.joinpath(
         Mapping_folder,
-        Marmot_user_defined_inputs.loc["emit_names.csv_name"]
-        .to_string(index=False)
-        .strip(),
+        Marmot_user_defined_inputs.loc["emit_names.csv_name", "User_defined_value"],
     )
 
     # ===================================================================================
@@ -525,11 +557,11 @@ def main():
 
         initiate = MarmotFormat(
             Scenario_name,
-            Model_Solutions_folder,
-            Properties_File,
-            Marmot_Solutions_folder=Marmot_Solutions_folder,
-            Region_Mapping=Region_Mapping,
-            emit_names=emit_names,
+            model_solutions_folder,
+            properties_file,
+            marmot_solutions_folder=marmot_solutions_folder,
+            region_mapping=region_mapping,
+            emit_names_dict=emit_names_dict,
         )
 
         if simulation_model == "PLEXOS":
