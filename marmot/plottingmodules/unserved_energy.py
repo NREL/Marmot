@@ -8,43 +8,70 @@ plots and is called from marmot_plot_main.py
 """
 
 import logging
+from pathlib import Path
+from typing import List
+
 import pandas as pd
 
 import marmot.utils.mconfig as mconfig
-
-from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
 )
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
+from marmot.plottingmodules.plotutils.styles import ColorList
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    get_sub_hour_interval_count,
+    set_timestamp_date_range,
+)
 
 logger = logging.getLogger("plotter." + __name__)
-plot_data_settings = mconfig.parser("plot_data")
+plot_data_settings: dict = mconfig.parser("plot_data")
 
 
-class UnservedEnergy(MPlotDataHelper):
+class UnservedEnergy(PlotDataStoreAndProcessor):
     """System unserved energy plots.
 
     The unserved_energy.py module contains methods that are
     related to unserved energy in the power system.
 
-    UnservedEnergy inherits from the MPlotDataHelper class to assist
+    UnservedEnergy inherits from the PlotDataStoreAndProcessor class to assist
     in creating figures.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        Zones: List[str],
+        Scenarios: List[str],
+        AGG_BY: str,
+        ordered_gen: List[str],
+        marmot_solutions_folder: Path,
+        custom_xticklabels: List[str] = None,
+        color_list: list = ColorList().colors,
+        **kwargs,
+    ):
         """
         Args:
-            *args
-                Minimum required parameters passed to the MPlotDataHelper 
-                class.
-            **kwargs
-                These parameters will be passed to the MPlotDataHelper 
-                class.
+            Zones (List[str]): List of regions/zones to plot.
+            Scenarios (List[str]): List of scenarios to plot.
+            AGG_BY (str): Informs region type to aggregate by when creating plots.
+            ordered_gen (List[str]): Ordered list of generator technologies to plot,
+                order defines the generator technology position in stacked bar and area plots.
+            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
+            custom_xticklabels (List[str], optional): List of custom x labels to
+                apply to barplots. Values will overwite existing ones.
+                Defaults to None.
+            color_list (list, optional): List of colors to apply to non-gen plots.
+                Defaults to ColorList().colors.
         """
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(*args, **kwargs)
+        # Instantiation of PlotDataStoreAndProcessor
+        super().__init__(AGG_BY, ordered_gen, marmot_solutions_folder, **kwargs)
+
+        self.Zones = Zones
+        self.Scenarios = Scenarios
+        self.custom_xticklabels = custom_xticklabels
+        self.color_list = color_list
 
     def unserved_energy_timeseries(
         self,
@@ -78,12 +105,12 @@ class UnservedEnergy(MPlotDataHelper):
         else:
             agg = "region"
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, f"{agg}_Unserved_Energy{data_resolution}", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -104,7 +131,7 @@ class UnservedEnergy(MPlotDataHelper):
                 unserved_energy = unserved_energy.groupby(["timestamp"]).sum()
 
                 if pd.notna(start_date_range):
-                    unserved_energy = self.set_timestamp_date_range(
+                    unserved_energy = set_timestamp_date_range(
                         unserved_energy, start_date_range, end_date_range
                     )
                     if unserved_energy.empty is True:
@@ -128,7 +155,9 @@ class UnservedEnergy(MPlotDataHelper):
                 continue
 
             # Determine auto unit coversion
-            unitconversion = self.capacity_energy_unitconversion(unserved_energy_out)
+            unitconversion = self.capacity_energy_unitconversion(
+                unserved_energy_out, self.Scenarios
+            )
             unserved_energy_out = unserved_energy_out / unitconversion["divisor"]
 
             # Data table of values to return to main program
@@ -180,8 +209,8 @@ class UnservedEnergy(MPlotDataHelper):
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -197,12 +226,12 @@ class UnservedEnergy(MPlotDataHelper):
         else:
             agg = "region"
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, f"{agg}_Unserved_Energy", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -223,10 +252,10 @@ class UnservedEnergy(MPlotDataHelper):
                 unserved_energy = unserved_energy.groupby(["timestamp"]).sum()
 
                 # correct sum for non-hourly runs
-                interval_count = self.get_sub_hour_interval_count(unserved_energy)
+                interval_count = get_sub_hour_interval_count(unserved_energy)
                 unserved_energy = unserved_energy / interval_count
                 if pd.notna(start_date_range):
-                    unserved_energy = self.set_timestamp_date_range(
+                    unserved_energy = set_timestamp_date_range(
                         unserved_energy, start_date_range, end_date_range
                     )
                     if unserved_energy.empty is True:
@@ -256,7 +285,9 @@ class UnservedEnergy(MPlotDataHelper):
                 continue
 
             # Determine auto unit coversion
-            unitconversion = self.capacity_energy_unitconversion(unserved_energy_out)
+            unitconversion = self.capacity_energy_unitconversion(
+                unserved_energy_out, self.Scenarios
+            )
             unserved_energy_out = unserved_energy_out / unitconversion["divisor"]
 
             # Data table of values to return to main program
@@ -327,8 +358,8 @@ class UnservedEnergy(MPlotDataHelper):
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -350,8 +381,8 @@ class UnservedEnergy(MPlotDataHelper):
         # scenarios must be a list.
         properties = [(True, f"{agg}_Unserved_Energy", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate
-        # MPlotDataHelper dictionary with all required properties,
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate
+        # PlotDataStoreAndProcessor dictionary with all required properties,
         # returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -374,14 +405,14 @@ class UnservedEnergy(MPlotDataHelper):
                 unserved_energy = unserved_energy.groupby(["timestamp"]).sum()
 
                 if pd.notna(start_date_range):
-                    unserved_energy = self.set_timestamp_date_range(
+                    unserved_energy = set_timestamp_date_range(
                         unserved_energy, start_date_range, end_date_range
                     )
                     if unserved_energy.empty is True:
                         logger.warning("No Unserved Energy in selected Date Range")
                         continue
 
-                interval_count = self.get_sub_hour_interval_count(unserved_energy)
+                interval_count = get_sub_hour_interval_count(unserved_energy)
                 unserved_energy = unserved_energy / interval_count
                 # Group data by hours and find mean across entire range
                 unserved_energy = self.year_scenario_grouper(
@@ -415,7 +446,9 @@ class UnservedEnergy(MPlotDataHelper):
             mplt = PlotLibrary()
             fig, ax = mplt.get_figure()
 
-            unitconversion = self.capacity_energy_unitconversion(unserved_energy_out)
+            unitconversion = self.capacity_energy_unitconversion(
+                unserved_energy_out, self.Scenarios
+            )
             unserved_energy_out = unserved_energy_out / unitconversion["divisor"]
             Data_Table_Out = unserved_energy_out
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")

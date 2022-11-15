@@ -13,13 +13,14 @@ generation_stack.py, curtailment.py etc.
 # Import Python Libraries
 # ========================================================================================
 
-import sys
 import importlib
+import sys
 import time
-import pandas as pd
 from pathlib import Path
-from typing import Union
+from typing import Union, List
+
 import matplotlib.pyplot as plt
+import pandas as pd
 
 try:
     import marmot.utils.mconfig as mconfig
@@ -28,9 +29,8 @@ except ModuleNotFoundError:
 
     print(INCORRECT_ENTRY_POINT.format(Path(__file__).name))
     sys.exit()
-from marmot.utils.loggersetup import SetupLogger
-from marmot.utils.definitions import INPUT_DIR, Module_CLASS_MAPPING
 from marmot.metamanagers.read_metadata import MetaData
+from marmot.plottingmodules.plotutils.plot_data_helper import GenCategories
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     DataSavedInModule,
     InputSheetError,
@@ -40,6 +40,13 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (
     UnderDevelopment,
     UnsupportedAggregation,
 )
+from marmot.plottingmodules.plotutils.styles import (
+    ColorList,
+    GeneratorColorDict,
+    PlotMarkers,
+)
+from marmot.utils.definitions import INPUT_DIR, Module_CLASS_MAPPING
+from marmot.utils.loggersetup import SetupLogger
 
 # A bug in pandas requires this to be included, otherwise df.to_string truncates
 # long strings.
@@ -59,19 +66,19 @@ class MarmotPlot(SetupLogger):
         self,
         Scenarios: Union[str, list],
         AGG_BY: str,
-        Model_Solutions_folder: Union[str, Path],
-        gen_names: Union[str, Path, pd.DataFrame],
+        model_solutions_folder: Union[str, Path],
+        gen_names_dict: Union[str, Path, pd.DataFrame, dict],
         ordered_gen_categories: Union[str, Path, pd.DataFrame],
-        color_dictionary_file: Union[str, Path, pd.DataFrame],
-        Marmot_plot_select: Union[str, Path, pd.DataFrame],
+        color_dictionary: Union[str, Path, pd.DataFrame, dict],
+        marmot_plot_select: Union[str, Path, pd.DataFrame],
         marmot_solutions_folder: Union[str, Path] = None,
-        Scenario_Diff: Union[str, list] = None,
+        scenario_diff: Union[str, list] = None,
         zone_region_sublist: Union[str, list] = None,
         xlabels: Union[str, list] = None,
         ylabels: Union[str, list] = None,
         ticklabels: Union[str, list] = None,
-        Region_Mapping: Union[str, Path, pd.DataFrame] = pd.DataFrame(),
-        TECH_SUBSET: Union[str, list] = None,
+        region_mapping: Union[str, Path, pd.DataFrame] = pd.DataFrame(),
+        tech_subset: Union[str, list] = None,
         **kwargs,
     ):
         """
@@ -80,20 +87,20 @@ class MarmotPlot(SetupLogger):
                 to process.
             AGG_BY (str): Informs region type to aggregate by
                 when creating plots.
-            Model_Solutions_folder (Union[str, Path]): Folder containing model
-                simulation results subfolders and their files.
-            gen_names (Union[str, Path, pd.DataFrame]): Mapping file to rename
-                generator technologies.
+            model_solutions_folder (Union[str, Path]): Directory containing model simulation
+                results subfolders and their files.
+            gen_names_dict (Union[str, Path, pd.DataFrame, dict]): Path to, Dataframe or dict
+                of generator technologies to rename.
             ordered_gen_categories (Union[str, Path, pd.DataFrame]): Path to or Dataframe
                 containing ordered generation and columns to specify technology subsets.
-            color_dictionary_file (Union[str, Path, pd.DataFrame]): Path to or Dataframe
-                containing list of colors to assign to each generator category..
-            Marmot_plot_select (Union[str, Path, pd.DataFrame]): Selection of plots
-                to plot.
-            marmot_solutions_folder (Union[str, Path], optional): Folder to save
+            color_dictionary (Union[str, Path, pd.DataFrame, dict]): Path to, Dataframe or dict
+                containing list of colors to assign to each generator category.
+            marmot_plot_select (Union[str, Path, pd.DataFrame]): Path to or DataFrame
+                containing information on plots to create and certain settings.
+            marmot_solutions_folder (Union[str, Path], optional): Directory to save
                 Marmot solution files.
                 Defaults to None.
-            Scenario_Diff (Union[str, list], optional): 2 value string
+            scenario_diff (Union[str, list], optional): 2 value string
                 or list, used to compare 2 scenarios.
                 Defaults to None.
             zone_region_sublist (Union[str, list], optional): Subset of regions
@@ -106,257 +113,332 @@ class MarmotPlot(SetupLogger):
             ticklabels (Union[str, list], optional): custom ticklabels for plots,
                 not available for every plot type.
                 Defaults to None.
-            Region_Mapping (Union[str, Path, pd.DataFrame], optional): Mapping file
+            region_mapping (Union[str, Path, pd.DataFrame], optional): Path to or Dataframe
                 to map custom regions/zones to create custom aggregations.
                 Aggregations are created by grouping PLEXOS regions.
                 Defaults to pd.DataFrame().
-            TECH_SUBSET (Union[str, list], optional): Tech subset category to plot.
-                The TECH_SUBSET value should be a column in the
+            tech_subset (Union[str, list], optional): Tech subset category to plot.
+                The tech_subset value should be a column in the
                 ordered_gen_categories.csv. If left None all techs will be plotted
                 Defaults to None.
             **kwargs
-                These parameters will be passed to the 
+                These parameters will be passed to the
                 marmot.utils.loggersetup.SetupLogger class.
         """
         super().__init__("plotter", **kwargs)  # Instantiation of SetupLogger
 
-        if isinstance(Scenarios, str):
-            self.Scenarios = pd.Series(Scenarios.split(",")).str.strip().tolist()
-        elif isinstance(Scenarios, list):
-            self.Scenarios = Scenarios
-
+        self.Scenarios = self.convert_str_to_list(Scenarios)
         self.AGG_BY = AGG_BY
-        self.TECH_SUBSET = TECH_SUBSET
-        self.Model_Solutions_folder = Path(Model_Solutions_folder)
-
-        if isinstance(gen_names, (str, Path)):
-            try:
-                gen_names = pd.read_csv(gen_names)
-                self.gen_names = gen_names.rename(
-                    columns={
-                        gen_names.columns[0]: "Original",
-                        gen_names.columns[1]: "New",
-                    }
-                )
-            except FileNotFoundError:
-                self.logger.warning(
-                    "Could not find specified gen_names file; "
-                    "check file name. This is required to run Marmot, "
-                    "system will now exit"
-                )
-                sys.exit()
-        elif isinstance(gen_names, pd.DataFrame):
-            self.gen_names = gen_names.rename(
-                columns={gen_names.columns[0]: "Original", gen_names.columns[1]: "New"}
-            )
-
-        if isinstance(ordered_gen_categories, (str, Path)):
-            try:
-                self.ordered_gen_categories = pd.read_csv(ordered_gen_categories)
-
-            except FileNotFoundError:
-                self.logger.warning(
-                    "Could not find "
-                    f'"{ordered_gen_categories}"; '
-                    "Check file name. This is required to "
-                    "run Marmot, system will now exit"
-                )
-                sys.exit()
-        elif isinstance(ordered_gen_categories, pd.DataFrame):
-            self.ordered_gen_categories = ordered_gen_categories
-
-        if isinstance(color_dictionary_file, (str, Path)):
-            try:
-                self.color_dictionary_file = pd.read_csv(color_dictionary_file)
-
-            except FileNotFoundError:
-                self.color_dictionary_file = None
-        elif isinstance(color_dictionary_file, pd.DataFrame):
-            self.color_dictionary_file = color_dictionary_file
-
-        if isinstance(Marmot_plot_select, (str, Path)):
-            try:
-                self.Marmot_plot_select = pd.read_csv(Marmot_plot_select)
-            except FileNotFoundError:
-                self.logger.warning(
-                    "Could not find specified Marmot_plot_select file; "
-                    "check file name. This is required to run Marmot, "
-                    "system will now exit"
-                )
-                sys.exit()
-        elif isinstance(Marmot_plot_select, pd.DataFrame):
-            self.Marmot_plot_select = Marmot_plot_select
+        self.model_solutions_folder = Path(model_solutions_folder)
+        self.gen_names_dict = gen_names_dict
+        self.ordered_gen_categories = ordered_gen_categories
+        self.color_dictionary = color_dictionary
+        self.marmot_plot_select = marmot_plot_select
 
         if marmot_solutions_folder is None:
-            self.marmot_solutions_folder = self.Model_Solutions_folder
+            self.marmot_solutions_folder = self.model_solutions_folder
         else:
             self.marmot_solutions_folder = Path(marmot_solutions_folder)
 
-        if isinstance(Scenario_Diff, str):
-            self.Scenario_Diff = (
-                pd.Series(Scenario_Diff.split(",")).str.strip().tolist()
-            )
-        else:
-            self.Scenario_Diff = Scenario_Diff
+        self.scenario_diff = self.convert_str_to_list(scenario_diff)
+        self.zone_region_sublist = self.convert_str_to_list(zone_region_sublist)
+        self.xlabels = self.convert_str_to_list(xlabels)
+        self.ylabels = self.convert_str_to_list(ylabels)
+        self.custom_xticklabels = self.convert_str_to_list(ticklabels)
+        self.region_mapping = region_mapping
+        self.tech_subset = tech_subset
+        self._ordered_gen_list = None
 
-        if isinstance(zone_region_sublist, str):
-            self.zone_region_sublist = (
-                pd.Series(zone_region_sublist.split(",")).str.strip().tolist()
-            )
-        else:
-            self.zone_region_sublist = zone_region_sublist
+    @property
+    def ordered_gen_list(self) -> List[str]:
+        """List of ordered generator technolgies.
 
-        if isinstance(xlabels, str):
-            self.xlabels = pd.Series(xlabels.split(",")).str.strip().tolist()
-        else:
-            self.xlabels = xlabels
+        Oder is specified in the ordered_gen_categories input.
 
-        if isinstance(ylabels, str):
-            self.ylabels = pd.Series(ylabels.split(",")).str.strip().tolist()
-        else:
-            self.ylabels = ylabels
-
-        if isinstance(ticklabels, str):
-            self.custom_xticklabels = (
-                pd.Series(ticklabels.split(",")).str.strip().tolist()
-            )
-        else:
-            self.custom_xticklabels = ticklabels
-
-        if isinstance(Region_Mapping, (str, Path)):
-            try:
-                self.Region_Mapping = pd.read_csv(Region_Mapping)
-                if not self.Region_Mapping.empty:
-                    self.Region_Mapping = self.Region_Mapping.astype(str)
-            except FileNotFoundError:
-                self.logger.warning(
-                    "Could not find specified Region Mapping file; " "check file name\n"
-                )
-                self.Region_Mapping = pd.DataFrame()
-        elif isinstance(Region_Mapping, pd.DataFrame):
-            self.Region_Mapping = Region_Mapping
-            if not self.Region_Mapping.empty:
-                self.Region_Mapping = self.Region_Mapping.astype(str)
-        try:
-            # delete category columns if exists
-            self.Region_Mapping = self.Region_Mapping.drop(["category"], axis=1)
-        except KeyError:
-            pass
-
-    def run_plotter(self):
-        """Main method to call to begin plotting figures.
-
-        This method takes no input variables, all required
-        variables are passed in via the __init__ method.
+        Returns:
+            List[str]: Ordered list of generator technolgies
         """
 
-        self.logger.info(f"Area Aggregation selected: {self.AGG_BY}")
+        if self._ordered_gen_list is None:
+            # Subset ordered_gen to user desired generation
+            if self.tech_subset:
+                if self.tech_subset not in self.ordered_gen_categories.columns:
+                    self.logger.warning(
+                        f"{self.tech_subset} column was not found "
+                        "in the ordered_gen_categories.csv. "
+                        "All generator technologies will be plotted"
+                    )
+                    self._ordered_gen_list = (
+                        self.ordered_gen_categories["Ordered_Gen"].str.strip().tolist()
+                    )
+                else:
+                    ordered_gen = self.ordered_gen_categories.loc[
+                        self.ordered_gen_categories[self.tech_subset] == True
+                    ]
+                    self._ordered_gen_list = (
+                        ordered_gen["Ordered_Gen"].str.strip().tolist()
+                    )
+                    self.logger.info(f"Tech Aggregation selected: {self.tech_subset}")
+            else:
+                self._ordered_gen_list = (
+                    self.ordered_gen_categories["Ordered_Gen"].str.strip().tolist()
+                )
+            # If Other category does not exist in ordered_gen, create entry
+            if "Other" not in self._ordered_gen_list:
+                self._ordered_gen_list.append("Other")
+        return self._ordered_gen_list
 
-        if self.zone_region_sublist:
-            self.logger.info(
-                f"Only plotting {self.AGG_BY}: " f"{self.zone_region_sublist}"
+    @property
+    def gen_names_dict(self) -> dict:
+        """Dictionary of existing gen technology names to new names.
+
+        Used to rename technologies.
+
+        Returns:
+            dict: Keys: Existing names, Values: New names
+        """
+        return self._gen_names_dict
+
+    @gen_names_dict.setter
+    def gen_names_dict(self, gen_names_dict) -> None:
+
+        if isinstance(gen_names_dict, (str, Path)):
+            try:
+                gen_names_dict = pd.read_csv(gen_names_dict)
+            except FileNotFoundError:
+                msg = (
+                    "Could not find specified gen_names_dict csv file; "
+                    "check file name and path."
+                )
+                self.logger.error(msg)
+                raise FileNotFoundError(msg)
+
+        if isinstance(gen_names_dict, pd.DataFrame):
+            if len(gen_names_dict.axes[1]) == 2:
+                self._gen_names_dict = (
+                    gen_names_dict.set_index(gen_names_dict.columns[0])
+                    .squeeze()
+                    .to_dict()
+                )
+            else:
+                msg = (
+                    "Expected exactly 2 columns for gen_names_dict input, "
+                    f"{len(input.axes[1])} columns were in the DataFrame."
+                )
+                self.logger.error(msg)
+                raise ValueError(msg)
+        elif isinstance(gen_names_dict, dict):
+            self._gen_names_dict = gen_names_dict
+        else:
+            msg = (
+                "Expected a DataFrame, dict, or a file path to csv for the gen_names_dict input but "
+                f"recieved a {type(gen_names_dict)}"
             )
+            self.logger.error(msg)
+            raise NotImplementedError(msg)
 
-        processed_hdf5_folder = self.marmot_solutions_folder.joinpath(
-            "Processed_HDF5_folder"
-        )
+    @property
+    def ordered_gen_categories(self) -> pd.DataFrame:
+        """DataFrame containing generator order and category information
 
-        figure_format = mconfig.parser("figure_file_format")
-        if figure_format == "nan":
-            figure_format = "png"
+        Has at least one column named Ordered_Gen.
+        Other columns define different generator technology category groupings.
 
-        # ================================================================================
-        # Standard Generation Order, Gen Categorization Lists, Plotting Colors
-        # ================================================================================
+        Returns:
+            pd.DataFrame: ordered_gen_categories DataFrame
+        """
+        return self._ordered_gen_categories
 
+    @ordered_gen_categories.setter
+    def ordered_gen_categories(self, ordered_gen_categories) -> None:
+
+        if isinstance(ordered_gen_categories, (str, Path)):
+            try:
+                ordered_gen_categories = pd.read_csv(ordered_gen_categories)
+            except FileNotFoundError:
+                msg = (
+                    "Could not find specified ordered_gen_categories csv file; "
+                    "check file name and path."
+                )
+                self.logger.error(msg)
+                raise FileNotFoundError(msg)
+        if isinstance(ordered_gen_categories, pd.DataFrame):
+            if "Ordered_Gen" in ordered_gen_categories.columns:
+                self._ordered_gen_categories = ordered_gen_categories
+            else:
+                msg = "Misssing 'Ordered_Gen' column from ordered_gen_categories input."
+                self.logger.error(msg)
+                raise ValueError(msg)
+        else:
+            msg = (
+                "Expected a DataFrame or a file path to csv for the ordered_gen_categories input but "
+                f"recieved a {type(ordered_gen_categories)}"
+            )
+            self.logger.error(msg)
+            raise NotImplementedError(msg)
+
+        # Compare gen_names_dict to ordered_gen_categories
         if (
-            set(self.gen_names["New"].unique()).issubset(
-                self.ordered_gen_categories["Ordered_Gen"].str.strip().tolist()
+            set(self.gen_names_dict.values()).issubset(
+                self._ordered_gen_categories["Ordered_Gen"].str.strip().tolist()
             )
         ) == False:
-            missing_gen = set(self.gen_names.New.unique()) - (
-                set(self.ordered_gen_categories["Ordered_Gen"].str.strip().tolist())
+            missing_gen = set(self.gen_names_dict.values()) - (
+                set(self._ordered_gen_categories["Ordered_Gen"].str.strip().tolist())
             )
             self.logger.warning(
                 "The following tech categories from the "
-                "gen_names csv do not exist in "
-                "ordered_gen_categories.csv!: "
+                "gen_names_dict input do not exist in "
+                "ordered_gen_categorie input!: "
                 f"{missing_gen}"
             )
 
-        # Subset ordered_gen to user desired generation
-        if self.TECH_SUBSET:
-            if self.TECH_SUBSET not in self.ordered_gen_categories.columns:
-                self.logger.warning(
-                    f"{self.TECH_SUBSET} column was not found "
-                    "in the ordered_gen_categories.csv. "
-                    "All generator technologies will be plotted"
+    @property
+    def color_dictionary(self) -> dict:
+        """Dictionary of gen technology names to plotting colors.
+
+        Returns:
+            dict: Keys gen technologies, Values colors
+        """
+        return self._color_dictionary
+
+    @color_dictionary.setter
+    def color_dictionary(self, color_dictionary) -> None:
+
+        if isinstance(color_dictionary, (str, Path)):
+            try:
+                color_dictionary = pd.read_csv(color_dictionary)
+            except FileNotFoundError:
+                msg = (
+                    "Could not find specified color dictionary csv file; "
+                    "check file name and path."
                 )
-                ordered_gen = (
-                    self.ordered_gen_categories["Ordered_Gen"].str.strip().tolist()
-                )
+                self.logger.error(msg)
+                raise FileNotFoundError(msg)
+
+        if isinstance(color_dictionary, pd.DataFrame):
+            if len(color_dictionary.axes[1]) == 2:
+                self._color_dictionary = GeneratorColorDict.set_colors_from_df(
+                    color_dictionary
+                ).color_dict
             else:
-                ordered_gen = self.ordered_gen_categories.loc[
-                    self.ordered_gen_categories[self.TECH_SUBSET] == True
-                ]
-                ordered_gen = ordered_gen["Ordered_Gen"].str.strip().tolist()
-                self.logger.info(f"Tech Aggregation selected: {self.TECH_SUBSET}")
+                msg = (
+                    "Expected exactly 2 columns for color_dictionary input, "
+                    f"{len(color_dictionary.axes[1])} columns were in the DataFrame."
+                )
+                self.logger.error(msg)
+                raise ValueError(msg)
+        elif isinstance(color_dictionary, dict):
+            self._color_dictionary = GeneratorColorDict(color_dictionary).color_dict
         else:
-            ordered_gen = (
-                self.ordered_gen_categories["Ordered_Gen"].str.strip().tolist()
+            msg = (
+                "Expected a DataFrame, dict, or file path to csv for the color_dictionary input but "
+                f"recieved a {type(color_dictionary)}"
             )
+            self.logger.error(msg)
+            raise NotImplementedError(msg)
 
-        # If Other category does not exist in ordered_gen, create entry
-        if "Other" not in ordered_gen:
-            ordered_gen.append("Other")
+    @property
+    def marmot_plot_select(self) -> pd.DataFrame:
+        """DataFrame containing information on plots to create and certain settings.
 
-        if self.color_dictionary_file is not None:
-            PLEXOS_color_dict = self.color_dictionary_file.rename(
-                columns={
-                    self.color_dictionary_file.columns[0]: "Generator",
-                    self.color_dictionary_file.columns[1]: "Colour",
-                }
-            )
+        Returns:
+            pd.DataFrame:
+        """
+        return self._marmot_plot_select
 
-            PLEXOS_color_dict["Generator"] = PLEXOS_color_dict["Generator"].str.strip()
-            PLEXOS_color_dict["Colour"] = PLEXOS_color_dict["Colour"].str.strip()
-            PLEXOS_color_dict = (
-                PLEXOS_color_dict[["Generator", "Colour"]]
-                .set_index("Generator")
-                .to_dict()["Colour"]
-            )
+    @marmot_plot_select.setter
+    def marmot_plot_select(self, marmot_plot_select) -> None:
+
+        if isinstance(marmot_plot_select, (str, Path)):
+            try:
+                self._marmot_plot_select = pd.read_csv(marmot_plot_select)
+            except FileNotFoundError:
+                msg = (
+                    "Could not find specified marmot_plot_select csv file; "
+                    "check file name and path."
+                )
+                self.logger.error(msg)
+                raise FileNotFoundError(msg)
+
+        elif isinstance(marmot_plot_select, pd.DataFrame):
+            self._marmot_plot_select = marmot_plot_select
         else:
-            PLEXOS_color_dict = None
+            msg = (
+                "Expected a DataFrame or a file path to csv for the marmot_plot_select input but "
+                f"recieved a {type(marmot_plot_select)}"
+            )
+            self.logger.error(msg)
+            raise NotImplementedError(msg)
 
-        color_list = [
-            "#396AB1",
-            "#CC2529",
-            "#3E9651",
-            "#ff7f00",
-            "#6B4C9A",
-            "#922428",
-            "#cab2d6",
-            "#6a3d9a",
-            "#fb9a99",
-            "#b15928"
-        ]
-        marker_style = ["^", "*", "o", "D", "x", "<", "P", "H", "8", "+"]
+    @property
+    def region_mapping(self) -> pd.DataFrame:
+        """Region mapping Dataframe to map custom aggregations.
 
-        gen_names_dict = (
-            self.gen_names[["Original", "New"]].set_index("Original").to_dict()["New"]
-        )
+        Returns:
+            pd.DataFrame:
+        """
+        return self._region_mapping
 
-        # If curtailment category does not exist in ordered_gen, create entry
-        curtailment_name = gen_names_dict.get("Curtailment", "Curtailment")
-        if curtailment_name not in ordered_gen:
-            ordered_gen.append(curtailment_name)
+    @region_mapping.setter
+    def region_mapping(self, region_mapping) -> None:
+        if isinstance(region_mapping, (str, Path)):
+            try:
+                region_mapping = pd.read_csv(region_mapping)
+            except FileNotFoundError:
+                msg = (
+                    "Could not find specified region_mapping csv file; "
+                    "check file name and path."
+                )
+                self.logger.error(msg)
+                raise FileNotFoundError(msg)
 
-        # ================================================================================
-        # Set aggregation
-        # ================================================================================
+        if isinstance(region_mapping, pd.DataFrame):
+            self._region_mapping = region_mapping.astype(str)
+            if "category" in region_mapping.columns:
+                # delete category columns if exists
+                self._region_mapping = self._region_mapping.drop(["category"], axis=1)
+        else:
+            msg = (
+                "Expected a DataFrame or a file path to csv for the region_mapping input but "
+                f"recieved a {type(region_mapping)}"
+            )
+            self.logger.error(msg)
+            raise NotImplementedError(msg)
 
-        # Create an instance of MetaData.
-        meta = MetaData(processed_hdf5_folder, Region_Mapping=self.Region_Mapping)
+    @staticmethod
+    def convert_str_to_list(string_object: str) -> List[str]:
+        """Converts a comma separated string to a list.
+
+        Args:
+            string_object (str): A comma separated string
+
+        Returns:
+            List[str]: list of strings.
+        """
+        if isinstance(string_object, str):
+            list_obj = [x.strip() for x in string_object.split(",")]
+        else:
+            list_obj = string_object
+        return list_obj
+
+    def get_geographic_regions(self, meta: MetaData) -> List[str]:
+        """Gets the geographic regions to plot based on the geographic aggregation.
+
+        The aggregation is determined with the AGG_BY attribute.
+
+        region and zone (PLEXOS) will pull model defined aggregations.
+        Other aggregations will use values from the region mapping file.
+
+        The zone_region_sublist attribute can be used to reduce the set of geographic regions
+        to plot.
+
+        Args:
+            meta (MetaData): instance of MetaData class
+
+        Returns:
+            List[str]: List of geographic regions to plot
+        """
 
         if self.AGG_BY in {"zone", "zones", "Zone", "Zones"}:
             self.AGG_BY = "zone"
@@ -415,22 +497,22 @@ class MarmotPlot(SetupLogger):
                         "in model Regions. Plotting all Regions"
                     )
 
-        elif not self.Region_Mapping.empty:
+        elif not self.region_mapping.empty:
             self.logger.info(
-                "Plotting Custom region aggregation from " "Region_Mapping File"
+                "Plotting Custom region aggregation from " "region_mapping File"
             )
             regions = pd.concat([meta.regions(scenario) for scenario in self.Scenarios])
-            self.Region_Mapping = regions.merge(
-                self.Region_Mapping, how="left", on="region"
+            self.region_mapping = regions.merge(
+                self.region_mapping, how="left", on="region"
             )
-            self.Region_Mapping.dropna(axis=1, how="all", inplace=True)
+            self.region_mapping.dropna(axis=1, how="all", inplace=True)
 
             try:
-                Zones = self.Region_Mapping[self.AGG_BY].unique()
+                Zones = self.region_mapping[self.AGG_BY].unique()
             except KeyError:
                 self.logger.warning(
                     f"AGG_BY = '{self.AGG_BY}' is not in the "
-                    "Region_Mapping File, enter a different aggregation"
+                    "region_mapping File, enter a different aggregation"
                 )
                 sys.exit()
 
@@ -444,7 +526,7 @@ class MarmotPlot(SetupLogger):
                         zsub.append(region)
                     else:
                         self.logger.info(
-                            "Region_Mapping File does not contain region: "
+                            "region_mapping File does not contain region: "
                             f"{region}, SKIPPING REGION"
                         )
                 if zsub:
@@ -452,7 +534,7 @@ class MarmotPlot(SetupLogger):
                 else:
                     self.logger.warning(
                         f"None of: {self.zone_region_sublist} "
-                        "in Region_Mapping File. Plotting all "
+                        "in region_mapping File. Plotting all "
                         f"Regions of aggregation '{self.AGG_BY}'"
                     )
         else:
@@ -461,14 +543,41 @@ class MarmotPlot(SetupLogger):
                 "specified was not found, system will now exit"
             )
             sys.exit()
+        return Zones
+
+    def run_plotter(self):
+        """Main method to call to begin plotting figures.
+
+        This method takes no input variables, all required
+        variables are passed in via the __init__ method.
+        """
+
+        self.logger.info(f"Area Aggregation selected: {self.AGG_BY}")
+
+        if self.zone_region_sublist:
+            self.logger.info(
+                f"Only plotting {self.AGG_BY}: " f"{self.zone_region_sublist}"
+            )
+
+        processed_hdf5_folder = self.marmot_solutions_folder.joinpath(
+            "Processed_HDF5_folder"
+        )
+
+        figure_format = mconfig.parser("figure_file_format")
+        if figure_format == "nan":
+            figure_format = "png"
+
+        # Create an instance of MetaData.
+        meta = MetaData(processed_hdf5_folder, region_mapping=self.region_mapping)
+        Zones = self.get_geographic_regions(meta)
 
         # ================================================================================
         # Start Main plotting loop
         # ================================================================================
 
         # Filter for chosen figures to plot
-        plot_selection = self.Marmot_plot_select.loc[
-            self.Marmot_plot_select["Plot Graph"] == True
+        plot_selection = self.marmot_plot_select.loc[
+            self.marmot_plot_select["Plot Graph"] == True
         ]
         plot_selection = plot_selection.sort_values(by=["Marmot Module", "Method"])
 
@@ -481,25 +590,27 @@ class MarmotPlot(SetupLogger):
             # List of required arguments
             argument_list = [
                 Zones,
-                self.AGG_BY,
                 self.Scenarios,
-                ordered_gen,
-                self.marmot_solutions_folder
+                self.AGG_BY,
+                self.ordered_gen_list,
+                self.marmot_solutions_folder,
             ]
             # dictionary of keyword arguments passed to plotting modules;
             # key names match the instance variables in each module
             argument_dict = {
-                "gen_names_dict": gen_names_dict,
-                "gen_categories": self.ordered_gen_categories,
-                "PLEXOS_color_dict": PLEXOS_color_dict,
-                "Scenario_Diff": self.Scenario_Diff,
+                "gen_names_dict": self.gen_names_dict,
+                "gen_categories": GenCategories().set_categories(
+                    self.ordered_gen_categories
+                ),
+                "marmot_color_dict": self.color_dictionary,
+                "scenario_diff": self.scenario_diff,
                 "ylabels": self.ylabels,
                 "xlabels": self.xlabels,
                 "custom_xticklabels": self.custom_xticklabels,
-                "color_list": color_list,
-                "marker_style": marker_style,
-                "Region_Mapping": self.Region_Mapping,
-                "TECH_SUBSET": self.TECH_SUBSET,
+                "color_list": ColorList().colors,
+                "marker_style": PlotMarkers().markers,
+                "region_mapping": self.region_mapping,
+                "tech_subset": self.tech_subset,
             }
 
             # Import plot module from plottingmodules package
@@ -508,9 +619,10 @@ class MarmotPlot(SetupLogger):
 
             class_name = getattr(plot_module, Module_CLASS_MAPPING[module])
             instantiate_mplot = class_name(*argument_list, **argument_dict)
-
             # Create output folder for each plotting module
-            figures : Path = instantiate_mplot.figure_folder.joinpath(f"{self.AGG_BY}_{module}")
+            figures: Path = instantiate_mplot.figure_folder.joinpath(
+                f"{self.AGG_BY}_{module}"
+            )
             figures.mkdir(exist_ok=True)
 
             # Main loop to process each figure and pass
@@ -670,7 +782,7 @@ def main():
         skipinitialspace=True,
     )
 
-    Marmot_plot_select = pd.read_csv(
+    marmot_plot_select = pd.read_csv(
         INPUT_DIR.joinpath(mconfig.parser("plot_select_file"))
     )
 
@@ -680,73 +792,43 @@ def main():
     ):
         marmot_solutions_folder = None
     else:
-        marmot_solutions_folder = (
-            Marmot_user_defined_inputs.loc["Marmot_Solutions_folder"]
-            .to_string(index=False)
-            .strip()
-        )
+        marmot_solutions_folder = Marmot_user_defined_inputs.loc[
+            "Marmot_Solutions_folder", "User_defined_value"
+        ].strip()
 
-    Scenarios = (
-        pd.Series(Marmot_user_defined_inputs.loc["Scenarios"].squeeze().split(","))
-        .str.strip()
-        .tolist()
-    )
+    Scenarios = Marmot_user_defined_inputs.loc["Scenarios", "User_defined_value"]
 
-    # These variables (along with Region_Mapping) are used to initialize MetaData
-    Model_Solutions_folder = (
-        Marmot_user_defined_inputs.loc["Model_Solutions_folder"]
-        .to_string(index=False)
-        .strip()
-    )
+    # These variables (along with region_mapping) are used to initialize MetaData
+    model_solutions_folder = Marmot_user_defined_inputs.loc[
+        "Model_Solutions_folder", "User_defined_value"
+    ].strip()
 
     # For plots using the difference of the values between two scenarios.
     # Max two entries, the second scenario is subtracted from the first.
-    if (
-        pd.isna(
-            Marmot_user_defined_inputs.loc[
-                "Scenario_Diff_plot", "User_defined_value"
-            ]
-        )
+    if pd.isna(
+        Marmot_user_defined_inputs.loc["Scenario_Diff_plot", "User_defined_value"]
     ):
-        Scenario_Diff = None
+        scenario_diff = None
     else:
-        Scenario_Diff = (
-            pd.Series(
-                str(Marmot_user_defined_inputs.loc["Scenario_Diff_plot"].squeeze()).split(
-                    ","
-                )
-            )
-            .str.strip()
-            .tolist()
-        )
+        scenario_diff = Marmot_user_defined_inputs.loc[
+            "Scenario_Diff_plot", "User_defined_value"
+        ]
 
     Mapping_folder = INPUT_DIR.joinpath("mapping_folder")
 
-    if (
-        pd.isna(
+    if pd.isna(
+        Marmot_user_defined_inputs.loc["Region_Mapping.csv_name", "User_defined_value"]
+    ):
+        region_mapping = pd.DataFrame()
+    else:
+        region_mapping = Mapping_folder.joinpath(
             Marmot_user_defined_inputs.loc[
                 "Region_Mapping.csv_name", "User_defined_value"
             ]
         )
-    ):
-        Region_Mapping = pd.DataFrame()
-    else:
-        Region_Mapping = pd.read_csv(
-            Mapping_folder.joinpath(
-                Marmot_user_defined_inputs.loc["Region_Mapping.csv_name"]
-                .to_string(index=False)
-                .strip()
-            )
-        )
 
-        Region_Mapping = Region_Mapping.astype(str)
-
-    gen_names = pd.read_csv(
-        Mapping_folder.joinpath(
-            Marmot_user_defined_inputs.loc["gen_names.csv_name"]
-            .to_string(index=False)
-            .strip()
-        )
+    gen_names_dict = Mapping_folder.joinpath(
+        Marmot_user_defined_inputs.loc["gen_names.csv_name", "User_defined_value"]
     )
 
     ordered_gen_cat_file = Mapping_folder.joinpath(
@@ -754,99 +836,61 @@ def main():
             "ordered_gen_categories_file", "User_defined_value"
         ]
     )
-    color_dictionary_file = Mapping_folder.joinpath(
+    color_dictionary = Mapping_folder.joinpath(
         Marmot_user_defined_inputs.loc["color_dictionary_file", "User_defined_value"]
     )
 
-    AGG_BY = Marmot_user_defined_inputs.loc["AGG_BY","User_defined_value"].strip()
+    AGG_BY = Marmot_user_defined_inputs.loc["AGG_BY", "User_defined_value"].strip()
 
     if pd.notna(Marmot_user_defined_inputs.loc["TECH_SUBSET", "User_defined_value"]):
-        TECH_SUBSET = Marmot_user_defined_inputs.loc["TECH_SUBSET", "User_defined_value"].strip()
+        tech_subset = Marmot_user_defined_inputs.loc[
+            "TECH_SUBSET", "User_defined_value"
+        ].strip()
     else:
-        TECH_SUBSET = None
+        tech_subset = None
 
     # Facet Grid Labels (Based on Scenarios)
-    if (
-        pd.isna(
-            Marmot_user_defined_inputs.loc[
-                "zone_region_sublist", "User_defined_value"
-            ]
-        )
+    if pd.isna(
+        Marmot_user_defined_inputs.loc["zone_region_sublist", "User_defined_value"]
     ):
         zone_region_sublist = None
     else:
-        zone_region_sublist = (
-            pd.Series(
-                str(Marmot_user_defined_inputs.loc["zone_region_sublist"].squeeze()).split(
-                    ","
-                )
-            )
-            .str.strip()
-            .tolist()
-        )
+        zone_region_sublist = Marmot_user_defined_inputs.loc[
+            "zone_region_sublist", "User_defined_value"
+        ]
 
-    if (
-        pd.isna(
-            Marmot_user_defined_inputs.loc[
-                "Facet_ylabels", "User_defined_value"
-            ]
-        )
-    ):
+    if pd.isna(Marmot_user_defined_inputs.loc["Facet_ylabels", "User_defined_value"]):
         ylabels = None
     else:
-        ylabels = (
-            pd.Series(
-                Marmot_user_defined_inputs.loc["Facet_ylabels", "User_defined_value"].split(",")
-            )
-            .str.strip()
-            .tolist()
-        )
+        ylabels = Marmot_user_defined_inputs.loc["Facet_ylabels", "User_defined_value"]
 
-    if (
-        pd.isna(
-            Marmot_user_defined_inputs.loc[
-                "Facet_xlabels", "User_defined_value"
-            ]
-        )
-    ):
+    if pd.isna(Marmot_user_defined_inputs.loc["Facet_xlabels", "User_defined_value"]):
         xlabels = None
     else:
-        xlabels = (
-            pd.Series(
-                Marmot_user_defined_inputs.loc["Facet_xlabels", "User_defined_value"].split(",")
-            )
-            .str.strip()
-            .tolist()
-        )
+        xlabels = Marmot_user_defined_inputs.loc["Facet_xlabels", "User_defined_value"]
 
     # option to change tick labels on plot
     if pd.isna(Marmot_user_defined_inputs.loc["Tick_labels", "User_defined_value"]):
         ticklabels = None
     else:
-        ticklabels = (
-            pd.Series(
-                str(Marmot_user_defined_inputs.loc["Tick_labels"].squeeze()).split(",")
-            )
-            .str.strip()
-            .tolist()
-        )
+        ticklabels = Marmot_user_defined_inputs.loc["Tick_labels", "User_defined_value"]
 
     initiate = MarmotPlot(
         Scenarios,
         AGG_BY,
-        Model_Solutions_folder,
-        gen_names,
+        model_solutions_folder,
+        gen_names_dict,
         ordered_gen_cat_file,
-        color_dictionary_file,
-        Marmot_plot_select,
+        color_dictionary,
+        marmot_plot_select,
         marmot_solutions_folder=marmot_solutions_folder,
-        Scenario_Diff=Scenario_Diff,
+        scenario_diff=scenario_diff,
         zone_region_sublist=zone_region_sublist,
         xlabels=xlabels,
         ylabels=ylabels,
         ticklabels=ticklabels,
-        Region_Mapping=Region_Mapping,
-        TECH_SUBSET=TECH_SUBSET,
+        region_mapping=region_mapping,
+        tech_subset=tech_subset,
     )
 
     initiate.run_plotter()

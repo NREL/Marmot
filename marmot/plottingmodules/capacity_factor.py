@@ -6,47 +6,75 @@ of generators and average output plots
 """
 
 import logging
+from pathlib import Path
+from typing import List
+
 import numpy as np
 import pandas as pd
 
 import marmot.utils.mconfig as mconfig
-
-from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
-from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
+from marmot.plottingmodules.plotutils.plot_data_helper import (
+    GenCategories,
+    PlotDataStoreAndProcessor,
+)
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
 )
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
+from marmot.plottingmodules.plotutils.styles import ColorList
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    set_timestamp_date_range,
+)
 
 logger = logging.getLogger("plotter." + __name__)
-plot_data_settings = mconfig.parser("plot_data")
+plot_data_settings: dict = mconfig.parser("plot_data")
+xdimension: int = mconfig.parser("figure_size", "xdimension")
+ydimension: int = mconfig.parser("figure_size", "ydimension")
 
 
-class CapacityFactor(MPlotDataHelper):
+class CapacityFactor(PlotDataStoreAndProcessor):
     """Generator capacity factor plots.
 
     The capacity_factor.py module contain methods that are
     related to the capacity factor of generators.
 
-    CapacityFactor inherits from the MPlotDataHelper class to
+    CapacityFactor inherits from the PlotDataStoreAndProcessor class to
     assist in creating figures.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        Zones: List[str],
+        Scenarios: List[str],
+        AGG_BY: str,
+        ordered_gen: List[str],
+        marmot_solutions_folder: Path,
+        gen_categories: GenCategories = GenCategories(),
+        color_list: list = ColorList().colors,
+        **kwargs,
+    ):
         """
         Args:
-            *args
-                Minimum required parameters passed to the MPlotDataHelper 
-                class.
-            **kwargs
-                These parameters will be passed to the MPlotDataHelper 
-                class.
+            Zones (List[str]): List of regions/zones to plot.
+            Scenarios (List[str]): List of scenarios to plot.
+            AGG_BY (str): Informs region type to aggregate by when creating plots.
+            ordered_gen (List[str]): Ordered list of generator technologies to plot,
+                order defines the generator technology position in stacked bar and area plots.
+            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
+            gen_categories (GenCategories): Instance of GenCategories class, groups generator technologies
+                into defined categories.
+                Deafults to GenCategories.
+            color_list (list, optional): List of colors to apply to non-gen plots.
+                Defaults to ColorList().colors.
         """
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(*args, **kwargs)
+        # Instantiation of PlotDataStoreAndProcessor
+        super().__init__(AGG_BY, ordered_gen, marmot_solutions_folder, **kwargs)
 
-        self.x = mconfig.parser("figure_size", "xdimension")
-        self.y = mconfig.parser("figure_size", "ydimension")
+        self.Zones = Zones
+        self.Scenarios = Scenarios
+        self.gen_categories = gen_categories
+        self.color_list = color_list
 
     def avg_output_when_committed(
         self,
@@ -55,20 +83,20 @@ class CapacityFactor(MPlotDataHelper):
         scenario_groupby: str = "Scenario",
         **_,
     ):
-        """Creates barplots of the percentage average generation output when committed 
+        """Creates barplots of the percentage average generation output when committed
         by technology type.
 
         Each scenario is plotted by a different colored grouped bar.
 
         Args:
-            start_date_range (str, optional): Defines a start date at which to represent 
+            start_date_range (str, optional): Defines a start date at which to represent
                 data from.
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -79,15 +107,15 @@ class CapacityFactor(MPlotDataHelper):
         """
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
             (True, "generator_Installed_Capacity", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper 
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor
         # dictionary with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -122,7 +150,7 @@ class CapacityFactor(MPlotDataHelper):
                 #Totable = gen.merga(cap,on['gen_name','region','zone','State','country'],how='left')
 
                 if pd.notna(start_date_range):
-                    Cap, Gen = self.set_timestamp_date_range(
+                    Cap, Gen = set_timestamp_date_range(
                         [Cap, Gen], start_date_range, end_date_range
                     )
                     if Gen.empty is True:
@@ -240,14 +268,14 @@ class CapacityFactor(MPlotDataHelper):
         Each scenario is plotted by a different colored grouped bar.
 
         Args:
-            start_date_range (str, optional): Defines a start date at which to represent 
+            start_date_range (str, optional): Defines a start date at which to represent
                 data from.
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -259,15 +287,15 @@ class CapacityFactor(MPlotDataHelper):
 
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
             (True, "generator_Installed_Capacity", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper 
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor
         # dictionary with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -294,7 +322,7 @@ class CapacityFactor(MPlotDataHelper):
                 Cap = self.df_process_gen_inputs(Cap)
 
                 if pd.notna(start_date_range):
-                    Cap, Gen = self.set_timestamp_date_range(
+                    Cap, Gen = set_timestamp_date_range(
                         [Cap, Gen], start_date_range, end_date_range
                     )
                     if Gen.empty is True:
@@ -332,7 +360,7 @@ class CapacityFactor(MPlotDataHelper):
 
             Data_Table_Out = CF_all_scenarios.T
 
-            mplt = PlotLibrary(figsize=(self.x * 1.5, self.y * 1.5))
+            mplt = PlotLibrary(figsize=(xdimension * 1.5, ydimension * 1.5))
             fig, ax = mplt.get_figure()
 
             mplt.barplot(
@@ -361,14 +389,14 @@ class CapacityFactor(MPlotDataHelper):
         Each scenario is plotted by a different colored grouped bar.
 
         Args:
-            start_date_range (str, optional): Defines a start date at which to represent 
+            start_date_range (str, optional): Defines a start date at which to represent
                 data from.
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -380,8 +408,8 @@ class CapacityFactor(MPlotDataHelper):
 
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
@@ -389,7 +417,7 @@ class CapacityFactor(MPlotDataHelper):
             (True, "generator_Hours_at_Minimum", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -419,7 +447,7 @@ class CapacityFactor(MPlotDataHelper):
                 Cap = Cap.xs(zone_input, level=self.AGG_BY)
 
                 if pd.notna(start_date_range):
-                    Min, Gen, Cap = self.set_timestamp_date_range(
+                    Min, Gen, Cap = set_timestamp_date_range(
                         [Min, Gen, Cap], start_date_range, end_date_range
                     )
                     if Gen.empty is True:
@@ -468,7 +496,7 @@ class CapacityFactor(MPlotDataHelper):
 
             Data_Table_Out = time_at_min.T
 
-            mplt = PlotLibrary(figsize=(self.x * 1.5, self.y * 1.5))
+            mplt = PlotLibrary(figsize=(xdimension * 1.5, ydimension * 1.5))
             fig, ax = mplt.get_figure()
 
             mplt.barplot(

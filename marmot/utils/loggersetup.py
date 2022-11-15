@@ -3,11 +3,13 @@
 @author: Daniel Levie
 """
 
-from pathlib import Path
-import yaml
 import logging
 import logging.config
-from marmot.utils.definitions import ROOT_DIR, LOG_DIR
+from pathlib import Path
+
+import yaml
+
+from marmot.utils.definitions import LOG_DIR, ROOT_DIR
 
 
 class SetupLogger:
@@ -26,43 +28,67 @@ class SetupLogger:
 
     LOG_CONFIG_FILE: str = "marmot_logging_config.yml"
     """Name of default logging config file located in utils package"""
-    
-    DEFAULT_LOG_CONFIG: dict =  {
-        'version': 1,
-        'formatters': {'info_format': {'format': '%(asctime)s:%(levelname)-8s- %(message)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S'},
-        'warning_format': {'format': '%(asctime)s:%(levelname)s:%(module)s.%(funcName)s - %(message)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S'}},
-        'handlers': {'console': {'class': 'logging.StreamHandler',
-            'level': 'INFO',
-            'stream': 'ext://sys.stdout'},
-        'warning_handler': {'class': 'logging.handlers.RotatingFileHandler',
-            'level': 'WARNING',
-            'formatter': 'warning_format',
-            'filename': '{}/WARNINGS_{}{}.log',
-            'backupCount': 3,
-            'encoding': 'utf8',
-            'mode': 'a'},
-        'info_handler': {'class': 'logging.handlers.RotatingFileHandler',
-            'level': 'INFO',
-            'formatter': 'info_format',
-            'filename': '{}/Log_{}{}.log',
-            'backupCount': 3,
-            'encoding': 'utf8',
-            'mode': 'a'}},
-        'loggers': {'formatter': {'level': 'INFO',
-            'handlers': ['console', 'warning_handler', 'info_handler'],
-            'propagate': True},
-        'plotter': {'level': 'INFO',
-            'handlers': ['console', 'warning_handler', 'info_handler'],
-            'propagate': True},
-        'root': {'level': 'DEBUG', 'handlers': ['console']}}
+
+    DEFAULT_LOG_CONFIG: dict = {
+        "version": 1,
+        "formatters": {
+            "info_format": {
+                "format": "%(asctime)s:%(levelname)-8s- %(message)s",
+                "datefmt": "%Y-%m-%d %H:%M:%S",
+            },
+            "warning_format": {
+                "format": "%(asctime)s:%(levelname)s:%(module)s.%(funcName)s - %(message)s",
+                "datefmt": "%Y-%m-%d %H:%M:%S",
+            },
+        },
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+                "level": "INFO",
+                "stream": "ext://sys.stdout",
+            },
+            "warning_handler": {
+                "class": "logging.handlers.RotatingFileHandler",
+                "level": "WARNING",
+                "formatter": "warning_format",
+                "filename": "{}/WARNINGS_{}{}.log",
+                "backupCount": 3,
+                "encoding": "utf8",
+                "mode": "a",
+            },
+            "info_handler": {
+                "class": "logging.handlers.RotatingFileHandler",
+                "level": "INFO",
+                "formatter": "info_format",
+                "filename": "{}/Log_{}{}.log",
+                "backupCount": 3,
+                "encoding": "utf8",
+                "mode": "a",
+            },
+        },
+        "loggers": {
+            "formatter": {
+                "level": "INFO",
+                "handlers": ["console", "warning_handler", "info_handler"],
+                "propagate": True,
+            },
+            "plotter": {
+                "level": "INFO",
+                "handlers": ["console", "warning_handler", "info_handler"],
+                "propagate": True,
+            },
+            "root": {"level": "DEBUG", "handlers": ["console"]},
+        },
     }
     """Default log config if LOG_CONFIG_FILE cannot be found"""
 
     def __init__(
-        self, logger_type: str, log_directory: Path = LOG_DIR, log_suffix: str = None,
-        **kwargs):
+        self,
+        logger_type: str,
+        log_directory: Path = LOG_DIR,
+        log_suffix: str = None,
+        **kwargs,
+    ):
         """
         Args:
             logger_type (str): Type of logger defined in
@@ -87,9 +113,9 @@ class SetupLogger:
         conf["handlers"]["warning_handler"]["filename"] = conf["handlers"][
             "warning_handler"
         ]["filename"].format(log_directory, logger_type, self.log_suffix)
-        conf["handlers"]["info_handler"]["filename"] = conf["handlers"][
-            "info_handler"
-        ]["filename"].format(log_directory, logger_type, self.log_suffix)
+        conf["handlers"]["info_handler"]["filename"] = conf["handlers"]["info_handler"][
+            "filename"
+        ].format(log_directory, logger_type, self.log_suffix)
 
         logging.config.dictConfig(conf)
 

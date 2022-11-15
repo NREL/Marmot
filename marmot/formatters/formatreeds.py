@@ -5,21 +5,21 @@ Inherits the Process class.
 @author: Daniel Levie
 """
 
-import os
-#os.environ['GAMSDIR'] = r"C:\GAMS\39"
-import sys
+# os.environ['GAMSDIR'] = r"C:\GAMS\39"
 import logging
 import re
-from pathlib import Path
-from typing import List, Dict
 from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Dict, List
+
 import gdxpds
 import pandas as pd
 
 import marmot.utils.mconfig as mconfig
-from marmot.metamanagers.read_metadata import MetaData
-from marmot.formatters.formatbase import Process
+from marmot.formatters.formatbase import Process, ReEDSPropertyColumnsBase
 from marmot.formatters.formatextra import ExtraReEDSProperties
+from marmot.metamanagers.read_metadata import MetaData
+from marmot.utils.error_handler import PropertyNotFound
 
 logger = logging.getLogger("formatter." + __name__)
 formatter_settings = mconfig.parser("formatter_settings")
@@ -57,7 +57,7 @@ class ProcessReEDS(Process):
         output_file_path: Path,
         *args,
         process_subset_years: list = None,
-        Region_Mapping: pd.DataFrame = pd.DataFrame(),
+        region_mapping: pd.DataFrame = pd.DataFrame(),
         **kwargs,
     ):
         """
@@ -66,16 +66,20 @@ class ProcessReEDS(Process):
             output_file_path (Path): Path to formatted h5 output file.
             process_subset_years (list, optional): If provided only process
                 years specified. Defaults to None.
-            Region_Mapping (pd.DataFrame, optional): DataFrame to map custom
+            region_mapping (pd.DataFrame, optional): DataFrame to map custom
                 regions/zones to create custom aggregations.
                 Defaults to pd.DataFrame().
             **kwargs
-                These parameters will be passed to the Process 
+                These parameters will be passed to the Process
                 class.
         """
         # Instantiation of Process Base class
         super().__init__(
-            input_folder, output_file_path, *args, Region_Mapping=Region_Mapping, **kwargs
+            input_folder,
+            output_file_path,
+            *args,
+            region_mapping=region_mapping,
+            **kwargs,
         )
         # Internal cached data is saved to the following variables.
         # To access the values use the public api e.g self.property_units
@@ -85,7 +89,7 @@ class ProcessReEDS(Process):
         self.metadata = MetaData(
             output_file_path.parent,
             read_from_formatted_h5=True,
-            Region_Mapping=Region_Mapping,
+            region_mapping=region_mapping,
         )
 
         if process_subset_years:
@@ -161,18 +165,23 @@ class ProcessReEDS(Process):
             reeds_outputs_dir = self.input_folder.joinpath("outputs")
             files = []
             for names in reeds_outputs_dir.iterdir():
-                if names.name == f"{self.GDX_RESULTS_PREFIX}{self.input_folder.name}.gdx":
+                if (
+                    names.name
+                    == f"{self.GDX_RESULTS_PREFIX}{self.input_folder.name}.gdx"
+                ):
                     files.append(names.name)
 
                     self.property_units = str(names)
 
             # List of all files in input folder in alpha numeric order
-            self._get_input_data_paths = sorted(files, key=lambda x: int(re.sub("\D", "0", x)))
+            self._get_input_data_paths = sorted(
+                files, key=lambda x: int(re.sub("\D", "0", x))
+            )
         return self._get_input_data_paths
-    
+
     @property
     def data_collection(self) -> Dict[str, Path]:
-        """Dictionary input file names to full filename path 
+        """Dictionary input file names to full filename path
 
         Returns:
             dict: data_collection {filename: fullpath}
@@ -180,7 +189,9 @@ class ProcessReEDS(Process):
         if self._data_collection is None:
             self._data_collection = {}
             for file in self.get_input_data_paths:
-                self._data_collection[file] = self.input_folder.joinpath("outputs", file)
+                self._data_collection[file] = self.input_folder.joinpath(
+                    "outputs", file
+                )
         return self._data_collection
 
     def output_metadata(self, files_list: list) -> None:
@@ -192,13 +203,12 @@ class ProcessReEDS(Process):
         """
         for partition in files_list:
             region_df = pd.read_csv(
-                self.input_folder.joinpath("inputs_case", "regions.csv"),
-                dtype=str
+                self.input_folder.joinpath("inputs_case", "regions.csv"), dtype=str
             )
             region_df.rename(columns={"p": "name", "s": "category"}, inplace=True)
-            region_df.to_hdf(
+            region_df[["name", "category"]].to_hdf(
                 self.output_file_path,
-                key=f"metadata/{partition}/objects/regions",
+                key=f"metadata/{partition.split('.')[0]}/objects/regions",
                 mode="a",
             )
 
@@ -225,30 +235,21 @@ class ProcessReEDS(Process):
         try:
             df: pd.DataFrame = gdxpds.to_dataframe(str(gdx_file), prop)[prop]
         except gdxpds.tools.Error:
-            df = self.report_prop_error(prop, prop_class)
-            return df
+            raise PropertyNotFound(prop, prop_class)
+
         # Get column names
-        df.columns = getattr(self.reeds_prop_cols, prop)
+        df = self.reeds_prop_cols.assign_column_names(df, prop)
         if "region" in df.columns:
             df.region = df.region.map(lambda x: self.wind_resource_to_pca.get(x, x))
-            if not self.Region_Mapping.empty:
+            if not self.region_mapping.empty:
                 # Merge in region mapping, drop any na columns
-                df = df.merge(self.Region_Mapping, how="left", on="region")
+                df = df.merge(self.region_mapping, how="left", on="region")
                 df.dropna(axis=1, how="all", inplace=True)
         # Get desired method, used for extra processing if needed
         process_att = getattr(self, f"df_process_{prop_class}", None)
         if process_att:
             # Process attribute and return to df
             df = process_att(df, prop, str(gdx_file))
-        
-        try:
-            df.year = df.year.astype(int)
-        except ValueError as e:
-            logger.error("Formatting ERROR: year column cannot be converted to type int. This is likely due to an " 
-                f"incorrectly ordered {self.reeds_prop_cols.__class__} variable, for property '{prop}'.\n"
-                f"Check column order in {self.reeds_prop_cols.__class__} and try running the formatter again.\n"
-                f"If the issue persists open a GitHub issue.\nTraceback message: {e}\nMarmot will not exit.")
-            sys.exit()
 
         if self.process_subset_years:
             df = df.loc[df.year.isin(self.process_subset_years)]
@@ -353,9 +354,11 @@ class ProcessReEDS(Process):
                     stor_prop_name
                 ]
             except gdxpds.tools.Error:
-                stor_out = self.report_prop_error(stor_prop_name, "storage")
                 return df
-            stor_out.columns = getattr(self.reeds_prop_cols, stor_prop_name)
+
+            stor_out = self.reeds_prop_cols.assign_column_names(
+                stor_out, stor_prop_name
+            )
             if prop == "gen_out_ann":
                 stor_out = stor_out.loc[stor_out.type == "out"]
             stor_out = stor_out.groupby(group_list).sum()
@@ -407,7 +410,7 @@ class ProcessReEDS(Process):
 
 
 @dataclass
-class ReEDSPropertyColumns:
+class ReEDSPropertyColumns(ReEDSPropertyColumnsBase):
     """ReEDS property column names"""
 
     gen_out: List = field(
@@ -450,8 +453,8 @@ class ReEDSPropertyColumns:
         default_factory=lambda: [
             "region_from",
             "region_to",
-            "category",
             "year",
+            "category",
             "Value",
         ]
     )

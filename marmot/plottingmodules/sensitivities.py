@@ -6,46 +6,83 @@ related to investigating generator and other device sensitivities.
 """
 
 import logging
-import pandas as pd
+from pathlib import Path
+from typing import List
+
 import matplotlib.pyplot as plt
+import pandas as pd
 
 import marmot.utils.mconfig as mconfig
-
-from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import (
+    PlotDataStoreAndProcessor,
+    merge_new_agg,
+)
 from marmot.plottingmodules.plotutils.plot_exceptions import (
+    InputSheetError,
     MissingInputData,
     UnderDevelopment,
-    InputSheetError,
 )
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
 
 logger = logging.getLogger("plotter." + __name__)
-plot_data_settings = mconfig.parser("plot_data")
+plot_data_settings: dict = mconfig.parser("plot_data")
+curtailment_prop: str = mconfig.parser("plot_data", "curtailment_property")
 
 
-class Sensitivities(MPlotDataHelper):
+class Sensitivities(PlotDataStoreAndProcessor):
     """System sensitivity plots
 
     The sensitivities.py module contains methods that are
     related to investigating generator sensitivities.
 
-    Sensitivities inherits from the MPlotDataHelper class to assist
+    Sensitivities inherits from the PlotDataStoreAndProcessor class to assist
     in creating figures.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        Zones: List[str],
+        Scenarios: List[str],
+        AGG_BY: str,
+        ordered_gen: List[str],
+        marmot_solutions_folder: Path,
+        marmot_color_dict: dict = None,
+        scenario_diff: List[str] = None,
+        region_mapping: pd.DataFrame = pd.DataFrame(),
+        **kwargs,
+    ):
         """
         Args:
-            *args
-                Minimum required parameters passed to the MPlotDataHelper 
-                class.
-            **kwargs
-                These parameters will be passed to the MPlotDataHelper 
-                class.
+            Zones (List[str]): List of regions/zones to plot.
+            Scenarios (List[str]): List of scenarios to plot.
+            AGG_BY (str): Informs region type to aggregate by when creating plots.
+            ordered_gen (List[str]): Ordered list of generator technologies to plot,
+                order defines the generator technology position in stacked bar and area plots.
+            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
+            marmot_color_dict (dict, optional): Dictionary of colors to use for
+                generation technologies.
+                Defaults to None.
+            scenario_diff (List[str], optional): 2 value list, used to compare 2
+                scenarios.
+                Defaults to None.
+            region_mapping (pd.DataFrame, optional): Mapping file to map
+                custom regions/zones to create custom aggregations.
+                Aggregations are created by grouping PLEXOS regions.
+                Defaults to pd.DataFrame().
         """
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(*args, **kwargs)
+        # Instantiation of PlotDataStoreAndProcessor
+        super().__init__(AGG_BY, ordered_gen, marmot_solutions_folder, **kwargs)
 
-        self.curtailment_prop = mconfig.parser("plot_data", "curtailment_property")
+        self.Zones = Zones
+        self.Scenarios = Scenarios
+        if marmot_color_dict is None:
+            self.marmot_color_dict = GeneratorColorDict.set_random_colors(
+                self.ordered_gen
+            ).color_dict
+        else:
+            self.marmot_color_dict = marmot_color_dict
+        self.scenario_diff = scenario_diff
+        self.region_mapping = region_mapping
 
     def _process_ts(self, df, zone_input):
         oz = df.xs(zone_input, level=self.AGG_BY)
@@ -90,29 +127,29 @@ class Sensitivities(MPlotDataHelper):
 
         outputs: dict = {}
 
-        if self.Scenario_Diff == [""]:
+        if self.scenario_diff == [""]:
             logger.warning(
-                "Scenario_Diff field is empty. Ensure User Input Sheet is set up correctly!"
+                "scenario_diff field is empty. Ensure User Input Sheet is set up correctly!"
             )
             outputs = InputSheetError()
             return outputs
-        if len(self.Scenario_Diff) == 1:
+        if len(self.scenario_diff) == 1:
             logger.warning(
-                "Scenario_Diff field only contains 1 entry, two are required. Ensure User Input Sheet is set up correctly!"
+                "scenario_diff field only contains 1 entry, two are required. Ensure User Input Sheet is set up correctly!"
             )
             outputs = InputSheetError()
             return outputs
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
-            (True, "generator_Generation", self.Scenario_Diff),
-            (True, f"generator_{self.curtailment_prop}", self.Scenario_Diff),
-            (True, "region_Net_Interchange", self.Scenario_Diff),
+            (True, "generator_Generation", self.scenario_diff),
+            (True, f"generator_{curtailment_prop}", self.scenario_diff),
+            (True, "region_Net_Interchange", self.scenario_diff),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -120,13 +157,13 @@ class Sensitivities(MPlotDataHelper):
             return MissingInputData()
 
         try:
-            bc = self.adjust_for_leapday(
-                self["generator_Generation"].get(self.Scenario_Diff[0])
+            bc = adjust_for_leapday(
+                self["generator_Generation"].get(self.scenario_diff[0])
             )
         except IndexError:
             logger.warning(
-                'Scenario_Diff "%s" is not in data. Ensure User Input Sheet is set up correctly!',
-                self.Scenario_Diff[0],
+                'scenario_diff "%s" is not in data. Ensure User Input Sheet is set up correctly!',
+                self.scenario_diff[0],
             )
             outputs = InputSheetError()
             return outputs
@@ -135,13 +172,13 @@ class Sensitivities(MPlotDataHelper):
         bc_CT = bc.xs("Gas-CT", level="tech")
         bc_CC = bc.xs("Gas-CC", level="tech")
         try:
-            scen = self.adjust_for_leapday(
-                self["generator_Generation"].get(self.Scenario_Diff[1])
+            scen = adjust_for_leapday(
+                self["generator_Generation"].get(self.scenario_diff[1])
             )
         except IndexError:
             logger.warning(
-                'Scenario_Diff "%s" is not in data. Ensure User Input Sheet is set up correctly!',
-                self.Scenario_Diff[0],
+                'scenario_diff "%s" is not in data. Ensure User Input Sheet is set up correctly!',
+                self.scenario_diff[0],
             )
             outputs = InputSheetError()
             return outputs
@@ -150,11 +187,11 @@ class Sensitivities(MPlotDataHelper):
         scen_CT = scen.xs("Gas-CT", level="tech")
         scen_CC = scen.xs("Gas-CC", level="tech")
 
-        curt_bc = self.adjust_for_leapday(
-            self[f"generator_{self.curtailment_prop}"].get(self.Scenario_Diff[0])
+        curt_bc = adjust_for_leapday(
+            self[f"generator_{curtailment_prop}"].get(self.scenario_diff[0])
         )
-        curt_scen = self.adjust_for_leapday(
-            self[f"generator_{self.curtailment_prop}"].get(self.Scenario_Diff[1])
+        curt_scen = adjust_for_leapday(
+            self[f"generator_{curtailment_prop}"].get(self.scenario_diff[1])
         )
         curt_diff_all = curt_scen - curt_bc
 
@@ -176,15 +213,15 @@ class Sensitivities(MPlotDataHelper):
         # Add net interchange difference to icing plot.
         bc_int = pd.read_hdf(
             self.processed_hdf5_folder.joinpath(
-                self.Scenario_Diff[0] + "_formatted.h5"
+                self.scenario_diff[0] + "_formatted.h5"
             ),
             "region_Net_Interchange",
         )
-        bc_int = self.adjust_for_leapday(
-            self["region_Net_Interchange"].get(self.Scenario_Diff[0])
+        bc_int = adjust_for_leapday(
+            self["region_Net_Interchange"].get(self.scenario_diff[0])
         )
-        scen_int = self.adjust_for_leapday(
-            self["region_Net_Interchange"].get(self.Scenario_Diff[1])
+        scen_int = adjust_for_leapday(
+            self["region_Net_Interchange"].get(self.scenario_diff[1])
         )
 
         int_diff_all = scen_int - bc_int
@@ -202,8 +239,8 @@ class Sensitivities(MPlotDataHelper):
                 icing_diff = oz_scen - oz_bc
                 icing_diff_perc = 100 * icing_diff / oz_bc
 
-                oz_bc.columns = [prop + " " + str(self.Scenario_Diff[0])]
-                oz_scen.columns = [str(self.Scenario_Diff[1])]
+                oz_bc.columns = [prop + " " + str(self.scenario_diff[0])]
+                oz_scen.columns = [str(self.scenario_diff[1])]
 
                 Data_Out_List = []
                 Data_Out_List.append(oz_bc)
@@ -225,7 +262,9 @@ class Sensitivities(MPlotDataHelper):
 
                 int_diff_all = int_diff_all.reset_index()
                 if self.AGG_BY not in int_diff_all.columns:
-                    int_diff_all = self.merge_new_agg(int_diff_all)
+                    int_diff_all = merge_new_agg(
+                        self.region_mapping, int_diff_all, self.AGG_BY
+                    )
                 int_diff = int_diff_all[int_diff_all[self.AGG_BY] == zone_input]
                 int_diff = int_diff.groupby("timestamp").sum()
                 int_diff.columns = ["Net export difference"]
@@ -247,18 +286,18 @@ class Sensitivities(MPlotDataHelper):
                 Data_Table_Out = pd.concat(Data_Out_List, axis=1, copy=False)
 
                 custom_color_dict = {
-                    "Curtailment difference": self.PLEXOS_color_dict["Curtailment"],
-                    prop + " " + self.Scenario_Diff[0]: self.PLEXOS_color_dict[prop],
-                    self.Scenario_Diff[1]: self.PLEXOS_color_dict[prop],
-                    "Gas-CC difference": self.PLEXOS_color_dict["Gas-CC"],
-                    "Gas-CT difference": self.PLEXOS_color_dict["Gas-CT"],
+                    "Curtailment difference": self.marmot_color_dict["Curtailment"],
+                    prop + " " + self.scenario_diff[0]: self.marmot_color_dict[prop],
+                    self.scenario_diff[1]: self.marmot_color_dict[prop],
+                    "Gas-CC difference": self.marmot_color_dict["Gas-CC"],
+                    "Gas-CT difference": self.marmot_color_dict["Gas-CT"],
                     "Net export difference": "black",
                 }
 
                 ls_dict = {
                     "Curtailment difference": "solid",
-                    prop + " " + self.Scenario_Diff[0]: "solid",
-                    self.Scenario_Diff[1]: ":",
+                    prop + " " + self.scenario_diff[0]: "solid",
+                    self.scenario_diff[1]: ":",
                     "Gas-CC difference": "solid",
                     "Gas-CT difference": "solid",
                     "Net export difference": "--",
@@ -277,15 +316,15 @@ class Sensitivities(MPlotDataHelper):
 
                 # Make two hatches: blue for when scenario > basecase, and red for when scenario < basecase.
                 if (
-                    self.Scenario_Diff[1] != "Icing"
-                    and self.Scenario_Diff[1] != "DryHydro"
+                    self.scenario_diff[1] != "Icing"
+                    and self.scenario_diff[1] != "DryHydro"
                 ):
                     axs[0].fill_between(
                         diffs.index,
-                        diffs[prop + " " + str(self.Scenario_Diff[0])],
-                        diffs[str(self.Scenario_Diff[1])],
-                        where=diffs[str(self.Scenario_Diff[1])]
-                        > diffs[prop + " " + str(self.Scenario_Diff[0])],
+                        diffs[prop + " " + str(self.scenario_diff[0])],
+                        diffs[str(self.scenario_diff[1])],
+                        where=diffs[str(self.scenario_diff[1])]
+                        > diffs[prop + " " + str(self.scenario_diff[0])],
                         label="Increased " + prop.lower() + " generation",
                         facecolor="blue",
                         hatch="///",
@@ -293,10 +332,10 @@ class Sensitivities(MPlotDataHelper):
                     )
                 axs[0].fill_between(
                     diffs.index,
-                    diffs[prop + " " + str(self.Scenario_Diff[0])],
-                    diffs[str(self.Scenario_Diff[1])],
-                    where=diffs[str(self.Scenario_Diff[1])]
-                    < diffs[prop + " " + str(self.Scenario_Diff[0])],
+                    diffs[prop + " " + str(self.scenario_diff[0])],
+                    diffs[str(self.scenario_diff[1])],
+                    where=diffs[str(self.scenario_diff[1])]
+                    < diffs[prop + " " + str(self.scenario_diff[0])],
                     label="Decreased " + prop.lower() + " generation",
                     facecolor="red",
                     hatch="///",
@@ -315,7 +354,7 @@ class Sensitivities(MPlotDataHelper):
                 axs[0].set_ylabel("Generation (MW)", color="black", rotation="vertical")
                 axs[0].set_xlabel(timezone, color="black", rotation="horizontal")
                 axs[0].margins(x=0.01)
-                MPlotDataHelper.set_subplot_timeseries_format(axs)
+                PlotDataStoreAndProcessor.set_subplot_timeseries_format(axs)
                 handles, labels = axs[0].get_legend_handles_labels()
                 axs[0].legend(
                     reversed(handles),
