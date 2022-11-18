@@ -47,6 +47,7 @@ Unstacked_Gen_Facet_Grid_Peak_Curtailment,FALSE,Peak Curtailment,,3,3,EST,1/2/40
 Unstacked_Gen_Facet_Grid,FALSE,,,,,EST,,,Interval,,,generation_unstack,gen_unstack
 Hydro_Versus_Continent_Net_Load,FALSE,,,,,,1/10/24,1/20/24,,,,hydro,hydro_continent_net_load
 Hydro_Versus_Net_Load,FALSE,,,,7,EST,,,,,,hydro,hydro_net_load
+Hydro_comparision_hourly,TRUE,,,,,,,,,,,hydro,hydro_timeseries
 All_Regions_Price_Duration_Curve,FALSE,,150,,,,,,,,,prices,pdc_all_regions
 Region_Price_Duration,FALSE,,,,,,1/10/24,1/20/24,,,,prices,region_pdc
 Region_Price_Duration_Threshold,FALSE,,150,,,,1/10/24,1/20/24,,,,prices,region_pdc
@@ -57,7 +58,7 @@ Node_Price_Duration_Curve,FALSE,"101,202",,,,,,,,,,prices,node_pdc
 Node_Price_Timeseries,FALSE,"101,202",,,,EST,1/10/24,1/20/24,,,,prices,node_timeseries_price
 Node_Price_Histogram,FALSE,"101,202",,,,,1/10/24,1/20/24,,,,prices,node_price_hist
 Node_Price_Histogram_Difference,FALSE,"101,202",,,,,,,,,,prices,node_price_hist_diff
-Detailed_Total_Generation_Cost,FALSE,,,,,,2021,2021,,Scenario,,production_cost,detailed_gen_cost
+Detailed_Total_Generation_Cost,FALSE,,,,,,,,,Scenario,,production_cost,detailed_gen_cost
 Detailed_Total_Generation_Cost_by_year,FALSE,,,,,,2030,2050,,Year-Scenario,,production_cost,detailed_gen_cost
 Detailed_Total_Generation_Cost_Diff,FALSE,,,,,,2030,2050,,Scenario,,production_cost,detailed_gen_cost_diff
 Detailed_Total_Generation_Cost_Diff_by_year,FALSE,,,,,,,,,Year-Scenario,,production_cost,detailed_gen_cost_diff
@@ -101,17 +102,17 @@ Total_Generation_by_year,FALSE,,,,,,,,,Year-Scenario,,total_generation,total_gen
 Total_Generation_Monthly,FALSE,,,,,EST,1/2/40,2040,,,,total_generation,total_gen_monthly
 Monthly_Wind_Solar,FALSE,,,,,EST,2048,2050,,,,total_generation,monthly_vre_generation
 Monthly_Wind_Solar_Percentage,FALSE,,,,,EST,2048,2050,,,,total_generation,monthly_vre_generation_percentage
-Total_Generation_Pie,TRUE,,,,,EST,2020,2030,,,,total_generation,total_gen_pie
+Total_Generation_Pie,FALSE,,,,,EST,2020,2030,,,,total_generation,total_gen_pie
 Total_Generation_Diff,FALSE,,,,,,,,,Scenario,,total_generation,total_gen_diff
 Total_Generation_Diff_by_year,FALSE,,,,,,,,,Year-Scenario,,total_generation,total_gen_diff
 Total_Installed_Capacity,FALSE,,,,,,,,,Scenario,,total_installed_capacity,total_cap
 Total_Installed_Capacity_by_year,FALSE,,,,,,,,,Year-Scenario,,total_installed_capacity,total_cap
-Total_Installed_Capacity_facet,TRUE,,,,,,,,,Year-Scenario,,total_installed_capacity,total_cap_facet
+Total_Installed_Capacity_facet,FALSE,,,,,,,,,Year-Scenario,,total_installed_capacity,total_cap_facet
 Total_Installed_Capacity_Diff,FALSE,,,,,,,,,Scenario,,total_installed_capacity,total_cap_diff
-Total_Installed_Capacity_and_Generation_Facet,TRUE,,,,,,,,,Scenario,,total_installed_capacity,total_cap_and_gen_facet
+Total_Installed_Capacity_and_Generation_Facet,FALSE,,,,,,,,,Scenario,,total_installed_capacity,total_cap_and_gen_facet
 Total_Installed_Capacity_and_Generation_Facet_by_year,FALSE,,,,,,2020,2040,,Year-Scenario,,total_installed_capacity,total_cap_and_gen_facet
 Individual_Interface_Flow,FALSE,"Interface-1-2,Interface-3-2",,,,EST,,,,,,transmission,interface_flow_ind
-Individual_Line_Flow_duration_curve,TRUE,AK Intertie,,,,,,,,,,transmission,line_flow_ind
+Individual_Line_Flow_duration_curve,FALSE,AK Intertie,,,,,,,,,,transmission,line_flow_ind
 Individual_Line_flow_duration_curve_seasonal,FALSE,113_316_1,,,,EST,1/10/24,1/20/24,,,,transmission,line_flow_ind_seasonal
 Individual_flow_diff_duration_curve,FALSE,113_316_1,,,,EST,1/10/24,1/20/24,,,,transmission,line_flow_ind_diff
 Line_Utilization_Histogram,FALSE,,,,,,,,,,,transmission,line_hist

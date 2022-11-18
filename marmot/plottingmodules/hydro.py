@@ -21,7 +21,7 @@ It may not produce production ready figures.
 # )
 
 # self = Hydro(Zones = ['BPAT_WI'],
-#           Scenarios = ['a_fh', 'a_td'],
+#           Scenarios = ['a_mh', 'a_wh'],
 #           AGG_BY = 'region',
 #           ordered_gen = ['Nuclear', 'Coal', 'Gas-CC', 'Gas-CC CCS', 'Gas-CT', 'Gas', 'Landfill gas', 'Gas-Steam', 'Dual Fuel', 'DualFuel', 'Oil-Gas-Steam', 'Oil/Gas', 'Oil', 'Hydro', 'Hydropower', 'Ocean', 'Geothermal', 'Biomass', 'Biopower', 'Other', 'VRE', 'Wind', 'Offshore Wind', 'OffshoreWind', 'Solar', 'PV', 'dPV', 'CSP', 'PV-Battery', 'Battery', 'OSW-Battery', 'PHS', 'Tidal', 'Storage', 'Storage discharge', 'Battery discharge', 'Net Imports', 'Curtailment', 'curtailment', 'Demand', 'Deamand + Storage Charging'],
 #           marmot_solutions_folder = '/Users/mschwarz/WaterRisk local/StageA_2009_results',
@@ -36,6 +36,8 @@ from typing import List
 
 import matplotlib.ticker as mtick
 import pandas as pd
+
+import matplotlib.pyplot as plt
 
 import marmot.utils.mconfig as mconfig
 from marmot.plottingmodules.plotutils.plot_data_helper import (
@@ -111,7 +113,7 @@ class Hydro(PlotDataStoreAndProcessor):
         else:
             self.marmot_color_dict = marmot_color_dict
 
-    def hydro_timeseries(self, end: int = 7, timezone: str = "", **_):
+    def hydro_timeseries(self, end: int = 7, agg_daily: bool = False, timezone: str = "", **_):
         """Timeseries Line plot of hydro generation.
 
         Creates separate plots for each week of the year, or longer depending
@@ -153,6 +155,7 @@ class Hydro(PlotDataStoreAndProcessor):
                 logger.info(f"Scenario = {scenario}")
                 #Create hydro data frame
                 Stacked_Gen_read = self["generator_Generation"].get(scenario)
+                #Stacked_Gen = Stacked_Gen_read.xs('BankheadDam_1',level='gen_name')
 
                 # The rest of the function won't work if this particular zone can't be found
                 # in the solution file (e.g. if it doesn't include Mexico)
@@ -163,7 +166,9 @@ class Hydro(PlotDataStoreAndProcessor):
                     continue
 
                 del Stacked_Gen_read
+
                 Stacked_Gen = self.df_process_gen_inputs(Stacked_Gen)
+
 
                 # Removes columns that only contain 0
                 Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
@@ -173,84 +178,76 @@ class Hydro(PlotDataStoreAndProcessor):
                     logger.warning("No Hydro Generation in %s", zone_input)
                     Hydro_Gen = MissingZoneData()
                     continue
-
+                #Hydro_Gen = Stacked_Gen['values'].copy()
+                #Hydro_Gen.index = Hydro_Gen.index.droplevel(['tech','region','zone','superzone','Midwest_Agg','Usual','Usual_and_RTOZone','Country','Interconnection','CountryInterconnect','Summary','units'])
+                
                 del Stacked_Gen
                 Hydro_Gen.name = scenario
                 hydro_gen_all.append(Hydro_Gen)
             Hydro_Gen_Out = pd.concat(hydro_gen_all,axis = 1)
 
+            unitconversion = self.capacity_energy_unitconversion(
+                Hydro_Gen_Out, self.Scenarios, sum_values=True
+            )
+            # Convert units
+            Hydro_Gen_Out = Hydro_Gen_Out / unitconversion["divisor"]
+            Hydro_Gen_Out['month'] = Hydro_Gen_Out.index.month
+
             # Scatter plot by season
-            mplt = PlotLibrary(1, 1, sharey=True, squeeze=False, ravel_axs=True)
+            mplt = PlotLibrary(3, 1, sharey=True, squeeze=False, ravel_axs=True)
             fig, axs = mplt.get_figure()
 
-            for col in Hydro_Gen_Out:
-                mplt.lineplot(
-                    Hydro_Gen_Out,
-                    col,
-                    # linewidth=2,
-                    # color=self.marmot_color_dict.get("Hydro", "#333333"),
-                    # label="Hydro",
-                )
+            for i,mon in enumerate(Hydro_Gen_Out.month.unique()):
+                Hydro_Gen_Out_month = Hydro_Gen_Out[Hydro_Gen_Out.month == mon]
+                Hydro_Gen_Out_month.drop(columns = ['month'],inplace = True)
 
-            axs.set_ylabel("Generation (MW)", color="black", rotation="vertical")
-            axs.set_xlabel(timezone, color="black", rotation="horizontal")
-            mplt.set_yaxis_major_tick_format()
-            ax.margins(x=0.01)
+                Hydro_Gen_Out_month['day'] = Hydro_Gen_Out_month.index.day
+                Hydro_Gen_Out_month = Hydro_Gen_Out_month.groupby('day').sum()
+                for col in Hydro_Gen_Out_month:
+                    mplt.lineplot(
+                        Hydro_Gen_Out_month,
+                        col,
+                        # linewidth=2,
+                        # color=self.marmot_color_dict.get("Hydro", "#333333"),
+                        label=col,
+                        sub_pos=i
+                    )
+                #mplt.set_subplot_timeseries_format(sub_pos=i)
+                mplt.set_yaxis_major_tick_format(sub_pos=i)
 
-            mplt.set_subplot_timeseries_format()
+            Hydro_Gen_Out.drop(columns = ['month'],inplace = True)
+            #axs[0].set_xlabel(timezone, color="black", rotation="horizontal")
+            axs[0].margins(x=0.01)
+
+            plt.ylabel(
+                f"Generation ({unitconversion['units']})",
+                color="black",
+                rotation="vertical",
+                labelpad=40,
+            )
 
             # Add title
             if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
+                #mplt.add_main_title('BankheadDam_1')
             # Add legend
             mplt.add_legend(reverse_legend=True)
-
+ 
             fig.savefig(
                 os.path.join(
                     hydro_figures,
                     zone_input
-                    + f"_Hydro_And_Net_Load_{self.Scenarios[0]}_period_{str(wk)}",
+                    + " hydro_compare_daily.svg",
                 ),
                 dpi=600,
                 bbox_inches="tight",
             )
-            Data_Table_Out.to_csv(
+            Hydro_Gen_Out.to_csv(
                 os.path.join(
                     hydro_figures,
                     zone_input
-                    + f"_Hydro_And_Net_Load_{self.Scenarios[0]}_period_{str(wk)}.csv",
+                    + f" hydro_compare_daily.csv",
                 )
-            )
-            del fig
-            del Data_Table_Out
-            # end weekly loop
-            # Scatter plot
-
-            mplt = SetupSubplot()
-            fig, ax = mplt.get_figure()
-            ax.scatter(Net_Load, Hydro_Gen, color="black", s=5)
-
-            ax.set_ylabel(
-                "In-Region Hydro Generation (MW)", color="black", rotation="vertical"
-            )
-            ax.set_xlabel(
-                "In-Region Net Load (MW)", color="black", rotation="horizontal"
-            )
-            mplt.set_yaxis_major_tick_format()
-            ax.xaxis.set_major_formatter(mtick.StrMethodFormatter("{x:,.0f}"))
-            ax.margins(x=0.01)
-
-            mplt.add_legend(reverse_legend=True)
-
-            if plot_data_settings["plot_title_as_region"]:
-                mplt.add_main_title(zone_input)
-            fig.savefig(
-                os.path.join(
-                    hydro_figures,
-                    zone_input + f"_Hydro_Versus_Net_Load_{self.Scenarios[0]}",
-                ),
-                dpi=600,
-                bbox_inches="tight",
             )
 
         outputs = DataSavedInModule()
@@ -484,7 +481,7 @@ class Hydro(PlotDataStoreAndProcessor):
                 ax.plot(Net_Load_Period, color="black", label="Load")
 
                 ax.set_ylabel("Generation (MW)", color="black", rotation="vertical")
-                ax.set_xlabel(timezone, color="black", rotation="horizontal")
+                #ax.set_xlabel(timezone, color="black", rotation="horizontal")
                 mplt.set_yaxis_major_tick_format()
                 ax.margins(x=0.01)
 
