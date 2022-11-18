@@ -356,7 +356,11 @@ class MarmotFormat(SetupLogger):
                         data_chunks.append(processed_data)
 
                 # Combine models
-                Processed_Data_Out = process_sim_model.combine_models(data_chunks)
+                if row["data_type"] == "year" and sim_model == "PLEXOS":
+                    Processed_Data_Out = process_sim_model.combine_models(data_chunks, drop_duplicates=False)
+                else:
+                    Processed_Data_Out = process_sim_model.combine_models(data_chunks)
+
                 if Processed_Data_Out.empty is False:
                     if row["data_type"] == "year" and sim_model == "PLEXOS":
                         self.logger.info(PLEXOS_YEAR_WARNING)
