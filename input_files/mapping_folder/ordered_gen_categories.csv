@@ -5,19 +5,20 @@ Gas-CC,,,,TRUE,
 Gas-CC CCS,,,,TRUE,
 Gas-CT,,,,TRUE,
 Gas,,,,TRUE,
-Landfill gas,,,,TRUE,
 Gas-Steam,,,,TRUE,
 Dual Fuel,,,,TRUE,
 DualFuel,,,,TRUE,
 Oil-Gas-Steam,,,,TRUE,
-Oil/Gas,,,,TRUE,
 Oil,,,,TRUE,
+Oil/Gas,,,,TRUE,
 Hydro,,TRUE,,,
 Hydropower,,TRUE,,,
 Ocean,,TRUE,,,
+Tidal,TRUE,TRUE,,,
 Geothermal,,TRUE,,,
 Biomass,,TRUE,,,
 Biopower,,TRUE,,,
+Landfill gas,,TRUE,,,
 Other,,,,,
 VRE,TRUE,TRUE,,,
 Wind,TRUE,TRUE,,,
@@ -31,12 +32,10 @@ PV-Battery,,TRUE,TRUE,,TRUE
 Battery,,,,,TRUE
 OSW-Battery,,,,,TRUE
 PHS,,,,,TRUE
-Tidal,,TRUE,,,
 Storage,,,,,TRUE
 Storage discharge,,,,,TRUE
-Battery discharge,,,,,TRUE
 Net Imports,,,,,
 Curtailment,,,,,
 curtailment,,,,,
 Demand,,,,,
-Deamand + Storage Charging,,,,,
+Demand + Storage Charging,,,,,
