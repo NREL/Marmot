@@ -4,22 +4,39 @@
 This module creates energy storage plots.
 """
 
+import datetime as dt
 import logging
-from re import I, L
-import pandas as pd
+from pathlib import Path
+from typing import List
+
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 
 import marmot.utils.mconfig as mconfig
-
-from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import (
+    GenCategories,
+    PlotDataStoreAndProcessor,
+    set_facet_col_row_dimensions,
+)
 from marmot.plottingmodules.plotutils.plot_exceptions import (
+    InputSheetError,
     MissingInputData,
     MissingZoneData,
 )
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary, SetupSubplot
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    adjust_for_leapday,
+    set_timestamp_date_range,
+)
 
 logger = logging.getLogger("plotter." + __name__)
-plot_data_settings = mconfig.parser("plot_data")
+plot_data_settings: dict = mconfig.parser("plot_data")
+shift_leapday: bool = mconfig.parser("shift_leapday")
+load_legend_names: dict = mconfig.parser("load_legend_names")
+curtailment_prop: str = mconfig.parser("plot_data", "curtailment_property")
+
 
 #####
 #Testing
@@ -36,12 +53,12 @@ plot_data_settings = mconfig.parser("plot_data")
 # )
 # start_date_range='5/7/50'
 # end_date_range='5/14/50'
-# prop = 'Envergex_p97_1'
+#prop = 'Envergex_p58_12'
 #prop = 'Envergex_p92_2'
 
 #######
 
-class FLECCSOperation(MPlotDataHelper):
+class FLECCSOperation(PlotDataStoreAndProcessor):
     """The FLECCS_operation.py module contains methods that are
     related to NGCC plants fitted with a flexible CCS technology, 
     specifically designed for the ARPA-E FLECCS project.
@@ -50,18 +67,44 @@ class FLECCSOperation(MPlotDataHelper):
     in creating figures.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        Zones: List[str],
+        Scenarios: List[str],
+        AGG_BY: str,
+        ordered_gen: List[str],
+        marmot_solutions_folder: Path,
+        gen_categories: GenCategories = GenCategories(),
+        marmot_color_dict: dict = None,
+        **kwargs,
+    ):
         """
         Args:
-            *args
-                Minimum required parameters passed to the MPlotDataHelper 
-                class.
-            **kwargs
-                These parameters will be passed to the MPlotDataHelper 
-                class.
+            Zones (List[str]): List of regions/zones to plot.
+            Scenarios (List[str]): List of scenarios to plot.
+            AGG_BY (str): Informs region type to aggregate by when creating plots.
+            ordered_gen (List[str]): Ordered list of generator technologies to plot,
+                order defines the generator technology position in stacked bar and area plots.
+            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
+            gen_categories (GenCategories): Instance of GenCategories class, groups generator technologies
+                into defined categories.
+                Deafults to GenCategories.
+            marmot_color_dict (dict, optional): Dictionary of colors to use for
+                generation technologies.
+                Defaults to None.
         """
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(*args, **kwargs)
+        # Instantiation of PlotDataStoreAndProcessor
+        super().__init__(AGG_BY, ordered_gen, marmot_solutions_folder, **kwargs)
+
+        self.Zones = Zones
+        self.Scenarios = Scenarios
+        self.gen_categories = gen_categories
+        if marmot_color_dict is None:
+            self.marmot_color_dict = GeneratorColorDict.set_random_colors(
+                self.ordered_gen
+            ).color_dict
+        else:
+            self.marmot_color_dict = marmot_color_dict
 
     def FLECCS_timeseries_singleplant(self,**kwargs):
 
@@ -105,11 +148,11 @@ class FLECCSOperation(MPlotDataHelper):
         # contain 3 parts: required True/False, property name and scenarios required, 
         # scenarios must be a list.
         properties = [
-            (True, "storage_Initial_Volume", self.Scenarios),  #Releveant for storage techs
-            (True, "waterway_Flow", self.Scenarios), #Represents CCS load.
+            #(False, "storage_Initial_Volume", self.Scenarios),  #Releveant for storage techs
+            #(False, "waterway_Flow", self.Scenarios), #Represents CCS load.
             (True, "generator_Generation", self.Scenarios),  #For the base NGCC
-            (False, "region_Price", self.Scenarios),
-            (False, "generator_Pump_Load", self.Scenarios)
+            (True, "region_Price", self.Scenarios),
+            (True, "generator_Pump_Load", self.Scenarios)
         ]
 
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
@@ -123,7 +166,7 @@ class FLECCSOperation(MPlotDataHelper):
             logger.info(f"{self.AGG_BY} = {zone_input}")
 
             # sets up x, y dimensions of plot
-            ncols, nrows = self.set_facet_col_row_dimensions(
+            ncols, nrows = set_facet_col_row_dimensions(
                 multi_scenario=self.Scenarios
             )
             #mplt = SetupSubplot(nrows=len(self.Scenarios), squeeze=False, ravel_axs=True)
@@ -138,45 +181,45 @@ class FLECCSOperation(MPlotDataHelper):
                 #####
                 #Pull storage volume.
                 #####
-                storage_volume_read = self["storage_Initial_Volume"].get(scenario)
-                try:
-                    storage_volume: pd.DataFrame = storage_volume_read.xs(
-                        zone_input, level=self.AGG_BY
-                    )
-                except KeyError:
-                    logger.warning(f"No storage resources in {zone_input}")
-                    outputs[zone_input] = MissingZoneData()
-                    continue
+                # storage_volume_read = self["storage_Initial_Volume"].get(scenario)
+                # try:
+                #     storage_volume: pd.DataFrame = storage_volume_read.xs(
+                #         zone_input, level=self.AGG_BY
+                #     )
+                # except KeyError:
+                #     logger.warning(f"No storage resources in {zone_input}")
+                #     outputs[zone_input] = MissingZoneData()
+                #     continue
 
-                # Isolate only FLECCS head storage objects (no actual storage plants and no tail).
-                storage_gen_units = storage_volume.index.get_level_values(
-                    "storage_resource"
-                )
-                if single_plant:
-                    single_stor = prop.split('_')[0] + '_head_' + prop.split('_')[1] + '_' + prop.split('_')[2]
-                    FLECCS_units = [unit for unit in storage_gen_units if single_stor in unit]
-                else:
-                    FLECCS_units = [unit for unit in storage_gen_units if f"{prop}_head" in unit]
+                # # Isolate only FLECCS head storage objects (no actual storage plants and no tail).
+                # storage_gen_units = storage_volume.index.get_level_values(
+                #     "storage_resource"
+                # )
+                # if single_plant:
+                #     single_stor = prop.split('_')[0] + '_head_' + prop.split('_')[1] + '_' + prop.split('_')[2]
+                #     FLECCS_units = [unit for unit in storage_gen_units if single_stor in unit]
+                # else:
+                #     FLECCS_units = [unit for unit in storage_gen_units if f"{prop}_head" in unit]
 
-                storage_volume = storage_volume.iloc[
-                    storage_volume.index.get_level_values("storage_resource").isin(
-                        FLECCS_units
-                    )
-                ]
-                storage_volume = storage_volume.groupby("timestamp").sum()
-                storage_volume.columns = ['Solvent storage volume \n (MWh equivalent)']
+                # storage_volume = storage_volume.iloc[
+                #     storage_volume.index.get_level_values("storage_resource").isin(
+                #         FLECCS_units
+                #     )
+                # ]
+                # storage_volume = storage_volume.groupby("timestamp").sum()
+                # storage_volume.columns = ['Solvent storage volume \n (MWh equivalent)']
 
-                ######
-                #Pull waterway flow
-                #####
+                # ######
+                # #Pull waterway flow
+                # #####
 
-                waterway_flow = self["waterway_Flow"].get(scenario)
-                if single_plant:
-                    single_ww = prop.split('_')[0] + '_waterway_' + prop.split('_')[1] + '_' + prop.split('_')[2]
-                    waterway_flow = waterway_flow.iloc[
-                        waterway_flow.index.get_level_values("waterway_name").isin([single_ww])
-                    ] #Downselect specific unit  
-                waterway_flow.columns = ['CCS load']
+                # waterway_flow = self["waterway_Flow"].get(scenario)
+                # if single_plant:
+                #     single_ww = prop.split('_')[0] + '_waterway_' + prop.split('_')[1] + '_' + prop.split('_')[2]
+                #     waterway_flow = waterway_flow.iloc[
+                #         waterway_flow.index.get_level_values("waterway_name").isin([single_ww])
+                #     ] #Downselect specific unit  
+                # waterway_flow.columns = ['CCS load']
 
                 ######
                 #Pull NGCC generation
@@ -184,7 +227,8 @@ class FLECCSOperation(MPlotDataHelper):
 
                 gen = self["generator_Generation"].get(scenario)
                 if single_plant:
-                    FLECCS_gens = prop.split('_')[0] + '_NGCC_' + prop.split('_')[1] + '_' + prop.split('_')[2]
+                    #FLECCS_gens = prop.split('_')[0] + '_NGCC_' + prop.split('_')[1] + '_' + prop.split('_')[2]
+                    FLECCS_gens = 'Georgia_Tech_NGCC_p58_12'
                 else:
                     all_gens = gen.index.get_level_values('gen_name').unique()
                     FLECCS_gens = [g for g in all_gens if 'Envergex_NGCC' in g]
@@ -209,24 +253,32 @@ class FLECCSOperation(MPlotDataHelper):
 
                 pump = self["generator_Pump_Load"].get(scenario)
                 FLECCS_pump = prop.split('_')[0] + '_pump_' + prop.split('_')[1] + '_' + prop.split('_')[2]
+                FLECCS_pump = 'Georgia_Tech_pump_p58_12'
                 pump = pump.iloc[
                     pump.index.get_level_values("gen_name").isin([FLECCS_pump])
                 ] #Downselect specific unit  
                 pump.columns = ['Storage charging']
+                pump.columns = ['DAC load']
 
 
                 if pd.notna(start_date_range):
-                    storage_volume, waterway_flow, NGCCgen, pump, price = self.set_timestamp_date_range(
-                        [storage_volume, waterway_flow, NGCCgen, pump, price],
+                    # storage_volume, waterway_flow, NGCCgen, pump, price = self.set_timestamp_date_range(
+                    #     [storage_volume, waterway_flow, NGCCgen, pump, price],
+                    #     start_date_range,
+                    #     end_date_range,
+                    # )
+                    NGCCgen, pump, price = set_timestamp_date_range(
+                        [NGCCgen, pump, price],
                         start_date_range,
                         end_date_range,
                     )
-                    if storage_volume.empty is True:
-                        logger.warning("No Storage resources in selected Date Range")
-                        continue
-                    if waterway_flow.empty is True:
-                        logger.warning("No waterway flow in selected Date Range")
-                        continue
+
+                    # if storage_volume.empty is True:
+                    #     logger.warning("No Storage resources in selected Date Range")
+                    #     continue
+                    # if waterway_flow.empty is True:
+                    #     logger.warning("No waterway flow in selected Date Range")
+                    #     continue
                     if NGCCgen.empty is True:
                         logger.warning("No NGCCgen in selected Date Range")
                         continue
@@ -237,8 +289,8 @@ class FLECCSOperation(MPlotDataHelper):
                 #df=pd.merge(NGCCgen,waterway_flow,on=['timestamp'])
                 df=pd.merge(NGCCgen,pump,on=['timestamp'])
                 #Subtract pump load from gen to get net power to the grid.
-                df['Net power to the grid'] = df['Net power to the grid'] - df['Storage charging']
-                df=df.merge(storage_volume,on=['timestamp'])
+                #df['Net power to the grid'] = df['Net power to the grid'] - df['Storage charging']
+                #df=df.merge(storage_volume,on=['timestamp'])
                 df=df.merge(price*10,on=['timestamp'])
 
                 # Data table of values to return to main program
