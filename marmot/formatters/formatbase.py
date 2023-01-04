@@ -4,11 +4,14 @@ Inherited by all model specific Process classes
 @author: Daniel Levie
 """
 
-import re
 import logging
-import pandas as pd
+import re
 from pathlib import Path
 from typing import Dict
+
+import pandas as pd
+
+from marmot.utils.error_handler import ReEDSColumnLengthError, ReEDSYearTypeConvertError
 
 logger = logging.getLogger("formatter." + __name__)
 
@@ -20,11 +23,7 @@ class Process:
     # unchanged names not included
     PROPERTY_MAPPING: dict = {}
     """Maps simulation model property names to Marmot property names"""
-    # Extra custom properties that are created based off existing properties.
-    # The dictionary keys are the existing properties and the values are the new
-    # property names and methods used to create it.
-    EXTRA_MARMOT_PROPERTIES: dict = {}
-    """Dictionary of Extra custom properties that are created based off existing properties."""
+
     # Conversion units dict, key values is a tuple of new unit name and
     # conversion multiplier
     UNITS_CONVERSION: dict = {
@@ -62,37 +61,32 @@ class Process:
     }
     """Dictionary to convert units to standard values used by Marmot"""
 
+    EXTRA_PROPERTIES_CLASS = "ExtraProperties"
+
     def __init__(
         self,
         input_folder: Path,
         output_file_path: Path,
         *_,
-        Region_Mapping : pd.DataFrame = pd.DataFrame(),
-        emit_names : pd.DataFrame = pd.DataFrame(),
+        region_mapping: pd.DataFrame = pd.DataFrame(),
+        emit_names_dict: dict = None,
         **__,
     ):
         """
         Args:
             input_folder (Path): Folder containing model input files.
             output_file_path (Path): Path to formatted h5 output file.
-            Region_Mapping (pd.DataFrame, optional): DataFrame to map custom
+            region_mapping (pd.DataFrame, optional): DataFrame to map custom
                 regions/zones to create custom aggregations.
                 Defaults to pd.DataFrame().
-            emit_names (pd.DataFrame, optional): DataFrame with 2 columns to rename
+            emit_names_dict (dict, optional): Dictionary to rename
                 emission names.
-                Defaults to pd.DataFrame().
+                Defaults to None.
         """
         self.input_folder = input_folder
         self.output_file_path = Path(output_file_path)
-        self.Region_Mapping = Region_Mapping.astype(str)
-        self.emit_names = emit_names
-
-        if not self.emit_names.empty:
-            self.emit_names_dict = (
-                self.emit_names[["Original", "New"]]
-                .set_index("Original")
-                .to_dict()["New"]
-            )
+        self.region_mapping = region_mapping.astype(str)
+        self.emit_names_dict = emit_names_dict
 
     @property
     def input_folder(self) -> Path:
@@ -122,12 +116,14 @@ class Process:
                 files.append(names.name)
 
             # List of all files in input folder in alpha numeric order
-            self._get_input_data_paths = sorted(files, key=lambda x: int(re.sub("\D", "0", x)))
-        return self._get_input_data_paths 
-    
+            self._get_input_data_paths = sorted(
+                files, key=lambda x: int(re.sub("\D", "0", x))
+            )
+        return self._get_input_data_paths
+
     @property
     def data_collection(self) -> Dict[str, Path]:
-        """Dictionary model names to full filename path 
+        """Dictionary model names to full filename path
 
         Returns:
             dict: data_collection {filename: fullpath}
@@ -162,26 +158,9 @@ class Process:
         """
         raise NotImplementedError("No default implementation of this functionality")
 
-    def report_prop_error(self, property: str, prop_class: str) -> pd.DataFrame:
-        """Outputs a warning message when the get_processed_data method
-        cannot find the specified property in the simulation model solution files.
-
-        Args:
-            property (str): property e.g Max Capacity, Generation etc.
-            prop_class (str): property class e.g Region, Generator, Zone etc.
-
-        Returns:
-            pd.DataFrame: Empty DataFrame.
-        """
-        logger.warning(
-            f'CAN NOT FIND "{prop_class} {property}". ' f'"{property}" DOES NOT EXIST'
-        )
-        logger.info("SKIPPING PROPERTY\n")
-        df = pd.DataFrame()
-        return df
-
-    def combine_models(self, model_list: list, 
-        drop_duplicates: bool = True) -> pd.DataFrame:
+    def combine_models(
+        self, model_list: list, drop_duplicates: bool = True
+    ) -> pd.DataFrame:
         """Combine temporally disaggregated model results.
 
         Will drop duplicate index entries by default.
@@ -202,4 +181,35 @@ class Process:
 
             if (origsize - df.size) > 0:
                 logger.info(f"Drop duplicates removed {origsize-df.size} rows")
+        return df
+
+
+class ReEDSPropertyColumnsBase:
+    """Contains methods common to all ReEDSPropertyColumns classes"""
+
+    def assign_column_names(self, df: pd.DataFrame, prop: str) -> pd.DataFrame:
+        """Assign column names to ReEDS DataFrame
+
+        Args:
+            df (pd.DataFrame): unprocessed ReEDS DataFrame
+            prop (str): Property name e.g gen_out, cap_out etc.
+
+        Raises:
+            ReEDSColumnLengthError: Raised when there is a length mismatch
+                between ReEDS df and ReEDSPropertyColumns
+            ReEDSYearTypeConvertError: Raised when ReEDS df.year column cannot
+                be convetred to type int
+
+        Returns:
+            pd.DataFrame: DataFrame with column names defined.
+        """
+        prop_columns = getattr(self, prop)
+        if len(df.columns) != len(prop_columns):
+            raise ReEDSColumnLengthError(df, prop_columns, prop, self.__class__)
+        else:
+            df.columns = prop_columns
+            try:
+                df.year = df.year.astype(int)
+            except ValueError:
+                raise ReEDSYearTypeConvertError(df, prop, self.__class__)
         return df

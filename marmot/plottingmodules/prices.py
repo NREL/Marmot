@@ -8,46 +8,79 @@ Prices plotted in $/MWh
 """
 
 import logging
+from pathlib import Path
+from typing import List
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from pathlib import Path
-import marmot.utils.mconfig as mconfig
 
-from marmot.plottingmodules.plotutils.plot_library import SetupSubplot
-from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
+import marmot.utils.mconfig as mconfig
+from marmot.plottingmodules.plotutils.plot_data_helper import (
+    PlotDataStoreAndProcessor,
+    set_facet_col_row_dimensions,
+    set_x_y_dimension,
+)
 from marmot.plottingmodules.plotutils.plot_exceptions import (
-    MissingInputData,
     DataSavedInModule,
     InputSheetError,
+    MissingInputData,
+)
+from marmot.plottingmodules.plotutils.plot_library import SetupSubplot
+from marmot.plottingmodules.plotutils.styles import ColorList
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    set_timestamp_date_range,
 )
 
 logger = logging.getLogger("plotter." + __name__)
-plot_data_settings = mconfig.parser("plot_data")
+plot_data_settings: dict = mconfig.parser("plot_data")
 
 
-class Prices(MPlotDataHelper):
+class Prices(PlotDataStoreAndProcessor):
     """Locational price analysis plots.
 
     The price.py module contains methods that are
     related to grid prices at regions, zones, nodes etc.
 
-    Prices inherits from the MPlotDataHelper class to assist
+    Prices inherits from the PlotDataStoreAndProcessor class to assist
     in creating figures.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        Zones: List[str],
+        Scenarios: List[str],
+        AGG_BY: str,
+        ordered_gen: List[str],
+        marmot_solutions_folder: Path,
+        color_list: list = ColorList().colors,
+        ylabels: List[str] = None,
+        xlabels: List[str] = None,
+        **kwargs,
+    ):
         """
         Args:
-            *args
-                Minimum required parameters passed to the MPlotDataHelper 
-                class.
-            **kwargs
-                These parameters will be passed to the MPlotDataHelper 
-                class.
+            Zones (List[str]): List of regions/zones to plot.
+            Scenarios (List[str]): List of scenarios to plot.
+            AGG_BY (str): Informs region type to aggregate by when creating plots.
+            ordered_gen (List[str]): Ordered list of generator technologies to plot,
+                order defines the generator technology position in stacked bar and area plots.
+            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
+            color_list (list, optional): List of colors to apply to non-gen plots.
+                Defaults to ColorList().colors.
+            ylabels (List[str], optional): y-axis labels for facet plots.
+                Defaults to None.
+            xlabels (List[str], optional): x-axis labels for facet plots.
+                Defaults to None.
         """
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(*args, **kwargs)
+        # Instantiation of PlotDataStoreAndProcessor
+        super().__init__(AGG_BY, ordered_gen, marmot_solutions_folder, **kwargs)
+
+        self.Zones = Zones
+        self.Scenarios = Scenarios
+        self.color_list = color_list
+        self.ylabels = ylabels
+        self.xlabels = xlabels
 
     def pdc_all_regions(
         self,
@@ -80,12 +113,12 @@ class Prices(MPlotDataHelper):
 
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, f"{agg}_Price", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -97,7 +130,7 @@ class Prices(MPlotDataHelper):
 
         region_number = len(self.Zones)
         # determine x,y length for plot
-        ncols, nrows = self.set_x_y_dimension(region_number)
+        ncols, nrows = set_x_y_dimension(region_number)
 
         grid_size = ncols * nrows
         # Used to calculate any excess axis to delete
@@ -116,7 +149,7 @@ class Prices(MPlotDataHelper):
                 price = self._process_data(self[f"{agg}_Price"], scenario, zone_input)
                 price = price.groupby(["timestamp"]).sum()
                 if pd.notna(start_date_range):
-                    price = self.set_timestamp_date_range(
+                    price = set_timestamp_date_range(
                         price, start_date_range, end_date_range
                     )
                 price.sort_values(by=scenario, ascending=False, inplace=True)
@@ -211,12 +244,12 @@ class Prices(MPlotDataHelper):
         else:
             agg = "region"
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, f"{agg}_Price", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -232,7 +265,7 @@ class Prices(MPlotDataHelper):
                 price = self._process_data(self[f"{agg}_Price"], scenario, zone_input)
                 price = price.groupby(["timestamp"]).sum()
                 if pd.notna(start_date_range):
-                    price = self.set_timestamp_date_range(
+                    price = set_timestamp_date_range(
                         price, start_date_range, end_date_range
                     )
                 price.sort_values(by=scenario, ascending=False, inplace=True)
@@ -244,12 +277,14 @@ class Prices(MPlotDataHelper):
 
             Data_Out = duration_curve.add_suffix(" ($/MWh)")
 
-            ncols = len(self.xlabels)
-            if ncols == 0:
+            if not self.xlabels:
                 ncols = 1
-            nrows = len(self.ylabels)
-            if nrows == 0:
+            else:
+                ncols = len(self.xlabels)
+            if not self.ylabels:
                 nrows = 1
+            else:
+                nrows = len(self.ylabels)
 
             # If the plot is not a facet plot, grid size should be 1x1
             if not facet:
@@ -336,12 +371,12 @@ class Prices(MPlotDataHelper):
         else:
             agg = "region"
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, f"{agg}_Price", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -356,7 +391,7 @@ class Prices(MPlotDataHelper):
                 price = self._process_data(self[f"{agg}_Price"], scenario, zone_input)
                 price = price.groupby(["timestamp"]).sum()
                 if pd.notna(start_date_range):
-                    price = self.set_timestamp_date_range(
+                    price = set_timestamp_date_range(
                         price, start_date_range, end_date_range
                     )
                 all_prices.append(price)
@@ -366,12 +401,14 @@ class Prices(MPlotDataHelper):
 
             Data_Out = timeseries.add_suffix(" ($/MWh)")
 
-            ncols = len(self.xlabels)
-            if ncols == 0:
+            if not self.xlabels:
                 ncols = 1
-            nrows = len(self.ylabels)
-            if nrows == 0:
+            else:
+                ncols = len(self.xlabels)
+            if not self.ylabels:
                 nrows = 1
+            else:
+                nrows = len(self.ylabels)
 
             # If the plot is not a facet plot, grid size should be 1x1
             if not facet:
@@ -452,12 +489,12 @@ class Prices(MPlotDataHelper):
         else:
             agg = "region"
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, f"{agg}_Price", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -468,7 +505,7 @@ class Prices(MPlotDataHelper):
         save_figures: Path = self.figure_folder.joinpath(f"{self.AGG_BY}_prices")
 
         region_number = len(self.Zones)
-        ncols, nrows = self.set_x_y_dimension(region_number)
+        ncols, nrows = set_x_y_dimension(region_number)
 
         grid_size = ncols * nrows
         # Used to calculate any excess axis to delete
@@ -489,7 +526,7 @@ class Prices(MPlotDataHelper):
                 price = self._process_data(self[f"{agg}_Price"], scenario, zone_input)
                 price = price.groupby(["timestamp"]).sum()
                 if pd.notna(start_date_range):
-                    price = self.set_timestamp_date_range(
+                    price = set_timestamp_date_range(
                         price, start_date_range, end_date_range
                     )
                 all_prices.append(price)
@@ -607,12 +644,12 @@ class Prices(MPlotDataHelper):
         Returns:
             DataSavedInModule: DataSavedInModule exception.
         """
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, "node_Price", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -638,7 +675,7 @@ class Prices(MPlotDataHelper):
             price = price.groupby(["timestamp", "node"]).sum()
             price.rename(columns={"values": scenario}, inplace=True)
             if pd.notna(start_date_range):
-                price = self.set_timestamp_date_range(
+                price = set_timestamp_date_range(
                     price, start_date_range, end_date_range
                 )
             if PDC:
@@ -651,7 +688,7 @@ class Prices(MPlotDataHelper):
 
         Data_Out = pdc.add_suffix(" ($/MWh)")
 
-        ncols, nrows = self.set_x_y_dimension(len(select_nodes))
+        ncols, nrows = set_x_y_dimension(len(select_nodes))
 
         # setup plot
         mplt = SetupSubplot(nrows, ncols, sharey=True, squeeze=False, ravel_axs=True)
@@ -772,12 +809,12 @@ class Prices(MPlotDataHelper):
         Returns:
             DataSavedInModule: DataSavedInModule exception.
         """
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, "node_Price", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -809,7 +846,7 @@ class Prices(MPlotDataHelper):
                 price = price.groupby(["timestamp"]).sum()
                 price.rename(columns={"values": scenario}, inplace=True)
                 if pd.notna(start_date_range):
-                    price = self.set_timestamp_date_range(
+                    price = set_timestamp_date_range(
                         price, start_date_range, end_date_range
                     )
 
@@ -828,8 +865,8 @@ class Prices(MPlotDataHelper):
             p_hist.columns = p_hist.columns.str.replace("_", " ")
             data_out = p_hist.add_suffix(" ($/MWh)")
 
-            ncols, nrows = self.set_facet_col_row_dimensions(
-                multi_scenario=self.Scenarios
+            ncols, nrows = set_facet_col_row_dimensions(
+                self.xlabels, self.ylabels, multi_scenario=self.Scenarios
             )
             grid_size = ncols * nrows
             # Used to calculate any excess axis to delete

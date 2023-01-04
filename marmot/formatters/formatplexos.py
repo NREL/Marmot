@@ -5,15 +5,18 @@ Inherits the Process class.
 @author: Daniel Levie
 """
 
-import re
-import pandas as pd
-import h5py
 import logging
-from typing import Dict
+import re
 from pathlib import Path
-from marmot.metamanagers.read_metadata import MetaData
+from typing import Dict
+
+import h5py
+import pandas as pd
+
 from marmot.formatters.formatbase import Process
-from marmot.formatters.formatextra import ExtraProperties
+from marmot.formatters.formatextra import ExtraPLEXOSProperties
+from marmot.metamanagers.read_metadata import MetaData
+from marmot.utils.error_handler import MissingH5PLEXOSDataError, PropertyNotFound
 
 try:
     # Import as Submodule
@@ -35,41 +38,8 @@ class ProcessPLEXOS(Process):
         "generator_Reserves_VO&M_Cost": "generator_Reserves_VOM_Cost",
     }
     """Maps simulation model property names to Marmot property names"""
-    # Extra custom properties that are created based off existing properties.
-    # The dictionary keys are the existing properties and the values are the new
-    # property names and methods used to create it.
-    EXTRA_MARMOT_PROPERTIES: dict = {
-        "generator_Generation": [
-            ("generator_Curtailment", ExtraProperties.plexos_generator_curtailment),
-            ("generator_Generation_Annual", ExtraProperties.annualize_property),
-        ],
-        "region_Unserved_Energy": [
-            ("region_Cost_Unserved_Energy", ExtraProperties.plexos_cost_unserved_energy)
-        ],
-        "zone_Unserved_Energy": [
-            ("zone_Cost_Unserved_Energy", ExtraProperties.plexos_cost_unserved_energy)
-        ],
-        "region_Load": [
-            ("region_Load_Annual", ExtraProperties.annualize_property),
-            ("region_Demand", ExtraProperties.plexos_demand),
-        ],
-        "zone_Load": [
-            ("zone_Load_Annual", ExtraProperties.annualize_property),
-            ("zone_Demand", ExtraProperties.plexos_demand),
-        ],
-        "generator_Pump_Load": [
-            ("generator_Pump_Load_Annual", ExtraProperties.annualize_property)
-        ],
-        "reserves_generators_Provision": [
-            ("reserves_generators_Provision_Annual", ExtraProperties.annualize_property)
-        ],
-        "generator_Curtailment": [
-            ("generator_Curtailment_Annual", ExtraProperties.annualize_property)
-        ],
-        "region_Demand": [("region_Demand_Annual", ExtraProperties.annualize_property)],
-        "zone_Demand": [("zone_Demand_Annual", ExtraProperties.annualize_property)],
-    }
-    """Dictionary of Extra custom properties that are created based off existing properties."""
+
+    EXTRA_PROPERTIES_CLASS = ExtraPLEXOSProperties
 
     def __init__(
         self,
@@ -77,7 +47,7 @@ class ProcessPLEXOS(Process):
         output_file_path: Path,
         *args,
         plexos_block: str = "ST",
-        Region_Mapping: pd.DataFrame = pd.DataFrame(),
+        region_mapping: pd.DataFrame = pd.DataFrame(),
         **kwargs,
     ):
         """
@@ -85,22 +55,28 @@ class ProcessPLEXOS(Process):
             input_folder (Path): Folder containing h5plexos h5 files.
             output_file_path (Path): Path to formatted h5 output file.
             plexos_block (str, optional): PLEXOS results type. Defaults to 'ST'.
-            Region_Mapping (pd.DataFrame, optional): DataFrame to map custom
+            region_mapping (pd.DataFrame, optional): DataFrame to map custom
                 regions/zones to create custom aggregations.
                 Defaults to pd.DataFrame().
             **kwargs
-                These parameters will be passed to the Process 
+                These parameters will be passed to the Process
                 class.
         """
         # Instantiation of Process Base class
         super().__init__(
-            input_folder, output_file_path, *args, Region_Mapping=Region_Mapping, **kwargs
+            input_folder,
+            output_file_path,
+            *args,
+            region_mapping=region_mapping,
+            **kwargs,
         )
         self.plexos_block = plexos_block
         self.metadata = MetaData(
-            self.input_folder, read_from_formatted_h5=False, Region_Mapping=Region_Mapping
+            self.input_folder,
+            read_from_formatted_h5=False,
+            region_mapping=region_mapping,
         )
-    
+
     @property
     def get_input_data_paths(self) -> list:
         """Gets a list of h5plexos input files within the scenario folders
@@ -115,7 +91,9 @@ class ProcessPLEXOS(Process):
                     files.append(names.name)  # Creates a list of only the hdf5 files
 
             # List of all hf files in hdf5 folder in alpha numeric order
-            self._get_input_data_paths = sorted(files, key=lambda x: int(re.sub("\D", "0", x)))
+            self._get_input_data_paths = sorted(
+                files, key=lambda x: int(re.sub("\D", "0", x))
+            )
         return self._get_input_data_paths
 
     @property
@@ -132,15 +110,17 @@ class ProcessPLEXOS(Process):
 
             self._data_collection = {}
             for file in self.get_input_data_paths:
-                self._data_collection[file] = PLEXOSSolution(
-                    self.input_folder.joinpath(file)
-                )
-                if not self.Region_Mapping.empty:
+                plx_file = PLEXOSSolution(self.input_folder.joinpath(file))
+                if not list(plx_file.h5file["data"].keys()):
+                    raise MissingH5PLEXOSDataError(file)
+
+                self._data_collection[file] = plx_file
+                if not self.region_mapping.empty:
                     regions.update(list(self.metadata.regions(file)["region"]))
 
-            if not self.Region_Mapping.empty:
-                if regions.issubset(self.Region_Mapping["region"]) is False:
-                    missing_regions = list(regions - set(self.Region_Mapping["region"]))
+            if not self.region_mapping.empty:
+                if regions.issubset(self.region_mapping["region"]) is False:
+                    missing_regions = list(regions - set(self.region_mapping["region"]))
                     logger.warning(
                         "The Following PLEXOS REGIONS are missing from "
                         "the 'region' column of your mapping file: "
@@ -226,8 +206,7 @@ class ProcessPLEXOS(Process):
                     object_class = prop_class
 
         except (ValueError, KeyError):
-            df = self.report_prop_error(prop, prop_class)
-            return df
+            raise PropertyNotFound(prop, prop_class)
 
         if self.plexos_block != "ST" and timescale == "interval":
             df = self.merge_timeseries_block_data(db, df)
@@ -237,16 +216,14 @@ class ProcessPLEXOS(Process):
             # Get original units from h5plexos file
             df_units = (
                 db.h5file[
-                    f"/data/{self.plexos_block}/{timescale}"
-                    f"/{object_class}/{prop}"
+                    f"/data/{self.plexos_block}/{timescale}" f"/{object_class}/{prop}"
                 ]
                 .attrs["units"]
                 .decode("UTF-8")
             )
         else:
             df_units = db.h5file[
-                f"/data/{self.plexos_block}/{timescale}"
-                f"/{object_class}/{prop}"
+                f"/data/{self.plexos_block}/{timescale}" f"/{object_class}/{prop}"
             ].attrs["unit"]
         # find unit conversion values
         converted_units = self.UNITS_CONVERSION.get(df_units, (df_units, 1))
@@ -296,9 +273,7 @@ class ProcessPLEXOS(Process):
         merged_data = merged_data.sort_index(level=["category", "name"])
         return merged_data
 
-    def df_process_generator(
-        self, df: pd.DataFrame, model_name: str
-    ) -> pd.DataFrame:
+    def df_process_generator(self, df: pd.DataFrame, model_name: str) -> pd.DataFrame:
         """Format PLEXOS Generator Class data.
 
         Args:
@@ -345,9 +320,9 @@ class ProcessPLEXOS(Process):
         else:
             idx_zone = idx_region
 
-        if not self.Region_Mapping.empty:
+        if not self.region_mapping.empty:
             region_gen_mapping = (
-                region_gen_cat_meta.merge(self.Region_Mapping, how="left", on="region")
+                region_gen_cat_meta.merge(self.region_mapping, how="left", on="region")
                 .sort_values(by=["tech", "gen_name"])
                 .drop(["region", "tech", "gen_name"], axis=1)
             )
@@ -392,11 +367,11 @@ class ProcessPLEXOS(Process):
 
         timeseries_len = len(df.index.get_level_values("timestamp").unique())
 
-        # checks if Region_Mapping contains data to merge, skips if empty
-        if not self.Region_Mapping.empty:
+        # checks if region_mapping contains data to merge, skips if empty
+        if not self.region_mapping.empty:
             region_gen_mapping = (
                 self.metadata.regions(model_name)
-                .merge(self.Region_Mapping, how="left", on="region")
+                .merge(self.region_mapping, how="left", on="region")
                 .drop(["region", "category"], axis=1)
             )
             region_gen_mapping.dropna(axis=1, how="all", inplace=True)
@@ -460,9 +435,7 @@ class ProcessPLEXOS(Process):
         df[0] = pd.to_numeric(df[0], downcast="float")
         return df
 
-    def df_process_interface(
-        self, df: pd.DataFrame, model_name: str
-    ) -> pd.DataFrame:
+    def df_process_interface(self, df: pd.DataFrame, model_name: str) -> pd.DataFrame:
         """Format PLEXOS PLEXOS Interface Class data.
 
         Args:
@@ -591,9 +564,7 @@ class ProcessPLEXOS(Process):
         df[0] = pd.to_numeric(df[0], downcast="float")
         return df
 
-    def df_process_constraint(
-        self, df: pd.DataFrame, model_name: str
-    ) -> pd.DataFrame:
+    def df_process_constraint(self, df: pd.DataFrame, model_name: str) -> pd.DataFrame:
         """Format PLEXOS Constraint Class data.
 
         Args:
@@ -616,9 +587,7 @@ class ProcessPLEXOS(Process):
         df[0] = pd.to_numeric(df[0], downcast="float")
         return df
 
-    def df_process_emission(
-        self, df: pd.DataFrame, model_name: str
-    ) -> pd.DataFrame:
+    def df_process_emission(self, df: pd.DataFrame, model_name: str) -> pd.DataFrame:
         """Format PLEXOS Emission Class data.
 
         Args:
@@ -675,39 +644,36 @@ class ProcessPLEXOS(Process):
                 on=["gen_name", "tech"],
             )
 
-        if not self.Region_Mapping.empty:
-            df = df.merge(self.Region_Mapping, how="left", on="region")
+        if not self.region_mapping.empty:
+            df = df.merge(self.region_mapping, how="left", on="region")
             df.dropna(axis=1, how="all", inplace=True)
 
-        if not self.emit_names.empty:
+        if self.emit_names_dict:
             # reclassify emissions as specified by user in mapping
             df["pollutant"] = pd.Categorical(
                 df["pollutant"].map(lambda x: self.emit_names_dict.get(x, x))
             )
-
         # remove categoricals (otherwise h5 save will fail)
         df = df.astype({"tech": "object", "pollutant": "object"})
 
         # Checks if all emissions categories have been identified and matched.
         # If not, lists categories that need a match
-        if not self.emit_names.empty:
-            if (
-                self.emit_names_dict != {}
-                and (
-                    set(df["pollutant"].unique()).issubset(
-                        self.emit_names["New"].unique()
-                    )
+        if (
+            self.emit_names_dict
+            and (
+                set(df["pollutant"].unique()).issubset(
+                    set(self.emit_names_dict.values())
                 )
-                is False
-            ):
-                missing_emit_cat = list(
-                    (set(df["pollutant"].unique()))
-                    - (set(self.emit_names["New"].unique()))
-                )
-                logger.warning(
-                    "The following emission objects do not have a "
-                    f"correct category mapping: {missing_emit_cat}\n"
-                )
+            )
+            is False
+        ):
+            missing_emit_cat = list(
+                (set(df["pollutant"].unique())) - (set(self.emit_names_dict.values()))
+            )
+            logger.warning(
+                "The following emission objects do not have a "
+                f"correct category mapping: {missing_emit_cat}\n"
+            )
 
         df_col = list(df.columns)
         df_col.remove(0)
@@ -747,9 +713,9 @@ class ProcessPLEXOS(Process):
                 self.metadata.zone_generators(model_name), how="left", on="gen_name"
             )
         # checks if Region_Maping contains data to merge, skips if empty (Default)
-        if not self.Region_Mapping.empty:
+        if not self.region_mapping.empty:
             # Merges in all Region Mappings
-            df = df.merge(self.Region_Mapping, how="left", on="region")
+            df = df.merge(self.region_mapping, how="left", on="region")
             df.dropna(axis=1, how="all", inplace=True)
 
         df.rename(columns={"name": "storage_resource"}, inplace=True)
@@ -828,9 +794,9 @@ class ProcessPLEXOS(Process):
         else:
             idx_zone = idx_region
 
-        if not self.Region_Mapping.empty:
+        if not self.region_mapping.empty:
             region_mapping = node_region_meta.merge(
-                self.Region_Mapping, how="left", on="region"
+                self.region_mapping, how="left", on="region"
             ).drop(["region", "node"], axis=1)
             region_mapping.dropna(axis=1, how="all", inplace=True)
 
@@ -855,9 +821,7 @@ class ProcessPLEXOS(Process):
         df[0] = pd.to_numeric(df[0], downcast="float")
         return df
 
-    def df_process_abatement(
-        self, df: pd.DataFrame, model_name: str
-    ) -> pd.DataFrame:
+    def df_process_abatement(self, df: pd.DataFrame, model_name: str) -> pd.DataFrame:
         """Format PLEXOS Abatement Class data.
 
         Args:
@@ -876,9 +840,7 @@ class ProcessPLEXOS(Process):
         df[0] = pd.to_numeric(df[0], downcast="float")
         return df
 
-    def df_process_batterie(
-        self, df: pd.DataFrame, model_name: str
-    ) -> pd.DataFrame:
+    def df_process_batterie(self, df: pd.DataFrame, model_name: str) -> pd.DataFrame:
         """
         Method for formatting data which comes form the PLEXOS Batteries Class
 
@@ -888,22 +850,23 @@ class ProcessPLEXOS(Process):
             Processed Output, single value column with multiindex.
 
         """
-        df = self.df.droplevel(level=["band", "property"])
+        df = df.droplevel(level=["band", "property"])
         df.index.rename("battery_name", level="name", inplace=True)
-        df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
+        df = df.reset_index()
+        region_batt_map = self.metadata.region_batteries(model_name)
+        df = df.merge(region_batt_map, on="battery_name", how="left")
         df_col = list(
             df.index.names
         )  # Gets names of all columns in df and places in list
-        df_col.insert(
-            0, df_col.pop(df_col.index("timestamp"))
-        )  # move timestamp to start of df
-        df = df.reorder_levels(df_col, axis=0)
+        df_col = list(df.columns)
+        df_col.remove(0)
+        df_col.insert(0, df_col.pop(df_col.index("timestamp")))
+        df.set_index(df_col, inplace=True)
         df[0] = pd.to_numeric(df[0], downcast="float")
+
         return df
 
-    def df_process_waterway(
-        self, df: pd.DataFrame, model_name: str
-    ) -> pd.DataFrame:
+    def df_process_waterway(self, df: pd.DataFrame, model_name: str) -> pd.DataFrame:
         """Format PLEXOS Waterway Class data.
 
         Args:

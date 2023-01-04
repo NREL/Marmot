@@ -31,7 +31,7 @@ def input_dir() -> Path:
     Returns:
         [pathlib.Path]: path to input dir
     """
-    input_folder = get_project_root().joinpath("input_files")
+    input_folder = get_project_root().parent.joinpath("input_files")
     return input_folder
 
 
@@ -52,6 +52,7 @@ Module_CLASS_MAPPING = {
     "ramping": "Ramping",
     "reserves": "Reserves",
     "sensitivities": "Sensitivities",
+    "storage": "Storage",
     "thermal_cap_reserve": "ThermalReserve",
     "total_generation": "TotalGeneration",
     "total_installed_capacity": "InstalledCapacity",
@@ -63,7 +64,8 @@ Module_CLASS_MAPPING = {
 INCORRECT_ENTRY_POINT = (
     "Beginning in Marmot v0.10.0, the abilty to run "
     "'python {}' directly has been removed. To run "
-    "the code as before, run 'python bin/run_marmot_plotter.py' from "
+    "the code as before, run 'python bin/run_marmot_plotter.py' or "
+    "'python bin/run_marmot_formatter.py' from "
     "Marmot Package directory"
 )
 
