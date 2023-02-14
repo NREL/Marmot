@@ -1,8 +1,9 @@
 Figure Output Name,Plot Graph,Plot Property,Y-Axis Max,Day Before,Day After,Timezone,Start date,End date,Timeseries Plot Resolution,Group by Scenario or Year-Scenario,Custom Data File,Marmot Module,Method
 Avg_Out_Committed,FALSE,,,,,EST,,,,Scenario,,capacity_factor,avg_output_when_committed
 Avg_Out_Committed_By_Year,FALSE,,,,,EST,2030,2050,,Year-Scenario,,capacity_factor,avg_output_when_committed
-Capacity_Factor,FALSE,,,,,EST,2030,2035,,Scenario,,capacity_factor,cf
+Capacity_Factor,FALSE,,,,,EST,,,,Scenario,,capacity_factor,cf
 Capacity_Factor_By_Year,FALSE,,,,,EST,2030,2050,,Year-Scenario,,capacity_factor,cf
+FLECCS_NGCC_Capacity_Factor,FALSE,,,,,,,,,,,capacity_factor,cf_singletech
 Time_at_Min_Gen,FALSE,,,,,,,,,Scenario,,capacity_factor,time_at_min_gen
 Capacity_Out_Stacked_annual,FALSE,,,,,EST,,,Annual ,,,capacity_out,capacity_out_stack
 Capacity_Out_Stacked,FALSE,,,,,EST,1/2/40,1/15/40,Interval,,,capacity_out,capacity_out_stack
@@ -20,7 +21,7 @@ Average_Diurnal_Curtailment_by_year,FALSE,,,,,EST,2040,2050,,Year-Scenario,,curt
 Total_Emissions_By_Gen_Type_CO2,FALSE,CO2,,,,,,,,Scenario,,emissions,total_emissions_by_type
 Total_Emissions_By_Gen_Type_CO2_and_year,FALSE,CO2,,,,,,,,Year-Scenario,,emissions,total_emissions_by_type
 Total_Emissions_By_Gen_Type_SO2,FALSE,SO2,,,,,,,,Scenario,,emissions,total_emissions_by_type
-Georgia_Tech_operation,TRUE,Georgia_Tech_p58_12,,,,,6/28/50,6/29/50,,,,fleccs_operation,FLECCS_timeseries_singleplant
+Georgia_Tech_operation,FALSE,Georgia_Tech_p58_12,,,,,6/28/50,6/29/50,,,,fleccs_operation,FLECCS_timeseries_singleplant
 Committed_Capacity_Stack_annual,FALSE,,,,,,,,Annual ,,,generation_stack,committed_stack
 Committed_Capacity_Stack,FALSE,,,,,EST,1/10/40,1/20/40,Interval,,,generation_stack,committed_stack
 Generation_Timeseries_Diff_annual,FALSE,,,,,EST,,,Annual ,,,generation_stack,gen_diff
@@ -50,7 +51,7 @@ Hydro_Versus_Continent_Net_Load,FALSE,,,,,,1/10/24,1/20/24,,,,hydro,hydro_contin
 Hydro_Versus_Net_Load,FALSE,,,,7,EST,,,,,,hydro,hydro_net_load
 Hydro_comparision_hourly,FALSE,,,,,,,,,,,hydro,hydro_timeseries
 All_Regions_Price_Duration_Curve,FALSE,,150,,,,,,,,,prices,pdc_all_regions
-Region_Price_Duration,FALSE,,,,,,1/10/24,1/20/24,,,,prices,region_pdc
+Region_Price_Duration,FALSE,,,,,,,,,,,prices,region_pdc
 Region_Price_Duration_Threshold,FALSE,,150,,,,1/10/24,1/20/24,,,,prices,region_pdc
 Region_Price_Timeseries,FALSE,,,,,,1/10/24,1/20/24,,,,prices,region_timeseries_price
 Region_Price_Timeseries_Threshold,FALSE,,150,,,,1/10/24,1/20/24,,,,prices,region_timeseries_price
@@ -59,6 +60,7 @@ Node_Price_Duration_Curve,FALSE,"101,202",,,,,,,,,,prices,node_pdc
 Node_Price_Timeseries,FALSE,"101,202",,,,EST,1/10/24,1/20/24,,,,prices,node_timeseries_price
 Node_Price_Histogram,FALSE,"101,202",,,,,1/10/24,1/20/24,,,,prices,node_price_hist
 Node_Price_Histogram_Difference,FALSE,"101,202",,,,,,,,,,prices,node_price_hist_diff
+National Load-Weighted Average Price,FALSE,,150,,,,,,,,,prices,national_lwavg_price
 Detailed_Total_Generation_Cost,FALSE,,,,,,,,,Scenario,,production_cost,detailed_gen_cost
 Detailed_Total_Generation_Cost_by_year,FALSE,,,,,,2030,2050,,Year-Scenario,,production_cost,detailed_gen_cost
 Detailed_Total_Generation_Cost_Diff,FALSE,,,,,,2030,2050,,Scenario,,production_cost,detailed_gen_cost_diff
@@ -98,7 +100,7 @@ Individual_Battery_Generation_duration_curve,FALSE,GVEA BESS,,,,,,,,,,storage,in
 Individual_Battery_Load_duration_curve,FALSE,GVEA BESS,,,,,,,,,,storage,ind_bat
 Thermal_Capacity_Reserves,FALSE,,,,,EST,,,Interval,,,thermal_cap_reserve,thermal_cap_reserves
 Thermal_Capacity_Reserves_by_year,FALSE,,,,,EST,,,Annual,,,thermal_cap_reserve,thermal_cap_reserves
-Total_Generation,FALSE,,,,,,2021,2021,,Scenario,,total_generation,total_gen
+Total_Generation,TRUE,,,,,,,,,Scenario,,total_generation,total_gen
 Total_Generation_by_year,FALSE,,,,,,,,,Year-Scenario,,total_generation,total_gen
 Total_Generation_Monthly,FALSE,,,,,EST,1/2/40,2040,,,,total_generation,total_gen_monthly
 Monthly_Wind_Solar,FALSE,,,,,EST,2048,2050,,,,total_generation,monthly_vre_generation
