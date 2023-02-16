@@ -116,7 +116,12 @@ class Prices(PlotDataStoreAndProcessor):
         # List of properties needed by the plot, properties are a set of tuples and
         # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
-        properties = [(True, f"{agg}_Price", self.Scenarios)]
+        properties = [
+            (True, f"{agg}_Price", self.Scenarios),
+            #(True, "generator_Installed_Capacity", self.Scenarios),
+            (True, f"generator_Installed_Capacity", self.Scenarios),
+            (True, f"generator_Available_Capacity", self.Scenarios),
+        ]
 
         # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
@@ -148,19 +153,40 @@ class Prices(PlotDataStoreAndProcessor):
             for scenario in self.Scenarios:
                 price = self._process_data(self[f"{agg}_Price"], scenario, zone_input)
                 price = price.groupby(["timestamp"]).sum()
+                #ww added
+                Cap = self._process_data(self[f"generator_Available_Capacity"], scenario, zone_input)
+                #Cap = Cap.xs(zone_input, level=self.AGG_BY)
+                #Cap = Cap.rename(columns={0: "Installed Capacity (MW)"})
+                Cap = Cap.groupby(["timestamp"]).sum()
+                #price = pd.merge(price,Cap,on=["timestamp"])
+                #global price
+                #price = [price / Cap for price, Cap in zip(price, Cap)]
+                #(price.astype(int)* Cap.astype(int)) /
+                #(price.astype(int)/ sum(Cap.astype(int)) )*Cap.astype(int)
+                price = (price.astype(int)/ (Cap.astype(int).sum()) )*Cap.astype(int)
                 if pd.notna(start_date_range):
-                    price = set_timestamp_date_range(
-                        price, start_date_range, end_date_range
+                    #ww changed
+                    price,cap = self.set_timestamp_date_range(
+                        [Cap,price], start_date_range, end_date_range
                     )
-                price.sort_values(by=scenario, ascending=False, inplace=True)
+                #price.sort_values(by=scenario, ascending=False, inplace=True)
                 price.reset_index(drop=True, inplace=True)
                 all_prices.append(price)
+                #all_prices.append(Cap)
 
+                
+            #Cap["year"] = Cap.index.get_level_values("timestamp").year.astype(str
+
+            
             duration_curve = pd.concat(all_prices, axis=1)
             duration_curve.columns = duration_curve.columns.str.replace("_", " ")
 
+
             data_out = duration_curve.copy()
             data_out.columns = [zone_input + "_" + str(col) for col in data_out.columns]
+            #ww added
+            #global cap 
+            #data_out.columns = sum(data_out*cap)/sum(cap)
             data_table.append(data_out)
 
             color_dict = dict(zip(duration_curve.columns, self.color_list))
@@ -194,12 +220,12 @@ class Prices(PlotDataStoreAndProcessor):
         Data_Table_Out = Data_Table_Out.add_suffix(" ($/MWh)")
 
         fig.savefig(
-            save_figures.joinpath("Price_Duration_Curve_All_Regions.svg"),
+            save_figures.joinpath("Price_weight_average.svg"),
             dpi=600,
             bbox_inches="tight",
         )
         Data_Table_Out.to_csv(
-            save_figures.joinpath("Price_Duration_Curve_All_Regions.csv")
+            save_figures.joinpath("Price_weight_average.csv")
         )
         outputs = DataSavedInModule()
         return outputs
@@ -268,8 +294,12 @@ class Prices(PlotDataStoreAndProcessor):
                     price = set_timestamp_date_range(
                         price, start_date_range, end_date_range
                     )
-                price.sort_values(by=scenario, ascending=False, inplace=True)
+                if 'values' in price.columns:
+                    price.sort_values(by='values', ascending=False, inplace=True)
+                else:
+                    price.sort_values(by=scenario, ascending=False, inplace=True)             
                 price.reset_index(drop=True, inplace=True)
+                price.columns = [scenario]
                 all_prices.append(price)
 
             duration_curve = pd.concat(all_prices, axis=1)
@@ -326,6 +356,91 @@ class Prices(PlotDataStoreAndProcessor):
             if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
             outputs[zone_input] = {"fig": fig, "data_table": Data_Out}
+        return outputs
+
+    def national_lwavg_price(
+        self,
+        figure_name: str = None,
+        y_axis_max: float = None,
+        timezone: str = "",
+        start_date_range: str = None,
+        end_date_range: str = None,
+        **_,
+    ):   
+
+        outputs: dict={}
+
+        def weighted_avg(df,values,weights):
+            return sum(df[values] * df[values] / df[weights].sum())
+
+        properties = [(True, "region_Price", self.Scenarios),
+                      (True, "region_Demand", self.Scenarios)]
+
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
+
+        if 1 in check_input_data:
+            return MissingInputData()
+
+        df_all_list = []
+        for scenario in self.Scenarios:
+            logger.info(f"Scenario = {scenario}")
+            price = self['region_Price'].get(scenario)
+            demand = self['region_Demand'].get(scenario)
+            avgs = pd.merge(price,demand,on=['timestamp','region'])
+            avgs.columns = ['price','demand']
+            avgs = avgs.reset_index()
+            avgs.set_index('timestamp',inplace=True)
+            df = pd.DataFrame(index = avgs.index.unique(),
+                            columns = [scenario])
+            for ts in df.index:
+                avg_hour = avgs[avgs.index == ts]
+                lwavg = np.average(a = avg_hour['price'],weights = avg_hour['demand'])
+                df.loc[ts,scenario] = lwavg
+        
+            df.sort_values(by=scenario, ascending=False, inplace=True)             
+            df.reset_index(drop=True, inplace=True)
+            df_all_list.append(df)
+        
+        df_all = pd.concat(df_all_list,axis = 1)
+
+        # setup plot
+        nrows = 1
+        ncols = 1
+        mplt = SetupSubplot(
+            nrows, ncols, sharey=True, squeeze=False, ravel_axs=True
+        )
+        fig, axs = mplt.get_figure()
+        plt.subplots_adjust(wspace=0.05, hspace=0.2)
+
+        n = 0
+        for column in df_all:
+            axs[n].plot(
+                df_all[column],
+                linewidth=1,
+                label=column,
+                alpha=1,
+            )
+            if pd.notna(y_axis_max):
+                axs[n].set_ylim(bottom=0, top=float(y_axis_max))
+                axs[n].set_xlim(0, len(df_all))
+
+        mplt.add_legend()
+        plt.ylabel(
+            "Price ($/MWh)",
+            color="black",
+            rotation="vertical",
+            labelpad=20,
+        )
+        plt.xlabel("Intervals", color="black", rotation="horizontal", labelpad=20)
+        mplt.add_main_title('Nation-wide load weighted average')
+
+        fig.savefig(self.figure_folder.joinpath("Country_prices", f"{figure_name}.svg"), 
+                    dpi=600, bbox_inches='tight')
+        df_all.to_csv(self.figure_folder.joinpath("Country_prices", f"{figure_name}.csv"))
+
+        outputs = DataSavedInModule()
         return outputs
 
     def region_timeseries_price(
@@ -673,7 +788,7 @@ class Prices(PlotDataStoreAndProcessor):
             price: pd.DataFrame = self["node_Price"][scenario]
             price = price.loc[(slice(None), select_nodes), :]
             price = price.groupby(["timestamp", "node"]).sum()
-            price.rename(columns={"values": scenario}, inplace=True)
+            price.rename(columns={0: scenario}, inplace=True)
             if pd.notna(start_date_range):
                 price = set_timestamp_date_range(
                     price, start_date_range, end_date_range
@@ -844,7 +959,7 @@ class Prices(PlotDataStoreAndProcessor):
                     continue
 
                 price = price.groupby(["timestamp"]).sum()
-                price.rename(columns={"values": scenario}, inplace=True)
+                price.rename(columns={0: scenario}, inplace=True)
                 if pd.notna(start_date_range):
                     price = set_timestamp_date_range(
                         price, start_date_range, end_date_range
@@ -956,5 +1071,5 @@ class Prices(PlotDataStoreAndProcessor):
     ) -> pd.DataFrame:
         df: pd.DataFrame = data_collection.get(scenario)
         df = df.xs(zone_input, level=self.AGG_BY)
-        df = df.rename(columns={"values": scenario})
+        df = df.rename(columns={0: scenario})
         return df

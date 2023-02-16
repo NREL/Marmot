@@ -27,11 +27,27 @@ from marmot.plottingmodules.plotutils.timeseries_modifiers import (
     set_timestamp_date_range,
 )
 
+from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, DataSavedInModule,
+            UnderDevelopment, InputSheetError, MissingMetaData, UnsupportedAggregation, MissingZoneData)
+
+
 logger = logging.getLogger("plotter." + __name__)
 plot_data_settings: dict = mconfig.parser("plot_data")
 xdimension: int = mconfig.parser("figure_size", "xdimension")
 ydimension: int = mconfig.parser("figure_size", "ydimension")
 
+gen_names_dict = pd.read_csv('/Users/mschwarz/Marmot_local/Marmot/input_files/mapping_folder/gen_names_Standard.csv')
+gen_names_dict = gen_names_dict.set_index(gen_names_dict.columns[0]).squeeze().to_dict()
+
+# self = CapacityFactor(
+#     Zones = ['USA'],
+#     AGG_BY = 'Country',
+#     #Scenarios = ['Linde_Ref150', 'Envergex_Ref150', 'CSU_Ref150', 'Rivers8_Ref150', 'Pitt_Ref150', 'MIT_Ref150', 'GA_Ref150', 'Luna_Ref150'],
+#     Scenarios = ['8Rivers_Ref150','CSU_Ref150'],
+#     ordered_gen = ['Nuclear', 'Coal', 'Gas-CC', 'Gas-CC CCS', 'Gas-CT', 'Gas', 'Gas-Steam', 'Dual Fuel', 'DualFuel', 'Oil-Gas-Steam', 'Oil', 'Hydro', 'Ocean', 'Geothermal', 'Biomass', 'Biopower', 'Other', 'VRE', 'Wind', 'Offshore Wind', 'OffshoreWind', 'Solar', 'PV', 'dPV', 'CSP', 'PV-Battery', 'Battery', 'OSW-Battery', 'PHS', 'Storage', 'Net Imports', 'Curtailment', 'curtailment', 'Demand', 'Deamand + Storage Charging'],
+#     marmot_solutions_folder = '/Users/mschwarz/Library/CloudStorage/OneDrive-NREL',
+#     gen_names_dict = gen_names_dict
+# )
 
 class CapacityFactor(PlotDataStoreAndProcessor):
     """Generator capacity factor plots.
@@ -139,13 +155,15 @@ class CapacityFactor(PlotDataStoreAndProcessor):
                 Gen = self.rename_gen_techs(Gen)
                 Gen.tech = Gen.tech.astype("category")
                 Gen.tech = Gen.tech.cat.set_categories(self.ordered_gen)
-                Gen = Gen[Gen["tech"].isin(self.gen_categories.thermal)]
+                Gen = Gen[Gen["tech"].isin(self.thermal_gen_cat)]
                 Gen.set_index("timestamp", inplace=True)
-                Gen = Gen.rename(columns={"values": "Output (MWh)"})
+                Gen = Gen.rename(columns={0: "Output (MWh)"})
 
                 Cap: pd.DataFrame = self["generator_Installed_Capacity"].get(scenario)
                 Cap = Cap.xs(zone_input, level=self.AGG_BY)
-                Cap = Cap.rename(columns={"values": "Installed Capacity (MW)"})
+                Cap = Cap.rename(columns={0: "Installed Capacity (MW)"})
+
+                #Totable = gen.merga(cap,on['gen_name','region','zone','State','country'],how='left')
 
                 if pd.notna(start_date_range):
                     Cap, Gen = set_timestamp_date_range(
@@ -204,14 +222,23 @@ class CapacityFactor(PlotDataStoreAndProcessor):
                                     )
                                     cap = sgt["Installed Capacity (MW)"].mean()
                                     # Calculate CF
-                                    cf = total_gen / (cap * duration_hours)
+                                    #ww changed from cf = total_gen / (cap * duration_hours) to cf = total_gen / (cap)
+                                    cf = total_gen / (cap)
                                     cfs.append(cf)
                                     caps.append(cap)
 
                             # Find average "CF" (average output when committed)
                             # for this technology, weighted by capacity.
+                            #ww changed from cf = np.average(cfs, weights=caps)
                             cf = np.average(cfs, weights=caps)
                             CF[tech_name] = cf
+                            #ww added
+                            ##PCC
+                            #CF["CCS off"] = CF["CCS off"] - CF["CCS on"]
+                            ##storage
+                            CF["Gas-CC CCS-flex-storage off"] = CF["Gas-CC CCS-flex-storage off"] - CF["Gas-CC CCS-flex-storage on"]
+                            ##DAC
+                            #CF["DAC&CCS-off"] = CF["DAC&CCS-off"] - CF["DAC&CCS-on"]
                     cf_chunks.append(CF)
 
             if cf_chunks:
@@ -229,11 +256,12 @@ class CapacityFactor(PlotDataStoreAndProcessor):
                 CF_all_scenarios.T,
                 color=self.color_list,
                 custom_tick_labels=list(CF_all_scenarios.columns),
-                ytick_major_fmt="percent",
+                #ytick_major_fmt="percent",
             )
 
             ax.set_ylabel(
-                "Average Output When Committed", color="black", rotation="vertical"
+                #ww changed:"Average Output When Committed", color="black", rotation="vertical" 
+                "MIT Annual Operational Hours(h)", color="black", rotation="vertical"
             )
 
             if plot_data_settings["plot_title_as_region"]:
@@ -335,7 +363,8 @@ class CapacityFactor(PlotDataStoreAndProcessor):
                     Cap, scenario, groupby=scenario_groupby
                 ).sum()
                 # Calculate CF
-                CF = Total_Gen / (Cap * duration_hours)
+                #ww changed from  CF = Total_Gen / (Cap * duration_hours)
+                CF = duration_hours
                 cf_scen_chunks.append(CF)
 
             if cf_scen_chunks:
@@ -443,18 +472,18 @@ class CapacityFactor(PlotDataStoreAndProcessor):
 
                 Min = Min.reset_index()
                 Min = Min.set_index("gen_name")
-                Min = Min.rename(columns={"values": "Hours at Minimum"})
+                Min = Min.rename(columns={0: "Hours at Minimum"})
 
                 Gen = Gen.reset_index()
                 Gen.tech = Gen.tech.astype("category")
                 Gen.tech = Gen.tech.cat.set_categories(self.ordered_gen)
-                Gen = Gen.rename(columns={"values": "Output (MWh)"})
-                Gen = Gen[~Gen["tech"].isin(self.gen_categories.vre)]
+                Gen = Gen.rename(columns={0: "Output (MWh)"})
+                Gen = Gen[~Gen["tech"].isin(self.vre_gen_cat)]
                 Gen.index = Gen.timestamp
 
                 Caps = Cap.groupby("gen_name").mean()
                 Caps.reset_index()
-                Caps = Caps.rename(columns={"values": "Installed Capacity (MW)"})
+                Caps = Caps.rename(columns={0: "Installed Capacity (MW)"})
                 Min = pd.merge(Min, Caps, on="gen_name")
 
                 # Find how many hours each generator was operating, for the denominator of the % time at min gen.
@@ -505,4 +534,84 @@ class CapacityFactor(PlotDataStoreAndProcessor):
                 mplt.add_main_title(zone_input)
 
             outputs[zone_input] = {"fig": fig, "data_table": Data_Table_Out}
+        return outputs
+
+
+    def cf_singletech(
+        self,
+        start_date_range: str = None,
+        end_date_range: str = None,
+        scenario_groupby: str = "Scenario",
+        **_,
+    ):
+        """Creates a barplot of generator capacity factor for a single technology.
+
+        Each scenario is plotted by a different bar.
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent
+                data from.
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+            scenario_groupby (str, optional): Specifies whether to group data by Scenario
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
+                plotting data which covers multiple years such as ReEDS.
+                Defaults to Scenario.
+
+                .. versionadded:: 0.10.0
+
+        Returns:
+            dict: dictionary containing the created plot and its data table.
+        """
+
+        outputs: dict = {}
+
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
+        # scenarios must be a list.
+        properties = [
+            (True, "generator_Generation", self.Scenarios),
+            (True, "generator_Installed_Capacity", self.Scenarios),
+        ]
+
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor
+        # dictionary with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
+
+        if 1 in check_input_data:
+            return MissingInputData()
+
+        CF_all_scenarios = pd.DataFrame(index=self.Scenarios,columns = ['CF'])
+
+        for scenario in self.Scenarios:
+
+            print(scenario)
+            Gen = self["generator_Generation"].get(scenario)
+            all_techs = Gen.index.get_level_values('tech').unique()
+            fleccs_ngcc = [tech for tech in all_techs if 'gas-cc-ccs-f' in tech and 'NGCC' in tech]
+
+            Gen_NGCC = Gen.xs(fleccs_ngcc[0],level='tech')
+
+            Cap = self["generator_Installed_Capacity"].get(scenario)
+            Cap_NGCC = Cap.xs(fleccs_ngcc[0],level='tech')
+
+            cf = Gen_NGCC.sum() / (Cap_NGCC.sum() * 8760)
+            CF_all_scenarios.loc[scenario]['CF'] = cf.squeeze()
+
+        mplt = PlotLibrary(figsize=(xdimension * 1.5, ydimension * 1.5))
+        fig, ax = mplt.get_figure()
+
+        mplt.barplot(
+            CF_all_scenarios, color=self.color_list, ytick_major_fmt="percent"
+        )
+
+        ax.set_ylabel("Base NGCC capacity Factor", color="black", rotation="vertical")
+
+        scenario_type = self.Scenarios[0].split('_')[1]
+
+        fig.savefig(f'/Users/mschwarz/CCS_local/Figures_Output/Country_capacity_factor/NGCC_CF_{scenario_type}.svg',dpi=600,bbox_inches="tight")
+
+        outputs = DataSavedInModule()
         return outputs
