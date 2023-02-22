@@ -765,7 +765,7 @@ class TotalGeneration(PlotDataStoreAndProcessor):
 
                 axs[i].margins(x=0.01)
                 axs[i].set_xlabel("")
-
+                axs[i].set_title(scenario)
                 if plot_as_percnt:
                     mplt.set_yaxis_major_tick_format(tick_format="percent", sub_pos=i)
 
