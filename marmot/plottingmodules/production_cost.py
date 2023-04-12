@@ -29,6 +29,19 @@ plot_data_settings: dict = mconfig.parser("plot_data")
 logger = logging.getLogger("plotter." + __name__)
 
 
+# gen_names_dict = pd.read_csv('/Users/mschwarz/Marmot_local/Marmot/input_files/mapping_folder/gen_names.csv')
+# gen_names_dict = gen_names_dict.set_index(gen_names_dict.columns[0]).squeeze().to_dict()
+
+# self = SystemCosts(
+#     Zones = ['USA'],
+#     AGG_BY = 'Country',
+#     Scenarios = ['ACDH90by35_2035','LimDH90by35_2035','LCCDH90by35_2035','VSCDH90by35_2035'],
+#     ordered_gen = ['Nuclear', 'Coal', 'Gas-CC', 'Gas-CC CCS', 'Gas-CT', 'Gas', 'Gas-Steam', 'Dual Fuel', 'DualFuel', 'Oil-Gas-Steam', 'Oil', 'Hydro', 'Ocean', 'Geothermal', 'Biomass', 'Biopower', 'Other', 'VRE', 'Wind', 'Offshore Wind', 'OffshoreWind', 'Solar', 'PV', 'dPV', 'CSP', 'PV-Battery', 'Battery', 'OSW-Battery', 'PHS', 'Storage', 'Net Imports', 'Curtailment', 'curtailment', 'Demand', 'Deamand + Storage Charging'],
+#     marmot_solutions_folder = '/Users/mschwarz/NTPS_local',
+#     gen_names_dict = gen_names_dict
+# )
+
+
 class SystemCosts(PlotDataStoreAndProcessor):
     """System operating cost plots.
 
@@ -507,8 +520,11 @@ class SystemCosts(PlotDataStoreAndProcessor):
                             break
 
                     if prop_name[1] == "generator_VOM_Cost":
-                        df["values"].to_numpy()[df["values"].to_numpy() < 0] = 0
-                    df = df.rename(columns={"values": prop_name[1]})
+                        try:
+                            df["values"].to_numpy()[df["values"].to_numpy() < 0] = 0
+                        except:
+                            df[0].to_numpy()[df[0].to_numpy() < 0] = 0
+                    df = df.rename(columns={"values": prop_name[1],0: prop_name[1]})
                     data_frames_lst.append(df)
 
                 detailed_gen_cost = pd.concat(data_frames_lst, axis=1).fillna(0)
@@ -1124,8 +1140,11 @@ class SystemCosts(PlotDataStoreAndProcessor):
                             break
 
                     if prop_name[1] == "generator_VOM_Cost":
-                        df["values"].to_numpy()[df["values"].to_numpy() < 0] = 0
-                    df = df.rename(columns={"values": prop_name[1]})
+                        try:
+                            df["values"].to_numpy()[df["values"].to_numpy() < 0] = 0
+                        except:
+                            df[0].to_numpy()[df[0].to_numpy() < 0] = 0
+                    df = df.rename(columns={"values": prop_name[1], 0: prop_name[1]})
                     data_frames_lst.append(df)
 
                 detailed_gen_cost = pd.concat(data_frames_lst, axis=1).fillna(0)
