@@ -107,7 +107,7 @@ Next activate the marmot-env::
 
 Finally initiate the plotter using the following command::
 
-      python run_marmot_plotter.pt
+      python run_marmot_plotter.py
 
 
 Marmot will now begin creating your figures and will print messages to the terminal.
