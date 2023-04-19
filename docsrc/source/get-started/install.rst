@@ -72,6 +72,31 @@ located in the Marmot repository.
 
          conda list
 
+Set up a conda environment - LINUX
+----------------------------------
+
+If you are running Marmot on the HPC - or another Linux platform - the marmot-env10.yml file may not solve. Instead use
+ <https://github.com/NREL/Marmot/blob/main/marmot-linux.yml>`_, 
+located in the Marmot repository.
+
+.. note::
+  The following example uses the provided **Windows** conda environment.
+
+- To create and activate a new conda environment open a terminal and follow these steps:
+
+   1. Create the environment from the ``marmot-env.yml`` file, if you are not in the Marmot directory, use the full file path to the file::
+
+         conda env create -f marmot-linux.yml
+
+   2. Activate the new environment::
+   
+         conda activate marmot-linux
+
+   3. The required modules should now be ready to use, to verify the environment was setup correctly type::
+
+         conda list
+
+
 Alternative dependecies installation
 ---------------------------------------
 
