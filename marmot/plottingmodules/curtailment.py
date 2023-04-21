@@ -148,6 +148,7 @@ class Curtailment(PlotDataStoreAndProcessor):
             PV_Curtailment_DC = pd.DataFrame()
 
             for scenario in self.Scenarios:
+                missing_data=0
                 logger.info(f"Scenario = {scenario}")
 
                 re_curt = self[f"generator_{curtailment_prop}"].get(scenario)
@@ -157,6 +158,7 @@ class Curtailment(PlotDataStoreAndProcessor):
                     re_curt = re_curt.xs(zone_input, level=self.AGG_BY)
                 except KeyError:
                     logger.info(f"No curtailment in {zone_input}")
+                    missing_data+=1
                     continue
 
                 re_curt = self.df_process_gen_inputs(re_curt)
@@ -629,15 +631,16 @@ class Curtailment(PlotDataStoreAndProcessor):
             vre_curt_chunks = []
             avail_gen_chunks = []
 
-            for scenario in self.Scenarios:
+            for idx,scenario in enumerate(self.Scenarios):
+                no_curt_scens_idx=[]
                 logger.info(f"Scenario = {scenario}")
 
                 vre_curt = self[f"generator_{curtailment_prop}"].get(scenario)
                 try:
                     vre_curt = vre_curt.xs(zone_input, level=self.AGG_BY)
                 except KeyError:
-                    logger.info(f"No curtailment in {zone_input}")
-                    continue
+                    logger.info(f"No curtailment in {zone_input} for {scenario}")
+                    no_curt_scens_idx.append(idx)
 
                 vre_curt = self.df_process_gen_inputs(vre_curt)
                 # If using Marmot's curtailment property
@@ -653,7 +656,7 @@ class Curtailment(PlotDataStoreAndProcessor):
                 try:  # Check for regions missing all generation.
                     avail_gen = avail_gen.xs(zone_input, level=self.AGG_BY)
                 except KeyError:
-                    logger.info(f"No available generation in {zone_input}")
+                    logger.info(f"No available generation in {zone_input} for {scenario}")
                     continue
 
                 avail_gen = self.df_process_gen_inputs(avail_gen)
@@ -720,6 +723,9 @@ class Curtailment(PlotDataStoreAndProcessor):
 
             # Set x-tick labels
             if self.custom_xticklabels:
+                # Remove scenarios labels with no curtailment, as they got dropped from the df.
+                if len(no_curt_scens_idx) > 0: 
+                    for idx in no_curt_scens_idx: self.custom_xticklabels.pop(idx)
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Curtailment_out.index

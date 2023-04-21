@@ -5,8 +5,8 @@ year,generator,cap_out,TRUE,Nameplate power capacity (Max Capacity x Units),gene
 interval,generator,curt_out,TRUE,Output from each generator by timestep,generator_Curtailment
 year,region,load_rt,TRUE,Total load within a region,region_Load
 interval,line,tran_flow_power,TRUE,"Flow from ""Node From"" to ""Node To""",line_Flow
-interval,line,losses_tran_h,TRUE,"losses from ""Node From"" to ""Node To""",line_Losses
-year,line,tran_out,TRUE,Transmission capacity,line_Import Limit
+interval,line,losses_tran_h,FALSE,"losses from ""Node From"" to ""Node To""",line_Losses
+year,line,tran_out,FALSE,Transmission capacity,line_Import Limit
 interval,generator,stor_in,TRUE,The amount that a generator charges during a timestep.,generator_Pump Load
 year,storage,stor_energy_cap,TRUE,Storage Energy Capacity,storage_Max Volumne
 year,emission,emit_r,TRUE,Total emissions production,emissions_Production

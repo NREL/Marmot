@@ -50,6 +50,18 @@ shift_leapday: bool = mconfig.parser("shift_leapday")
 xdimension = mconfig.parser("figure_size", "xdimension")
 ydimension = mconfig.parser("figure_size", "ydimension")
 
+# gen_names_dict = pd.read_csv('/Users/mschwarz/Marmot_local/Marmot/input_files/mapping_folder/gen_names.csv')
+# gen_names_dict = gen_names_dict.set_index(gen_names_dict.columns[0]).squeeze().to_dict()
+
+# self = Transmission(
+#     Zones = ['PJM'],
+#     AGG_BY = 'zone',
+#     Scenarios = ['VSCDH90by35_2035_PLEXOS'],
+#     ordered_gen = ['Nuclear', 'Coal', 'Gas-CC', 'Gas-CC CCS', 'Gas-CT', 'Gas', 'Gas-Steam', 'Dual Fuel', 'DualFuel', 'Oil-Gas-Steam', 'Oil', 'Hydro', 'Ocean', 'Geothermal', 'Biomass', 'Biopower', 'Other', 'VRE', 'Wind', 'Offshore Wind', 'OffshoreWind', 'Solar', 'PV', 'dPV', 'CSP', 'PV-Battery', 'Battery', 'OSW-Battery', 'PHS', 'Storage', 'Net Imports', 'Curtailment', 'curtailment', 'Demand', 'Deamand + Storage Charging'],
+#     marmot_solutions_folder = '/Users/mschwarz/NTPS_local',
+#     gen_names_dict = gen_names_dict
+# )
+
 
 class Transmission(PlotDataStoreAndProcessor):
     """System transmission plots.

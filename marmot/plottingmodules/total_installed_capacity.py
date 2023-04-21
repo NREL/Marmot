@@ -163,7 +163,7 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
                     logger.warning(f"No installed capacity in {zone_input}")
                     outputs[zone_input] = MissingZoneData()
                     continue
-                if 'PLEXOS' in scenario:
+                if 'PLEXOS' in scenario and 'ReEDS_pvb1' in Total_Installed_Capacity.index.get_level_values('tech').unique():
                     Total_Installed_Capacity.drop('ReEDS_pvb1',level = 'tech',axis = 0,inplace = True)
 
                 Total_Installed_Capacity = self.df_process_gen_inputs(

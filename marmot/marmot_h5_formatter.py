@@ -12,8 +12,7 @@ it can be read into the marmot_plot_main.py file
 # =======================================================================================
 # Import Python Libraries
 # =======================================================================================
-
-import sys
+#%%
 import time
 from pathlib import Path
 from typing import Union
@@ -41,7 +40,7 @@ from marmot.utils.loggersetup import SetupLogger
 pd.set_option("display.max_colwidth", 1000)
 
 formatter_settings = mconfig.parser("formatter_settings")
-
+#%%
 
 class MarmotFormat(SetupLogger):
     """Main module class to be instantiated to run the formatter.
@@ -420,6 +419,36 @@ class MarmotFormat(SetupLogger):
                             time.sleep(60)
                             save_attempt += 1
 
+                    #####
+                    #Aggregate data to each level of geographic area,
+                    #as defined in the region mapping file.
+                    #####
+                    # for agg in self.region_mapping.columns:
+                    #     agg_property_key_name = row["group"] + "_" + prop_underscore + "_" + agg + "_agg"
+                    #     df_agg = 
+
+                    #     if "values" not in df.columns:
+                    #         df = df.rename(columns={0: "values"})
+                            
+                    #     if set(["timestamp", "tech"]).issubset(df.index.names):
+                    #         df = df.reset_index(["timestamp", "tech"])
+                    #     df = df.groupby(["timestamp", "tech"], as_index=False, observed=True).sum()
+                    #     # Rename generator technologies
+                    #     df = self.rename_gen_techs(df)
+                    #     # If duplicate rows remain, groupby again
+                    #     if df[["timestamp", "tech"]].duplicated().any():
+                    #         df = df.groupby(["timestamp", "tech"], as_index=False, observed=True).sum()
+                    #     # Filter for only data in ordered_gen
+                    #     df = df[df.tech.isin(self.ordered_gen)]
+                    #     # Check if data is not already categorical
+                    #     if df.tech.dtype.name != "category":
+                    #         df.tech = df.tech.astype("category")
+                    #     df.tech = df.tech.cat.set_categories(self.ordered_gen, ordered=True)
+                    #     df = df.sort_values(["tech"])
+                    #     df = df.pivot(index="timestamp", columns="tech", values="values")
+                    #     return df.fillna(0)
+
+
                     # Calculate any extra properties
                     extra_prop_functions = extraprops_init.get_extra_properties(
                         property_key_name
@@ -546,7 +575,7 @@ def main():
     if pd.isna(
         Marmot_user_defined_inputs.loc["Marmot_Solutions_folder", "User_defined_value"]
     ):
-        marmot_solutions_folder = None
+        marmot_solutions_folder = model_solutions_folder
     else:
         marmot_solutions_folder = Marmot_user_defined_inputs.loc[
             "Marmot_Solutions_folder", "User_defined_value"
@@ -595,14 +624,14 @@ def main():
     # ===================================================================================
     # Loop through scenarios in list
     # ===================================================================================
-
+   # Scenario_name = Scenario_List[0]
     for Scenario_name in Scenario_List:
 
         initiate = MarmotFormat(
             Scenario_name,
             model_solutions_folder,
             properties_file,
-            marmot_solutions_folder=marmot_solutions_folder,
+            marmot_solutions_folder,
             region_mapping=region_mapping,
             emit_names_dict=emit_names_dict,
         )

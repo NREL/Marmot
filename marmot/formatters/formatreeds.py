@@ -91,10 +91,13 @@ class ProcessReEDS(Process):
             read_from_formatted_h5=True,
             region_mapping=region_mapping,
         )
-
         if process_subset_years:
             # Ensure values are ints
-            process_subset_years = list(map(int, process_subset_years))
+            if isinstance(process_subset_years,list):
+                process_subset_years = [int(year) for year in process_subset_years]
+            else:
+                process_subset_years = int(process_subset_years)
+            #process_subset_years = list(map(int, process_subset_years))
             logger.info(f"Processing subset of ReEDS years: {process_subset_years}")
         self.process_subset_years = process_subset_years
 
@@ -252,7 +255,10 @@ class ProcessReEDS(Process):
             df = process_att(df, prop, str(gdx_file))
 
         if self.process_subset_years:
-            df = df.loc[df.year.isin(self.process_subset_years)]
+            if isinstance(self.process_subset_years,list):
+                df = df.loc[df.year.isin(self.process_subset_years)]
+            else:
+                df = df.loc[df.year == self.process_subset_years]
 
         if timescale == "interval":
             df = self.merge_timeseries_block_data(df)

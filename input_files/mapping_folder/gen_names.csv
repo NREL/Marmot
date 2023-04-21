@@ -358,3 +358,16 @@ ReEDS_gas-cc-ccs_mod,Gas-CC CCS
 ReEDS_beccs_mod,BECCS
 ReEDS_gas-cc-ccs_max,Gas-CC CCS
 ReEDS_beccs_max,BECCS
+CoalOldUns_coal-CCS_mod,Coal CCS
+CoalOldUns_coal-CCS_max,Coal CCS
+CoalOldScr_coal-CCS_mod,Coal CCS
+CoalOldScr_coal-CCS_max,Coal CCS
+coal-new_coal-CCS_mod,Coal CCS
+coal-new_coal-CCS_max,Coal CCS
+distpv,dPV
+wind-ofs_8,Offshore Wind
+csp2_11,CSP
+Coal-IGCC_coal-CCS_mod,Coal CCS
+Coal-IGCC_coal-CCS_mod,Coal CCS
+Gas-CC_Gas-CC-CCS_mod,Gas-CC CCS
+Gas-CC_Gas-CC-CCS_mod,Gas-CC CCS
