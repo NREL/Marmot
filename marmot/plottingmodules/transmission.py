@@ -1951,6 +1951,7 @@ class Transmission(MPlotDataHelper):
         Each scenarios is plotted on a separate Facet plot.
         Figures and data tables are returned to plot_main
         """
+
         outputs = self._region_region_interchange(self.Scenarios, **kwargs)
         return outputs
 
@@ -1969,7 +1970,8 @@ class Transmission(MPlotDataHelper):
         return outputs
 
     def _region_region_interchange(self, scenario_type: str, plot_scenario: bool = True, 
-                                    timezone: str = "", **_):
+                                    timezone: str = "", start_date_range: str = None,
+                                    end_date_range: str = None, **_):
         """#TODO: Finish Docstring 
 
         Args:
@@ -2037,6 +2039,13 @@ class Transmission(MPlotDataHelper):
                     rr_int['child']  = rr_int['child'].map(agg_region_mapping)
 
                 rr_int_agg = rr_int.groupby(['timestamp','parent','child'],as_index=True).sum()
+                if pd.notna(start_date_range):
+                    rr_int_agg = self.set_timestamp_date_range(
+                        rr_int_agg, start_date_range, end_date_range
+                    )
+                    if rr_int_agg.empty is True:
+                        logger.warning("No flows in selected Date Range")
+                        continue
                 rr_int_agg.rename(columns = {'values':'flow (MW)'}, inplace = True)
                 rr_int_agg = rr_int_agg.reset_index()
 
