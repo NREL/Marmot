@@ -5,54 +5,117 @@ This code creates generation stack plots.
 @author: Daniel Levie
 """
 
-import logging
-import pandas as pd
 import datetime as dt
-import numpy as np
+import logging
+from pathlib import Path
+from typing import List
+
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 
 import marmot.utils.mconfig as mconfig
-
-from marmot.plottingmodules.plotutils.plot_library import SetupSubplot, PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import (
+    GenCategories,
+    PlotDataStoreAndProcessor,
+    set_facet_col_row_dimensions,
+)
 from marmot.plottingmodules.plotutils.plot_exceptions import (
-    MissingInputData,
-    UnderDevelopment,
     InputSheetError,
+    MissingInputData,
     MissingZoneData,
+)
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary, SetupSubplot
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    adjust_for_leapday,
+    set_timestamp_date_range,
 )
 
 logger = logging.getLogger("plotter." + __name__)
 plot_data_settings: dict = mconfig.parser("plot_data")
 shift_leapday: bool = mconfig.parser("shift_leapday")
 load_legend_names: dict = mconfig.parser("load_legend_names")
+curtailment_prop: str = mconfig.parser("plot_data", "curtailment_property")
+include_batteries: bool = mconfig.parser("plot_data","include_explicit_battery_objects")
 
+# gen_names_dict = pd.read_csv('/Users/mschwarz/Marmot_local/Marmot/input_files/mapping_folder/gen_names.csv')
+# gen_names_dict = gen_names_dict.set_index(gen_names_dict.columns[0]).squeeze().to_dict()
 
-class GenerationStack(MPlotDataHelper):
+# self = GenerationStack(
+#     Zones = ['CAISO'],
+#     AGG_BY = 'BA',
+#     Scenarios = ['ACDH90by35_2035', 'LimDH90by35_2035'],
+#     ordered_gen = ['Nuclear', 'Coal', 'Gas-CC', 'Gas-CC CCS', 'Gas-CT', 'Gas', 'Gas-Steam', 'Dual Fuel', 'DualFuel', 'Oil-Gas-Steam', 'Oil', 'Hydro', 'Ocean', 'Geothermal', 'Biomass', 'Biopower', 'Other', 'VRE', 'Wind', 'Offshore Wind', 'OffshoreWind', 'Solar', 'PV', 'dPV', 'CSP', 'PV-Battery', 'Battery', 'OSW-Battery', 'PHS', 'Storage', 'Net Imports', 'Curtailment', 'curtailment', 'Demand', 'Deamand + Storage Charging'],
+#     marmot_solutions_folder = '/Users/mschwarz/NTPS_local',
+#     gen_names_dict = gen_names_dict
+# )
+
+class GenerationStack(PlotDataStoreAndProcessor):
     """Timeseries generation stacked area plots.
 
     The generation_stack.py contains methods that are
     related to the timeseries generation of generators,
     in a stacked area format.
 
-    GenerationStack inherits from the MPlotDataHelper class to assist
+    GenerationStack inherits from the PlotDataStoreAndProcessor class to assist
     in creating figures.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        Zones: List[str],
+        Scenarios: List[str],
+        AGG_BY: str,
+        ordered_gen: List[str],
+        marmot_solutions_folder: Path,
+        gen_categories: GenCategories = GenCategories(),
+        marmot_color_dict: dict = None,
+        scenario_diff: List[str] = None,
+        ylabels: List[str] = None,
+        xlabels: List[str] = None,
+        **kwargs,
+    ):
         """
         Args:
-            *args
-                Minimum required parameters passed to the MPlotDataHelper 
-                class.
-            **kwargs
-                These parameters will be passed to the MPlotDataHelper 
-                class.
+            Zones (List[str]): List of regions/zones to plot.
+            Scenarios (List[str]): List of scenarios to plot.
+            AGG_BY (str): Informs region type to aggregate by when creating plots.
+            ordered_gen (List[str]): Ordered list of generator technologies to plot,
+                order defines the generator technology position in stacked bar and area plots.
+            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
+            gen_categories (GenCategories): Instance of GenCategories class, groups generator technologies
+                into defined categories.
+                Deafults to GenCategories.
+            marmot_color_dict (dict, optional): Dictionary of colors to use for
+                generation technologies.
+                Defaults to None.
+            scenario_diff (List[str], optional): 2 value list, used to compare 2
+                scenarios.
+                Defaults to None.
+            ylabels (List[str], optional): y-axis labels for facet plots.
+                Defaults to None.
+            xlabels (List[str], optional): x-axis labels for facet plots.
+                Defaults to None.
         """
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(*args, **kwargs)
+        # Instantiation of PlotDataStoreAndProcessor
+        super().__init__(AGG_BY, ordered_gen, marmot_solutions_folder, **kwargs)
 
-        self.curtailment_prop = mconfig.parser("plot_data", "curtailment_property")
+        self.Zones = Zones
+        self.Scenarios = Scenarios
+        self.gen_categories = gen_categories
+        if marmot_color_dict is None:
+            self.marmot_color_dict = GeneratorColorDict.set_random_colors(
+                self.ordered_gen
+            ).color_dict
+        else:
+            self.marmot_color_dict = marmot_color_dict
+        self.ylabels = ylabels
+        self.xlabels = xlabels
+        if scenario_diff is None:
+            self.scenario_diff = [""]
+        else:
+            self.scenario_diff = scenario_diff
 
     def committed_stack(
         self,
@@ -90,22 +153,19 @@ class GenerationStack(MPlotDataHelper):
         """
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
-            (
-                True,
-                f"generator_Installed_Capacity{data_resolution}",
-                [self.Scenarios[0]],
-            ),
+            (True, f"generator_Installed_Capacity{data_resolution}", self.Scenarios),
             (True, f"generator_Generation{data_resolution}", self.Scenarios),
             (True, f"generator_Units_Generating{data_resolution}", self.Scenarios),
             (True, f"generator_Available_Capacity{data_resolution}", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
+
         check_input_data = self.get_formatted_data(properties)
 
         # Checks if all data required by plot is available, if 1 in list required data is missing
@@ -171,7 +231,7 @@ class GenerationStack(MPlotDataHelper):
                 # unitconversion based off peak generation hour, only checked once
                 if i == 0:
                     unitconversion = self.capacity_energy_unitconversion(
-                        thermal_commit_cap
+                        thermal_commit_cap, self.Scenarios
                     )
                 thermal_commit_cap = thermal_commit_cap / unitconversion["divisor"]
 
@@ -188,7 +248,7 @@ class GenerationStack(MPlotDataHelper):
                 avail_cap = avail_cap / unitconversion["divisor"]
 
                 if pd.notna(start_date_range):
-                    thermal_commit_cap, gen, avail_cap = self.set_timestamp_date_range(
+                    thermal_commit_cap, gen, avail_cap = set_timestamp_date_range(
                         [thermal_commit_cap, gen, avail_cap],
                         start_date_range,
                         end_date_range,
@@ -210,17 +270,17 @@ class GenerationStack(MPlotDataHelper):
                         commit_cap = avail_cap[tech]
 
                     axs[j, i].plot(
-                        gen_one_tech, alpha=0, color=self.PLEXOS_color_dict[tech]
+                        gen_one_tech, alpha=0, color=self.marmot_color_dict[tech]
                     )[0]
                     axs[j, i].fill_between(
                         gen_one_tech.index,
                         gen_one_tech,
                         0,
-                        color=self.PLEXOS_color_dict[tech],
+                        color=self.marmot_color_dict[tech],
                         alpha=0.5,
                     )
                     if tech != "Hydro":
-                        axs[j, i].plot(commit_cap, color=self.PLEXOS_color_dict[tech])
+                        axs[j, i].plot(commit_cap, color=self.marmot_color_dict[tech])
 
                     mplt.set_yaxis_major_tick_format(sub_pos=(j, i))
                     axs[j, i].margins(x=0.01)
@@ -306,22 +366,19 @@ class GenerationStack(MPlotDataHelper):
         # Main loop for gen_stack
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, f"generator_Generation{data_resolution}", self.Scenarios),
-            (
-                False,
-                f"generator_{self.curtailment_prop}{data_resolution}",
-                self.Scenarios,
-            ),
+            (False, f"generator_{curtailment_prop}{data_resolution}", self.Scenarios),
             (False, f"{agg}_Load{data_resolution}", self.Scenarios),
             (False, f"{agg}_Demand{data_resolution}", self.Scenarios),
             (False, f"{agg}_Unserved_Energy{data_resolution}", self.Scenarios),
+            #(False, f"batterie_Generation{data_resolution}", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -334,8 +391,8 @@ class GenerationStack(MPlotDataHelper):
             logger.info(f"Zone = {zone_input}")
 
             # sets up x, y dimensions of plot
-            ncols, nrows = self.set_facet_col_row_dimensions(
-                multi_scenario=self.Scenarios
+            ncols, nrows = set_facet_col_row_dimensions(
+                self.xlabels, self.ylabels, multi_scenario=self.Scenarios
             )
             grid_size = ncols * nrows
             # Used to calculate any excess axis to delete
@@ -366,7 +423,7 @@ class GenerationStack(MPlotDataHelper):
                         f"generator_Generation{data_resolution}"
                     ].get(scenario)
                     if shift_leapday:
-                        stacked_gen_df = self.adjust_for_leapday(stacked_gen_df)
+                        stacked_gen_df = adjust_for_leapday(stacked_gen_df)
                     stacked_gen_df = stacked_gen_df.xs(zone_input, level=self.AGG_BY)
                 except KeyError:
                     logger.warning(f"No generation in {zone_input}")
@@ -375,46 +432,31 @@ class GenerationStack(MPlotDataHelper):
                 stacked_gen_df = self.df_process_gen_inputs(stacked_gen_df)
 
                 # Insert Curtailment into gen stack if it exists in database
-                stacked_curt_df: pd.DataFrame = self[
-                    f"generator_{self.curtailment_prop}{data_resolution}"
-                ].get(scenario)
+                stacked_gen_df = self.add_curtailment_to_df(
+                    stacked_gen_df,
+                    scenario,
+                    zone_input,
+                    self.gen_categories.vre,
+                    data_resolution=data_resolution,
+                )
+
                 curtailment_name = self.gen_names_dict.get("Curtailment", "Curtailment")
-                if not stacked_curt_df.empty:
-                    if shift_leapday:
-                        stacked_curt_df = self.adjust_for_leapday(stacked_curt_df)
-                    if (
-                        zone_input
-                        in stacked_curt_df.index.get_level_values(self.AGG_BY).unique()
-                    ):
-                        stacked_curt_df = stacked_curt_df.xs(
-                            zone_input, level=self.AGG_BY
-                        )
-                        stacked_curt_df = self.df_process_gen_inputs(stacked_curt_df)
-                        # If using Marmot's curtailment property
-                        if self.curtailment_prop == "Curtailment":
-                            stacked_curt_df = self.assign_curtailment_techs(
-                                stacked_curt_df
-                            )
-                        stacked_curt_df = stacked_curt_df.sum(axis=1)
-                        stacked_curt_df[
-                            stacked_curt_df < 0.05
-                        ] = 0  # Remove values less than 0.05 MW
-                        # Insert curtailment into
-                        stacked_gen_df.insert(
-                            len(stacked_gen_df.columns),
-                            column=curtailment_name,
-                            value=stacked_curt_df,
-                        )
-                        stacked_gen_df = stacked_gen_df.fillna(0)
-                        # Calculates Net Load by removing variable gen + curtailment
-                        vre_gen_cat = self.gen_categories.vre + [curtailment_name]
-                    else:
-                        vre_gen_cat = self.gen_categories.vre
+                if curtailment_name in stacked_gen_df.columns:
+                    vre_gen_cat = self.gen_categories.vre + [curtailment_name]
                 else:
                     vre_gen_cat = self.gen_categories.vre
+                # Insert battery generation.
+                if include_batteries:
+                    stacked_gen_df = self.add_battery_gen_to_df(
+                        stacked_gen_df,
+                        scenario,
+                        zone_input,
+                        data_resolution=data_resolution,
+                    )
 
+                # Zoom in on selected date range.
                 if pd.notna(start_date_range):
-                    stacked_gen_df = self.set_timestamp_date_range(
+                    stacked_gen_df = set_timestamp_date_range(
                         stacked_gen_df, start_date_range, end_date_range
                     )
                     if stacked_gen_df.empty is True:
@@ -429,46 +471,18 @@ class GenerationStack(MPlotDataHelper):
                 net_load = net_load.sum(axis=1)
                 net_load = net_load.rename("Net Load")
 
-                # Extra optional properties
-                extra_data_frames = []
+                # Process extra optional properties
                 extra_property_names = [
                     f"{agg}_Load{data_resolution}",
                     f"{agg}_Demand{data_resolution}",
                     f"{agg}_Unserved_Energy{data_resolution}",
                 ]
-                # Get and process extra properties
-                for ext_prop in extra_property_names:
-                    df: pd.DataFrame = self[ext_prop].get(scenario)
-                    if (
-                        df.empty
-                        or not plot_data_settings["include_stackplot_load_lines"]
-                    ):
-                        date_index = pd.date_range(
-                            start="2010-01-01", periods=1, freq="H", name="timestamp"
-                        )
-                        df = pd.DataFrame(data=[0], index=date_index, columns=["values"])
-                    else:
-                        df = df.xs(zone_input, level=self.AGG_BY)
-                        df = df.groupby(["timestamp"]).sum()
-                    df = df.rename(columns={"values": ext_prop})
-                    extra_data_frames.append(df)
-
-                extra_plot_data = pd.concat(extra_data_frames, axis=1).fillna(0)
-
-                if (
-                    extra_plot_data[f"{agg}_Unserved_Energy{data_resolution}"] == 0
-                ).all() == False:
-                    extra_plot_data["Load-Unserved_Energy"] = (
-                        extra_plot_data[f"{agg}_Demand{data_resolution}"]
-                        - extra_plot_data[f"{agg}_Unserved_Energy{data_resolution}"]
-                    )
-
-                extra_plot_data = extra_plot_data.rename(
-                    columns={
-                        f"{agg}_Load{data_resolution}": "Total Load",
-                        f"{agg}_Unserved_Energy{data_resolution}": "Unserved Energy",
-                        f"{agg}_Demand{data_resolution}": "Total Demand",
-                    }
+                extra_plot_data = self.process_extra_properties(
+                    extra_property_names,
+                    scenario,
+                    zone_input,
+                    agg,
+                    data_resolution=data_resolution,
                 )
 
                 # Adjust extra data to generator date range
@@ -484,7 +498,7 @@ class GenerationStack(MPlotDataHelper):
                 # unitconversion based off peak generation hour, only checked once
                 if i == 0:
                     unitconversion = self.capacity_energy_unitconversion(
-                        stacked_gen_df, sum_values=True
+                        stacked_gen_df, self.Scenarios, sum_values=True
                     )
                 # Convert units
                 stacked_gen_df = stacked_gen_df / unitconversion["divisor"]
@@ -516,7 +530,7 @@ class GenerationStack(MPlotDataHelper):
                         stacked_gen_df = stacked_gen_df.loc[start_date:end_date]
                         extra_plot_data = extra_plot_data.loc[start_date:end_date]
 
-                if mconfig.parser("plot_data", "include_stackplot_net_imports"):
+                if plot_data_settings["include_stackplot_net_imports"]:
                     stacked_gen_df = self.include_net_imports(
                         stacked_gen_df,
                         extra_plot_data["Total Load"],
@@ -548,7 +562,7 @@ class GenerationStack(MPlotDataHelper):
 
                 mplt.stackplot(
                     stacked_gen_df,
-                    self.PLEXOS_color_dict,
+                    self.marmot_color_dict,
                     labels=stacked_gen_df.columns,
                     sub_pos=i,
                 )
@@ -657,12 +671,12 @@ class GenerationStack(MPlotDataHelper):
         """
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, f"generator_Generation{data_resolution}", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -676,10 +690,10 @@ class GenerationStack(MPlotDataHelper):
 
             Total_Gen_Stack_1: pd.DataFrame = self[
                 f"generator_Generation{data_resolution}"
-            ].get(self.Scenario_Diff[0])
+            ].get(self.scenario_diff[0])
             if Total_Gen_Stack_1 is None:
                 logger.warning(
-                    f"Scenario_Diff '{self.Scenario_Diff[0]}'' is not in data. "
+                    f"scenario_diff '{self.scenario_diff[0]}'' is not in data. "
                     "Ensure User Input Sheet is set up correctly!"
                 )
                 outputs = InputSheetError()
@@ -701,10 +715,10 @@ class GenerationStack(MPlotDataHelper):
 
             Total_Gen_Stack_2: pd.DataFrame = self[
                 f"generator_Generation{data_resolution}"
-            ].get(self.Scenario_Diff[1])
+            ].get(self.scenario_diff[1])
             if Total_Gen_Stack_2 is None:
                 logger.warning(
-                    f"Scenario_Diff '{self.Scenario_Diff[1]}' is not in data. "
+                    f"scenario_diff '{self.scenario_diff[1]}' is not in data. "
                     "Ensure User Input Sheet is set up correctly!"
                 )
                 outputs = InputSheetError()
@@ -717,12 +731,12 @@ class GenerationStack(MPlotDataHelper):
                 Total_Gen_Stack_2, columns=self.ordered_gen
             ).fillna(0)
 
-            logger.info(f"Scenario 1 = {self.Scenario_Diff[0]}")
-            logger.info(f"Scenario 2 = {self.Scenario_Diff[1]}")
+            logger.info(f"Scenario 1 = {self.scenario_diff[0]}")
+            logger.info(f"Scenario 2 = {self.scenario_diff[1]}")
             Gen_Stack_Out = Total_Gen_Stack_1 - Total_Gen_Stack_2
 
             if pd.notna(start_date_range):
-                Gen_Stack_Out = self.set_timestamp_date_range(
+                Gen_Stack_Out = set_timestamp_date_range(
                     Gen_Stack_Out, start_date_range, end_date_range
                 )
                 if Gen_Stack_Out.empty is True:
@@ -740,7 +754,9 @@ class GenerationStack(MPlotDataHelper):
             # Reverses order of columns
             Gen_Stack_Out = Gen_Stack_Out.iloc[:, ::-1]
 
-            unitconversion = self.capacity_energy_unitconversion(Gen_Stack_Out)
+            unitconversion = self.capacity_energy_unitconversion(
+                Gen_Stack_Out, self.Scenarios
+            )
             Gen_Stack_Out = Gen_Stack_Out / unitconversion["divisor"]
 
             # Data table of values to return to main program
@@ -753,11 +769,11 @@ class GenerationStack(MPlotDataHelper):
                 ax.plot(
                     Gen_Stack_Out[column],
                     linewidth=3,
-                    color=self.PLEXOS_color_dict[column],
+                    color=self.marmot_color_dict[column],
                     label=column,
                 )
 
-            mplt.add_main_title(f"{self.Scenario_Diff[0]} vs. {self.Scenario_Diff[1]}")
+            mplt.add_main_title(f"{self.scenario_diff[0]} vs. {self.scenario_diff[1]}")
             ax.set_ylabel(
                 f"Generation Difference ({unitconversion['units']})",
                 color="black",

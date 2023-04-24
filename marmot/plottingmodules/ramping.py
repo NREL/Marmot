@@ -7,44 +7,73 @@ This module creates bar plot of the total volume of generator starts in MW,GW,et
 """
 
 import logging
+from pathlib import Path
+from typing import List
+
 import pandas as pd
 
 import marmot.utils.mconfig as mconfig
-
-from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import (
+    GenCategories,
+    PlotDataStoreAndProcessor,
+)
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
     UnderDevelopment,
 )
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
+from marmot.plottingmodules.plotutils.styles import ColorList
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    set_timestamp_date_range,
+)
 
 logger = logging.getLogger("plotter." + __name__)
-plot_data_settings = mconfig.parser("plot_data")
+plot_data_settings: dict = mconfig.parser("plot_data")
 
 
-class Ramping(MPlotDataHelper):
+class Ramping(PlotDataStoreAndProcessor):
     """Generator start and ramping plots.
 
     The ramping.py module contains methods that are
     related to the ramp periods of generators.
 
-    Ramping inherits from the MPlotDataHelper class to assist
+    Ramping inherits from the PlotDataStoreAndProcessor class to assist
     in creating figures.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        Zones: List[str],
+        Scenarios: List[str],
+        AGG_BY: str,
+        ordered_gen: List[str],
+        marmot_solutions_folder: Path,
+        gen_categories: GenCategories = GenCategories(),
+        color_list: list = ColorList().colors,
+        **kwargs,
+    ):
         """
         Args:
-            *args
-                Minimum required parameters passed to the MPlotDataHelper 
-                class.
-            **kwargs
-                These parameters will be passed to the MPlotDataHelper 
-                class.
+            Zones (List[str]): List of regions/zones to plot.
+            Scenarios (List[str]): List of scenarios to plot.
+            AGG_BY (str): Informs region type to aggregate by when creating plots.
+            ordered_gen (List[str]): Ordered list of generator technologies to plot,
+                order defines the generator technology position in stacked bar and area plots.
+            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
+            gen_categories (GenCategories): Instance of GenCategories class, groups generator technologies
+                into defined categories.
+                Deafults to GenCategories.
+            color_list (list, optional): List of colors to apply to non-gen plots.
+                Defaults to ColorList().colors.
         """
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(*args, **kwargs)
+        # Instantiation of PlotDataStoreAndProcessor
+        super().__init__(AGG_BY, ordered_gen, marmot_solutions_folder, **kwargs)
+
+        self.Zones = Zones
+        self.Scenarios = Scenarios
+        self.gen_categories = gen_categories
+        self.color_list = color_list
 
     def capacity_started(
         self,
@@ -65,8 +94,8 @@ class Ramping(MPlotDataHelper):
                 represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -86,8 +115,8 @@ class Ramping(MPlotDataHelper):
             (True, "generator_Installed_Capacity", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate
-        # MPlotDataHelper dictionary with all required properties,
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate
+        # PlotDataStoreAndProcessor dictionary with all required properties,
         # returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -112,7 +141,7 @@ class Ramping(MPlotDataHelper):
                 Cap = Cap.xs(zone_input, level=self.AGG_BY)
 
                 if pd.notna(start_date_range):
-                    Gen = self.set_timestamp_date_range(
+                    Gen = set_timestamp_date_range(
                         Gen, start_date_range, end_date_range
                     )
                     if Gen.empty is True:
@@ -187,7 +216,7 @@ class Ramping(MPlotDataHelper):
 
             cap_started_all_scenarios = cap_started_all_scenarios.fillna(0)
             unitconversion = self.capacity_energy_unitconversion(
-                cap_started_all_scenarios
+                cap_started_all_scenarios, self.Scenarios
             )
 
             cap_started_all_scenarios = (
@@ -232,15 +261,15 @@ class Ramping(MPlotDataHelper):
 
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
             (True, "generator_Installed_Capacity", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -330,7 +359,7 @@ class Ramping(MPlotDataHelper):
             )
 
             unitconversion = self.capacity_energy_unitconversion(
-                cap_started_all_scenarios
+                cap_started_all_scenarios, self.Scenarios
             )
 
             cap_started_all_scenarios = (
@@ -370,4 +399,102 @@ class Ramping(MPlotDataHelper):
                 mplt.add_main_title(zone_input)
 
             outputs[zone_input] = {"fig": fig2, "data_table": Data_Table_Out}
+        return outputs
+
+    def count_starts_single_gen(
+        self,
+        prop: str = None,
+        start_date_range: str = None,
+        end_date_range: str = None,
+        **_,
+    ):
+        """Counts the number of times a specified generator turns on during the simulation.
+
+        Args:
+
+            prop (str, optional): Name of the PLEXOS generator.
+                Defaults to None.
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
+        """
+
+        outputs: dict = {}
+
+        # List of properties needed by the plot, properties are a set of
+        # tuples and contain 3 parts:
+        # required True/False, property name and scenarios required,
+        # scenarios must be a list.
+        properties = [
+            (True, "generator_Generation", self.Scenarios),
+        ]
+
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate
+        # PlotDataStoreAndProcessor dictionary with all required properties,
+        # returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
+
+        if 1 in check_input_data:
+            return MissingInputData()
+
+        for zone_input in self.Zones:
+            logger.info(f"{self.AGG_BY} = {zone_input}")
+            cycles_df = pd.DataFrame(
+                columns=[prop],
+                index=self.Scenarios,
+            )
+
+            for scenario in self.Scenarios:
+                logger.info(f"Scenario = {str(scenario)}")
+
+                Gen: pd.DataFrame = self["generator_Generation"].get(scenario)
+                try:
+                    Gen = Gen.xs(prop, level="gen_name")
+                except KeyError:
+                    logger.warning(f"{prop} has no generation in {zone_input}")
+                    break
+
+                if pd.notna(start_date_range):
+                    Gen = set_timestamp_date_range(
+                        Gen, start_date_range, end_date_range
+                    )
+                    if Gen.empty is True:
+                        logger.warning("No Generation in selected Date Range")
+                        continue
+
+                starts = 0
+                for idx in range(len(Gen["values"]) - 1):
+                    if (
+                        Gen["values"].iloc[idx] == 0
+                        and not Gen["values"].iloc[idx + 1] == 0
+                    ):
+                        starts += 1
+
+                cycles_df.loc[scenario, prop] = starts
+
+            if cycles_df.empty == True:
+                outputs[zone_input] = MissingZoneData()
+                continue
+
+            cycles_df = cycles_df.fillna(0)
+            unitconversion = self.capacity_energy_unitconversion(
+                cycles_df, self.Scenarios
+            )
+
+            cycles_df = cycles_df / unitconversion["divisor"]
+            Data_Table_Out = cycles_df.add_suffix("starts")
+
+            mplt = PlotLibrary()
+            fig, ax = mplt.get_figure()
+            mplt.barplot(cycles_df, color=self.color_list)
+
+            ax.set_ylabel(
+                "Number of starts",
+                color="black",
+                rotation="vertical",
+            )
+
+            # mplt.add_legend()
+            mplt.add_main_title(prop)
+
+            outputs[zone_input] = {"fig": fig, "data_table": Data_Table_Out}
         return outputs

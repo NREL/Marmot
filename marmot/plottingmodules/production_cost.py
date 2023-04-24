@@ -8,43 +8,88 @@ Plots can be broken down by cost categories, generator types etc.
 """
 
 import logging
-import pandas as pd
 from pathlib import Path
+from typing import List
+
+import pandas as pd
 
 import marmot.utils.mconfig as mconfig
-from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
 )
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    set_timestamp_date_range,
+)
 
-plot_data_settings = mconfig.parser("plot_data")
+plot_data_settings: dict = mconfig.parser("plot_data")
 logger = logging.getLogger("plotter." + __name__)
 
 
-class SystemCosts(MPlotDataHelper):
+# gen_names_dict = pd.read_csv('/Users/mschwarz/Marmot_local/Marmot/input_files/mapping_folder/gen_names.csv')
+# gen_names_dict = gen_names_dict.set_index(gen_names_dict.columns[0]).squeeze().to_dict()
+
+# self = SystemCosts(
+#     Zones = ['USA'],
+#     AGG_BY = 'Country',
+#     Scenarios = ['ACDH90by35_2035','LimDH90by35_2035','LCCDH90by35_2035','VSCDH90by35_2035'],
+#     ordered_gen = ['Nuclear', 'Coal', 'Gas-CC', 'Gas-CC CCS', 'Gas-CT', 'Gas', 'Gas-Steam', 'Dual Fuel', 'DualFuel', 'Oil-Gas-Steam', 'Oil', 'Hydro', 'Ocean', 'Geothermal', 'Biomass', 'Biopower', 'Other', 'VRE', 'Wind', 'Offshore Wind', 'OffshoreWind', 'Solar', 'PV', 'dPV', 'CSP', 'PV-Battery', 'Battery', 'OSW-Battery', 'PHS', 'Storage', 'Net Imports', 'Curtailment', 'curtailment', 'Demand', 'Deamand + Storage Charging'],
+#     marmot_solutions_folder = '/Users/mschwarz/NTPS_local',
+#     gen_names_dict = gen_names_dict
+# )
+
+
+class SystemCosts(PlotDataStoreAndProcessor):
     """System operating cost plots.
 
     The production_cost.py module contains methods that are
     related related to the cost of operating the power system.
 
-    SystemCosts inherits from the MPlotDataHelper class to assist
+    SystemCosts inherits from the PlotDataStoreAndProcessor class to assist
     in creating figures.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        Zones: List[str],
+        Scenarios: List[str],
+        AGG_BY: str,
+        ordered_gen: List[str],
+        marmot_solutions_folder: Path,
+        marmot_color_dict: dict = None,
+        custom_xticklabels: List[str] = None,
+        **kwargs,
+    ):
         """
         Args:
-            *args
-                Minimum required parameters passed to the MPlotDataHelper 
-                class.
-            **kwargs
-                These parameters will be passed to the MPlotDataHelper 
-                class.
+            Zones (List[str]): List of regions/zones to plot.
+            Scenarios (List[str]): List of scenarios to plot.
+            AGG_BY (str): Informs region type to aggregate by when creating plots.
+            ordered_gen (List[str]): Ordered list of generator technologies to plot,
+                order defines the generator technology position in stacked bar and area plots.
+            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
+            marmot_color_dict (dict, optional): Dictionary of colors to use for
+                generation technologies.
+                Defaults to None.
+            custom_xticklabels (List[str], optional): List of custom x labels to
+                apply to barplots. Values will overwite existing ones.
+                Defaults to None.
         """
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(*args, **kwargs)
+        # Instantiation of PlotDataStoreAndProcessor
+        super().__init__(AGG_BY, ordered_gen, marmot_solutions_folder, **kwargs)
+
+        self.Zones = Zones
+        self.Scenarios = Scenarios
+        if marmot_color_dict is None:
+            self.marmot_color_dict = GeneratorColorDict.set_random_colors(
+                self.ordered_gen
+            ).color_dict
+        else:
+            self.marmot_color_dict = marmot_color_dict
+        self.custom_xticklabels = custom_xticklabels
 
     def prod_cost(
         self,
@@ -68,8 +113,8 @@ class SystemCosts(MPlotDataHelper):
             custom_data_file_path (Path, optional): Path to custom data file to concat extra
                 data. Index and column format should be consistent with output data csv.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -80,8 +125,8 @@ class SystemCosts(MPlotDataHelper):
         """
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, "generator_Total_Generation_Cost", self.Scenarios),
@@ -90,7 +135,7 @@ class SystemCosts(MPlotDataHelper):
             (True, "generator_Installed_Capacity", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -234,8 +279,8 @@ class SystemCosts(MPlotDataHelper):
             custom_data_file_path (Path, optional): Path to custom data file to concat extra
                 data. Index and column format should be consistent with output data csv.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -251,15 +296,15 @@ class SystemCosts(MPlotDataHelper):
         else:
             agg = "region"
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, "generator_Total_Generation_Cost", self.Scenarios),
             (False, f"{agg}_Cost_Unserved_Energy", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -300,7 +345,7 @@ class SystemCosts(MPlotDataHelper):
                 )
 
                 if pd.notna(start_date_range):
-                    gen_cost, cost_unserved_energy = self.set_timestamp_date_range(
+                    gen_cost, cost_unserved_energy = set_timestamp_date_range(
                         [gen_cost, cost_unserved_energy],
                         start_date_range,
                         end_date_range,
@@ -422,8 +467,8 @@ class SystemCosts(MPlotDataHelper):
             custom_data_file_path (Path, optional): Path to custom data file to concat extra
                 data. Index and column format should be consistent with output data csv.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -434,8 +479,8 @@ class SystemCosts(MPlotDataHelper):
         """
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (False, "generator_FOM_Cost", self.Scenarios),
@@ -446,7 +491,7 @@ class SystemCosts(MPlotDataHelper):
             (False, "generator_Emissions_Cost", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -465,10 +510,7 @@ class SystemCosts(MPlotDataHelper):
                 for prop_name in properties:
                     df: pd.DataFrame = self[prop_name[1]].get(scenario)
                     if df.empty:
-                        date_index = pd.date_range(
-                            start="2010-01-01", periods=1, freq="H", name="timestamp"
-                        )
-                        df = pd.DataFrame(data=[0], index=date_index, columns=["values"])
+                        continue
                     else:
                         try:
                             df = df.xs(zone_input, level=self.AGG_BY)
@@ -478,8 +520,11 @@ class SystemCosts(MPlotDataHelper):
                             break
 
                     if prop_name[1] == "generator_VOM_Cost":
-                        df["values"].to_numpy()[df["values"].to_numpy() < 0] = 0
-                    df = df.rename(columns={"values": prop_name[1]})
+                        try:
+                            df["values"].to_numpy()[df["values"].to_numpy() < 0] = 0
+                        except:
+                            df[0].to_numpy()[df[0].to_numpy() < 0] = 0
+                    df = df.rename(columns={"values": prop_name[1],0: prop_name[1]})
                     data_frames_lst.append(df)
 
                 detailed_gen_cost = pd.concat(data_frames_lst, axis=1).fillna(0)
@@ -495,7 +540,7 @@ class SystemCosts(MPlotDataHelper):
                 )
 
                 if pd.notna(start_date_range):
-                    detailed_gen_cost = self.set_timestamp_date_range(
+                    detailed_gen_cost = set_timestamp_date_range(
                         detailed_gen_cost, start_date_range, end_date_range
                     )
                     if detailed_gen_cost.empty is True:
@@ -533,7 +578,7 @@ class SystemCosts(MPlotDataHelper):
                 total_systems_cost_out = self.insert_custom_data_columns(
                     total_systems_cost_out, custom_data_file_path
                 )
-
+            if 'FO&M Cost' in detailed_gen_cost_out.columns: detailed_gen_cost_out.drop(columns =['FO&M Cost'],inplace = True)
             # Data table of values to return to main program
             Data_Table_Out = detailed_gen_cost_out.add_suffix(" (Million $)")
 
@@ -617,8 +662,8 @@ class SystemCosts(MPlotDataHelper):
             custom_data_file_path (Path, optional): Path to custom data file to concat extra
                 data. Index and column format should be consistent with output data csv.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -630,12 +675,12 @@ class SystemCosts(MPlotDataHelper):
         # Create Dictionary to hold Datframes for each scenario
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, "generator_Total_Generation_Cost", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -662,7 +707,7 @@ class SystemCosts(MPlotDataHelper):
                 gen_cost = self.df_process_gen_inputs(gen_cost)
 
                 if pd.notna(start_date_range):
-                    gen_cost = self.set_timestamp_date_range(
+                    gen_cost = set_timestamp_date_range(
                         gen_cost, start_date_range, end_date_range
                     )
                     if gen_cost.empty is True:
@@ -675,7 +720,7 @@ class SystemCosts(MPlotDataHelper):
                     ).sum()
                 )
 
-            # Checks if gen_cost_out_chunks contains data, 
+            # Checks if gen_cost_out_chunks contains data,
             # if not skips zone and does not return a plot
             if not gen_cost_out_chunks:
                 outputs[zone_input] = MissingZoneData()
@@ -691,7 +736,7 @@ class SystemCosts(MPlotDataHelper):
                 :, (total_systems_cost_out != 0).any(axis=0)
             ]
 
-            # Checks if total_systems_cost_out contains data, 
+            # Checks if total_systems_cost_out contains data,
             # if not skips zone and does not return a plot
             if total_systems_cost_out.empty:
                 outputs[zone_input] = MissingZoneData()
@@ -715,7 +760,7 @@ class SystemCosts(MPlotDataHelper):
 
             mplt.barplot(
                 total_systems_cost_out,
-                color=self.PLEXOS_color_dict,
+                color=self.marmot_color_dict,
                 stacked=True,
                 custom_tick_labels=tick_labels,
             )
@@ -752,8 +797,8 @@ class SystemCosts(MPlotDataHelper):
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -769,15 +814,15 @@ class SystemCosts(MPlotDataHelper):
 
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, "generator_Total_Generation_Cost", self.Scenarios),
             (False, f"{agg}_Cost_Unserved_Energy", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -818,7 +863,7 @@ class SystemCosts(MPlotDataHelper):
                 )
 
                 if pd.notna(start_date_range):
-                    gen_cost, cost_unserved_energy = self.set_timestamp_date_range(
+                    gen_cost, cost_unserved_energy = set_timestamp_date_range(
                         [gen_cost, cost_unserved_energy],
                         start_date_range,
                         end_date_range,
@@ -907,8 +952,8 @@ class SystemCosts(MPlotDataHelper):
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -920,12 +965,12 @@ class SystemCosts(MPlotDataHelper):
         # Create Dictionary to hold Datframes for each scenario
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, "generator_Total_Generation_Cost", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         # Checks if all data required by plot is available, if 1 in list required data is missing
@@ -950,7 +995,7 @@ class SystemCosts(MPlotDataHelper):
                 gen_cost = self.df_process_gen_inputs(gen_cost)
 
                 if pd.notna(start_date_range):
-                    gen_cost = self.set_timestamp_date_range(
+                    gen_cost = set_timestamp_date_range(
                         gen_cost, start_date_range, end_date_range
                     )
                     if gen_cost.empty is True:
@@ -963,7 +1008,7 @@ class SystemCosts(MPlotDataHelper):
                     ).sum()
                 )
 
-            # Checks if gen_cost_out_chunks contains data, 
+            # Checks if gen_cost_out_chunks contains data,
             # if not skips zone and does not return a plot
             if not gen_cost_out_chunks:
                 outputs[zone_input] = MissingZoneData()
@@ -990,7 +1035,7 @@ class SystemCosts(MPlotDataHelper):
                 continue
             total_systems_cost_out.drop(scen_base, inplace=True)  # Drop base entry
 
-            # Checks if total_systems_cost_out contains data, 
+            # Checks if total_systems_cost_out contains data,
             # if not skips zone and does not return a plot
             if total_systems_cost_out.empty == True:
                 outputs[zone_input] = MissingZoneData()
@@ -1003,7 +1048,7 @@ class SystemCosts(MPlotDataHelper):
             fig, ax = mplt.get_figure()
 
             mplt.barplot(
-                total_systems_cost_out, color=self.PLEXOS_color_dict, stacked=True
+                total_systems_cost_out, color=self.marmot_color_dict, stacked=True
             )
 
             ax.axhline(y=0)
@@ -1029,7 +1074,7 @@ class SystemCosts(MPlotDataHelper):
         scenario_groupby: str = "Scenario",
         **_,
     ):
-        """Creates stacked barplots of Total Generation Cost by by cost type 
+        """Creates stacked barplots of Total Generation Cost by by cost type
         (fuel, emission, start cost etc.) relative to a base scenario.
 
         Barplots show the change in total total generation cost relative to a base scenario.
@@ -1042,8 +1087,8 @@ class SystemCosts(MPlotDataHelper):
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -1054,8 +1099,8 @@ class SystemCosts(MPlotDataHelper):
         """
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (False, "generator_FOM_Cost", self.Scenarios),
@@ -1066,7 +1111,7 @@ class SystemCosts(MPlotDataHelper):
             (False, "generator_Emissions_Cost", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -1085,10 +1130,7 @@ class SystemCosts(MPlotDataHelper):
                 for prop_name in properties:
                     df: pd.DataFrame = self[prop_name[1]].get(scenario)
                     if df.empty:
-                        date_index = pd.date_range(
-                            start="2010-01-01", periods=1, freq="H", name="timestamp"
-                        )
-                        df = pd.DataFrame(data=[0], index=date_index, columns=["values"])
+                        continue
                     else:
                         try:
                             df = df.xs(zone_input, level=self.AGG_BY)
@@ -1098,8 +1140,11 @@ class SystemCosts(MPlotDataHelper):
                             break
 
                     if prop_name[1] == "generator_VOM_Cost":
-                        df["values"].to_numpy()[df["values"].to_numpy() < 0] = 0
-                    df = df.rename(columns={"values": prop_name[1]})
+                        try:
+                            df["values"].to_numpy()[df["values"].to_numpy() < 0] = 0
+                        except:
+                            df[0].to_numpy()[df[0].to_numpy() < 0] = 0
+                    df = df.rename(columns={"values": prop_name[1], 0: prop_name[1]})
                     data_frames_lst.append(df)
 
                 detailed_gen_cost = pd.concat(data_frames_lst, axis=1).fillna(0)
@@ -1115,7 +1160,7 @@ class SystemCosts(MPlotDataHelper):
                 )
 
                 if pd.notna(start_date_range):
-                    detailed_gen_cost = self.set_timestamp_date_range(
+                    detailed_gen_cost = set_timestamp_date_range(
                         detailed_gen_cost, start_date_range, end_date_range
                     )
                     if detailed_gen_cost.empty is True:
@@ -1128,7 +1173,7 @@ class SystemCosts(MPlotDataHelper):
                     ).sum()
                 )
 
-            # Checks if gen_cost_out_chunks contains data, if not skips zone and does 
+            # Checks if gen_cost_out_chunks contains data, if not skips zone and does
             # not return a plot
             if not gen_cost_out_chunks:
                 outputs[zone_input] = MissingZoneData()
@@ -1161,7 +1206,7 @@ class SystemCosts(MPlotDataHelper):
                 :, (detailed_gen_cost_out != 0).any(axis=0)
             ]
 
-            # Checks if detailed_gen_cost_out contains data, 
+            # Checks if detailed_gen_cost_out contains data,
             # if not skips zone and does not return a plot
             if detailed_gen_cost_out.empty == True:
                 outputs[zone_input] = MissingZoneData()

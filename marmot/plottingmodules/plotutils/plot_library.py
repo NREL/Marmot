@@ -7,19 +7,19 @@ and a library of regularly used plot types.
 
 import logging
 import textwrap
+from typing import List, Tuple, Union
+
 import numpy as np
 import pandas as pd
 import matplotlib as mpl
-import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from matplotlib.patches import Patch
-from typing import Tuple, List, Union
 
 import marmot.utils.mconfig as mconfig
-
 
 logger = logging.getLogger("plotter." + __name__)
 
@@ -293,7 +293,7 @@ class SetupSubplot:
         """Adds a property annotation to the subplot.
 
         .. versionadded:: 0.10.0
-        
+
         The current supported properties are:
 
         - Peak Demand
@@ -538,9 +538,9 @@ class SetupSubplot:
 
         Wrapper around matplotlib.axes.Axes.set_xticklabels
 
-        Checks to see if the number of labels is greater than or equal 
+        Checks to see if the number of labels is greater than or equal
         to the default number set in config.yml. If this is the case, rotate
-        specify whether or not to rotate the labels and angle specifies 
+        specify whether or not to rotate the labels and angle specifies
         what angle they should be rotated to.
 
         Args:
@@ -556,7 +556,7 @@ class SetupSubplot:
                 how SetupSubplot was instantiated.
                 Defaults to 0.
             **kwargs
-                These parameters will be passed to matplotlib.axes.Axes.set_xticklabels 
+                These parameters will be passed to matplotlib.axes.Axes.set_xticklabels
                 function.
         """
         ax = self._check_if_array(sub_pos)
@@ -588,7 +588,7 @@ class SetupSubplot:
             ylabels (list, optional): list of ylabels.
                 Defaults to None.
             **kwargs
-                These parameters will be passed to matplotlib.axes.Axes.set_xlabel 
+                These parameters will be passed to matplotlib.axes.Axes.set_xlabel
                 and matplotlib.axes.Axes.set_ylabel functions.
         """
 
@@ -654,6 +654,99 @@ class SetupSubplot:
                         pass
                     k = k + 1
 
+    def add_barplot_load_lines_and_use(
+        self,
+        load_and_use_df: pd.DataFrame,
+        include_charging_line: bool = mconfig.parser(
+            "plot_data", "include_barplot_load_storage_charging_line"
+        ),
+        load_legend_names: dict = mconfig.parser("load_legend_names"),
+        sub_pos: Union[int, Tuple[int, int]] = 0,
+        **kwargs,
+    ) -> None:
+        """Adds load lines to barplots and unserved energy if present.
+
+        Args:
+            load_and_use_df (pd.DataFrame): Dataframe containing load line data
+            include_charging_line (bool, optional): Add storage charging line True/False.
+                Defaults to mconfig.parser("plot_data", "include_barplot_load_storage_charging_line").
+            load_legend_names (dict, optional): Dictionary of load legend names.
+                Must have keys 'load' and 'demand'. Defaults to mconfig.parser("load_legend_names").
+            sub_pos (Union[int, Tuple[int, int]], optional): Position of subplot,
+                can be either a integer or a tuple of 2 integers depending on
+                how SetupSubplot was instantiated.
+                Defaults to 0.
+
+        Raises:
+            KeyError: Raised if either 'Total Load' or 'Total Demand' are missing in
+                from the load_and_use_df
+        """
+
+        if not set(["Total Load", "Total Demand"]).issubset(
+            set(load_and_use_df.columns)
+        ):
+            raise KeyError(
+                "'Total Load' and 'Total Demand' columns were not found in the "
+                "data. These are required to add barplot load columns"
+            )
+
+        ax = self._check_if_array(sub_pos)
+
+        for n, index_key in enumerate(load_and_use_df.index):
+
+            x = [
+                ax.patches[n].get_x(),
+                ax.patches[n].get_x() + ax.patches[n].get_width(),
+            ]
+            height1 = [float(load_and_use_df.loc[index_key, "Total Load"])] * 2
+
+            if (
+                include_charging_line
+                and load_and_use_df.loc[index_key, "Total Load"]
+                > load_and_use_df.loc[index_key, "Total Demand"]
+            ):
+
+                ax.plot(
+                    x,
+                    height1,
+                    c="black",
+                    linewidth=2,
+                    linestyle="--",
+                    label=load_legend_names["load"],
+                )
+                height2 = [float(load_and_use_df.loc[index_key, "Total Demand"])] * 2
+                ax.plot(
+                    x,
+                    height2,
+                    c="black",
+                    linewidth=1.5,
+                    label=load_legend_names["demand"],
+                )
+            elif load_and_use_df.loc[index_key, "Total Demand"] > 0:
+                ax.plot(
+                    x,
+                    height1,
+                    c="black",
+                    linewidth=2,
+                    label=load_legend_names["demand"],
+                )
+
+            if (
+                "Unserved Energy" in load_and_use_df.columns
+                and load_and_use_df.loc[index_key, "Unserved Energy"] > 0
+            ):
+                height3 = [
+                    float(load_and_use_df.loc[index_key, "Load-Unserved_Energy"])
+                ] * 2
+                ax.fill_between(
+                    x,
+                    height3,
+                    height1,
+                    facecolor="#DD0200",
+                    alpha=0.5,
+                    label="Unserved Energy",
+                )
+
 
 class PlotLibrary(SetupSubplot):
     """A library of commonly used plotting methods.
@@ -687,7 +780,7 @@ class PlotLibrary(SetupSubplot):
                 how SetupSubplot was instantiated.
                 Defaults to 0
             **kwargs
-                These parameters will be passed to matplotlib.axes.Axes.stackplot 
+                These parameters will be passed to matplotlib.axes.Axes.stackplot
                 function.
         """
         ax = self._check_if_array(sub_pos)
@@ -739,7 +832,7 @@ class PlotLibrary(SetupSubplot):
                 Value gets passed to the set_yaxis_major_tick_format method
                 Defaults to 'standard'
             **kwargs
-                These parameters will be passed to matplotlib.axes.Axes.plot 
+                These parameters will be passed to matplotlib.axes.Axes.plot
                 function.
         """
         ax = self._check_if_array(sub_pos)
@@ -806,7 +899,7 @@ class PlotLibrary(SetupSubplot):
                 Value gets passed to the set_yaxis_major_tick_format method
                 Defaults to 'standard'
             **kwargs
-                These parameters will be passed to matplotlib.axes.Axes.plot 
+                These parameters will be passed to matplotlib.axes.Axes.plot
                 function.
         """
         ax = self._check_if_array(sub_pos)
@@ -849,7 +942,7 @@ class PlotLibrary(SetupSubplot):
                 how SetupSubplot was instantiated.
                 Defaults to 0
             **kwargs
-                These parameters will be passed to matplotlib.axes.Axes.hist 
+                These parameters will be passed to matplotlib.axes.Axes.hist
                 function.
         """
         ax = self._check_if_array(sub_pos)
@@ -896,7 +989,7 @@ class PlotLibrary(SetupSubplot):
                 Value gets passed to the set_yaxis_major_tick_format method
                 Defaults to 'standard'
             **kwargs
-                These parameters will be passed to matplotlib.axes.Axes.plot 
+                These parameters will be passed to matplotlib.axes.Axes.plot
                 function.
         """
         ax = self._check_if_array(sub_pos)

@@ -6,50 +6,95 @@ generators that are on an outage.
 @author: Daniel Levie 
 """
 
-import os
 import logging
+import os
+from pathlib import Path
+from typing import List
+
+import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 
 import marmot.utils.mconfig as mconfig
-
-from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import (
+    GenCategories,
+    PlotDataStoreAndProcessor,
+    set_facet_col_row_dimensions,
+)
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
-    UnderDevelopment,
     MissingZoneData,
+    UnderDevelopment,
+)
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    adjust_for_leapday,
+    set_timestamp_date_range,
 )
 
 logger = logging.getLogger("plotter." + __name__)
-plot_data_settings = mconfig.parser("plot_data")
+plot_data_settings: dict = mconfig.parser("plot_data")
 shift_leapday: bool = mconfig.parser("shift_leapday")
 
 
-class CapacityOut(MPlotDataHelper):
+class CapacityOut(PlotDataStoreAndProcessor):
     """Generator outage plots.
 
     The capacity_out.py module contains methods that are
     related to generators that are on an outage.
 
-    CapacityOut inherits from the MPlotDataHelper class to assist
+    CapacityOut inherits from the PlotDataStoreAndProcessor class to assist
     in creating figures.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        Zones: List[str],
+        Scenarios: List[str],
+        AGG_BY: str,
+        ordered_gen: List[str],
+        marmot_solutions_folder: Path,
+        marmot_color_dict: dict = None,
+        gen_categories: GenCategories = GenCategories(),
+        ylabels: List[str] = None,
+        xlabels: List[str] = None,
+        **kwargs,
+    ):
         """
         Args:
-            *args
-                Minimum required parameters passed to the MPlotDataHelper 
-                class.
-            **kwargs
-                These parameters will be passed to the MPlotDataHelper 
-                class.
+            Zones (List[str]): List of regions/zones to plot.
+            Scenarios (List[str]): List of scenarios to plot.
+            AGG_BY (str): Informs region type to aggregate by when creating plots.
+            ordered_gen (List[str]): Ordered list of generator technologies to plot,
+                order defines the generator technology position in stacked bar and area plots.
+            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
+            gen_categories (GenCategories): Instance of GenCategories class, groups generator technologies
+                into defined categories.
+                Deafults to GenCategories.
+            marmot_color_dict (dict, optional): Dictionary of colors to use for
+                generation technologies.
+                Defaults to None.
+            ylabels (List[str], optional): y-axis labels for facet plots.
+                Defaults to None.
+            xlabels (List[str], optional): x-axis labels for facet plots.
+                Defaults to None.
         """
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(*args, **kwargs)
+        # Instantiation of PlotDataStoreAndProcessor
+        super().__init__(AGG_BY, ordered_gen, marmot_solutions_folder, **kwargs)
+
+        self.Zones = Zones
+        self.Scenarios = Scenarios
+        if marmot_color_dict is None:
+            self.marmot_color_dict = GeneratorColorDict.set_random_colors(
+                self.ordered_gen
+            ).color_dict
+        else:
+            self.marmot_color_dict = marmot_color_dict
+        self.gen_categories = gen_categories
+        self.ylabels = ylabels
+        self.xlabels = xlabels
 
     def capacity_out_stack(
         self,
@@ -78,15 +123,15 @@ class CapacityOut(MPlotDataHelper):
         """
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, f"generator_Installed_Capacity{data_resolution}", self.Scenarios),
             (True, f"generator_Available_Capacity{data_resolution}", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -94,7 +139,9 @@ class CapacityOut(MPlotDataHelper):
             return MissingInputData()
 
         # sets up x, y dimensions of plot
-        ncols, nrows = self.set_facet_col_row_dimensions(multi_scenario=self.Scenarios)
+        ncols, nrows = set_facet_col_row_dimensions(
+            self.xlabels, self.ylabels, multi_scenario=self.Scenarios
+        )
 
         grid_size = ncols * nrows
 
@@ -129,7 +176,7 @@ class CapacityOut(MPlotDataHelper):
                     .copy()
                 )
                 if shift_leapday:
-                    avail_cap = self.adjust_for_leapday(avail_cap)
+                    avail_cap = adjust_for_leapday(avail_cap)
                 if zone_input in avail_cap.index.get_level_values(self.AGG_BY).unique():
                     avail_cap = avail_cap.xs(zone_input, level=self.AGG_BY)
                 else:
@@ -150,7 +197,9 @@ class CapacityOut(MPlotDataHelper):
                 cap_out = self.df_process_gen_inputs(cap_out)
                 # Subset only thermal gen categories
                 thermal_gens = [
-                    therm for therm in self.gen_categories.thermal if therm in cap_out.columns
+                    therm
+                    for therm in self.gen_categories.thermal
+                    if therm in cap_out.columns
                 ]
                 cap_out = cap_out[thermal_gens]
 
@@ -158,7 +207,7 @@ class CapacityOut(MPlotDataHelper):
                     logger.warning(f"No Thermal Generation in: {zone_input}")
                     continue
                 if pd.notna(start_date_range):
-                    cap_out = self.set_timestamp_date_range(
+                    cap_out = set_timestamp_date_range(
                         cap_out, start_date_range, end_date_range
                     )
                     if cap_out.empty is True:
@@ -168,7 +217,7 @@ class CapacityOut(MPlotDataHelper):
                 # unitconversion based off peak outage hour, only checked once
                 if i == 0:
                     unitconversion = self.capacity_energy_unitconversion(
-                        cap_out, sum_values=True
+                        cap_out, self.Scenarios, sum_values=True
                     )
 
                 cap_out = cap_out / unitconversion["divisor"]
@@ -179,7 +228,7 @@ class CapacityOut(MPlotDataHelper):
 
                 mplt.stackplot(
                     df=cap_out,
-                    color_dict=self.PLEXOS_color_dict,
+                    color_dict=self.marmot_color_dict,
                     labels=cap_out.columns,
                     sub_pos=i,
                 )
@@ -226,12 +275,14 @@ class CapacityOut(MPlotDataHelper):
 
             logger.info("Zone = " + str(zone_input))
 
-            ncols = len(self.xlabels)
-            if ncols == 0:
+            if not self.xlabels:
                 ncols = 1
-            nrows = len(self.ylabels)
-            if nrows == 0:
+            else:
+                ncols = len(self.xlabels)
+            if not self.ylabels:
                 nrows = 1
+            else:
+                nrows = len(self.ylabels)
             grid_size = ncols * nrows
             fig1, axs = plt.subplots(
                 nrows, ncols, figsize=((8 * ncols), (4 * nrows)), sharey=True
@@ -322,7 +373,7 @@ class CapacityOut(MPlotDataHelper):
                         labels=one_zone.columns,
                         linewidth=0,
                         colors=[
-                            self.PLEXOS_color_dict.get(x, "#333333")
+                            self.marmot_color_dict.get(x, "#333333")
                             for x in one_zone.T.index
                         ],
                     )
@@ -358,7 +409,7 @@ class CapacityOut(MPlotDataHelper):
                         labels=one_zone.columns,
                         linewidth=0,
                         colors=[
-                            self.PLEXOS_color_dict.get(x, "#333333")
+                            self.marmot_color_dict.get(x, "#333333")
                             for x in one_zone.T.index
                         ],
                     )

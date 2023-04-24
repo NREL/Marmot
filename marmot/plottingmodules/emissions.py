@@ -11,45 +11,76 @@ TO DO:
 """
 
 import logging
-import pandas as pd
 from pathlib import Path
+from typing import List
+
+import pandas as pd
 
 import marmot.utils.mconfig as mconfig
-
-from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
 from marmot.plottingmodules.plotutils.plot_exceptions import (
-    MissingInputData,
     InputSheetError,
+    MissingInputData,
     MissingZoneData,
+)
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    set_timestamp_date_range,
 )
 
 logger = logging.getLogger("plotter." + __name__)
-plot_data_settings = mconfig.parser("plot_data")
+plot_data_settings: dict = mconfig.parser("plot_data")
 
 
-class Emissions(MPlotDataHelper):
+class Emissions(PlotDataStoreAndProcessor):
     """Generator emissions plots.
 
     The emissions.py module contains methods that are
     related to the fossil fuel emissions of generators.
 
-    Emissions inherits from the MPlotDataHelper class to assist
+    Emissions inherits from the PlotDataStoreAndProcessor class to assist
     in creating figures.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        Zones: List[str],
+        Scenarios: List[str],
+        AGG_BY: str,
+        ordered_gen: List[str],
+        marmot_solutions_folder: Path,
+        marmot_color_dict: dict = None,
+        custom_xticklabels: List[str] = None,
+        **kwargs,
+    ):
         """
         Args:
-            *args
-                Minimum required parameters passed to the MPlotDataHelper 
-                class.
-            **kwargs
-                These parameters will be passed to the MPlotDataHelper 
-                class.
+            Zones (List[str]): List of regions/zones to plot.
+            Scenarios (List[str]): List of scenarios to plot.
+            AGG_BY (str): Informs region type to aggregate by when creating plots.
+            ordered_gen (List[str]): Ordered list of generator technologies to plot,
+                order defines the generator technology position in stacked bar and area plots.
+            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
+            marmot_color_dict (dict, optional): Dictionary of colors to use for
+                generation technologies.
+                Defaults to None.
+            custom_xticklabels (List[str], optional): List of custom x labels to
+                apply to barplots. Values will overwite existing ones.
+                Defaults to None.
         """
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(*args, **kwargs)
+        # Instantiation of PlotDataStoreAndProcessor
+        super().__init__(AGG_BY, ordered_gen, marmot_solutions_folder, **kwargs)
+
+        self.Zones = Zones
+        self.Scenarios = Scenarios
+        if marmot_color_dict is None:
+            self.marmot_color_dict = GeneratorColorDict.set_random_colors(
+                self.ordered_gen
+            ).color_dict
+        else:
+            self.marmot_color_dict = marmot_color_dict
+        self.custom_xticklabels = custom_xticklabels
 
     def total_emissions_by_type(
         self,
@@ -76,8 +107,8 @@ class Emissions(MPlotDataHelper):
             custom_data_file_path (Path, optional): Path to custom data file to concat extra
                 data. Index and column format should be consistent with output data csv.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -89,12 +120,12 @@ class Emissions(MPlotDataHelper):
         # Create Dictionary to hold Datframes for each scenario
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, "emissions_generators_Production", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -122,7 +153,7 @@ class Emissions(MPlotDataHelper):
                     continue
 
                 if pd.notna(start_date_range):
-                    emit = self.set_timestamp_date_range(
+                    emit = set_timestamp_date_range(
                         emit, start_date_range, end_date_range
                     )
                     if emit.empty:
@@ -191,7 +222,7 @@ class Emissions(MPlotDataHelper):
 
             mplt.barplot(
                 emitPlot,
-                color=self.PLEXOS_color_dict,
+                color=self.marmot_color_dict,
                 stacked=True,
                 custom_tick_labels=tick_labels,
             )
