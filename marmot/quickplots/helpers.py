@@ -1,0 +1,621 @@
+# Function to calculate total VRE available
+# Function to calculate Total VRE generated
+import pandas as pd
+import matplotlib.pyplot as plt
+#from file_helpers import *
+import numpy as np
+from .config import color_dict
+import random
+
+MW_to_TW = 1000000
+MW_to_GW = 1000
+
+{"start_unit":{"final_unit": "multiplication_factor"}}
+{"MW":{"GW":1000},
+ "MW":{"TW":1000000},
+ "GW":{"MW":1/1000},
+ "GW":{"TW":1000},
+ "TW":{"GW":1/1000},
+ "TW":{"MW":1/1000000}
+}
+
+
+
+def get_gen_color_map(file):
+    """
+        Opens a .css file and parses it to get a color mapping.
+        Open the css file in VSCode to quickly update mapping with built in Color Wheel.
+    """
+    color_dict = {}
+    with open(file, 'r') as f:
+
+        for line in f:
+
+            temp = line.strip().split(' ')
+            gen_type = temp[0].replace("#","")
+            color = temp[1].split(':')[1].replace("}","")
+            color_dict[gen_type] = color
+    return color_dict
+
+
+
+
+def rank_series_values(series):
+
+    series_sorted = series.sort_values(ascending=False).to_frame()
+    series_sorted['rank'] = np.arange(len(series_sorted))
+
+    return series_sorted
+
+
+
+def above_threshold(x, threshold=90):
+    if x >= threshold:
+        return 1.0
+    else:
+        return 0.0
+
+
+def scale_up_down(df):
+    """
+    Not fully implemented
+    """
+    max_val = df.max().max() # Get max value of dataframe
+
+    return NotImplemented
+
+def trim_axs(axs, N):
+    """
+    Reduce *axs* to *N* Axes. All further Axes are removed from the figure.
+    """
+    axs = axs.flat
+    for ax in axs[N:]:
+        ax.remove()
+    return axs[:N]
+
+
+columns_ordered = [val for val in color_dict.keys()]
+
+#columns_ordered = ['Other','Nuclear', 'Coal','Oil', 'Gas','Gas-CT','Gas-CC', 'Hydro','Wind','Offshore-Wind','CSP','PV','dPV','Battery', 'Curtailment']
+
+#colors = [color_dict[col] for col in columns_ordered]
+
+# minimum requirements
+
+#curt_tech = ['WS', 'WT', 'PVe']
+curt_tech = ['Wind',"Offshore-Wind", 'PV','dPV']
+
+
+def order_columns_colors(columns):
+
+    """
+        Reorders the columns and returns the corresponding sequence of colors
+        If a column is not mapped to a color, assigns a random color.
+        Unassigned columns are first (bottom of the dispatch stack)
+    """
+
+    sub_cols_ordered = [col for col in columns if col not in columns_ordered+['Demand']] + [col for col in columns_ordered if col in columns]
+    sub_colors = ["#"+''.join([random.choice('0123456789ABCDEF') for j in range(6)]) for col in columns if col not in columns_ordered+['Demand']] + \
+                    [color_dict[col] for col in columns_ordered if col in columns]
+
+    return sub_cols_ordered, sub_colors
+
+
+
+# assumes a frame with generation and demand columns (no multi-index)
+
+# Plots a dispatch stack
+# Columns should be generation tech + demand
+# Rows should be Months for a given system/superzone/interconnect
+# Or rows can be Superzones/Interconnect/system for
+
+def plot_dispatch_stack_bar(df, ax=None):
+
+    """
+    Plots a bar chart of the Dispatch Stack dataframe
+
+    expects a dataframe with columns of standard technology types (Wind, PV, etc.)
+
+    y - axis: Total Generation and Demand* in TWh
+    x - axis: The index of the dataframe. (examples: Months of the year, Year, ISOs, Balancing Areas)
+
+    * Plots Demand if available
+    """
+
+    if ax == None:
+        ax = plt.axes()
+
+    #Convert to TWh
+    df_tw = df/MW_to_TW
+
+    sub_cols_ordered, sub_colors = order_columns_colors(df_tw.columns)
+
+    #sub_cols_ordered = [col for col in columns_ordered if col in df_tw]
+    #sub_colors = [color_dict[col] for col in sub_cols_ordered]
+
+    df_tw[sub_cols_ordered].plot.bar(stacked=True, color=sub_colors, ax=ax)
+
+    if 'Demand' in df_tw.columns:
+        if len(df_tw) == 1:
+            xmin = [i-0.25 for i in range(len(df_tw.index))]
+            xmax = [i+0.25 for i in range(len(df_tw.index))]
+            ax.hlines(y=df_tw['Demand'].values, color='Black', linestyle='-', xmin=xmin, xmax=xmax, label='Demand')
+
+        else:
+            xmin = [i-0.25 for i in range(len(df_tw.index))]
+            xmax = [i+0.25 for i in range(len(df_tw.index))]
+            ax.hlines(df_tw['Demand'].values, xmin=xmin, xmax=xmax, colors='Black', label='Demand')
+
+    handles, labels = ax.get_legend_handles_labels()
+
+    ax.legend(reversed(handles), reversed(labels),bbox_to_anchor=(1.05, 0.95))
+    ax.spines[['right', 'top']].set_visible(False)
+
+    ax.set_ylabel("Generation and Demand (TWh)")
+    ax.set_xlabel("")
+    ax.set_title("Dispatch Stack")
+
+    plt.xticks(rotation=45)
+    return ax
+
+
+# expects a dataframe with generation technologies and demand as columns and timestamps as index
+def plot_stacked_area_window(df, ax=None):
+
+    """
+        Plots a stacked area chart of the various technology types.
+
+        Generally reserved for plotting raw time windows of dataframes (no monthly or annual aggregates)
+        Called by the plot_peak_demand_window() and plot_min_demand_window().
+
+        x-axis: Dataframe index, usually timestamps
+        y-axis: Power by Dispatch Technology in GW, (Wind, PV, etc)
+
+    """
+
+    if ax == None:
+        ax = plt.axes()
+
+
+
+    df_gw = df/MW_to_GW
+
+    sub_cols_ordered, sub_colors = order_columns_colors(df_gw.columns)
+
+    # Plot the columns in order. #Plot non-mapped in random order then mapped
+    #sub_cols_ordered = [col for col in df.columns if col not in columns_ordered] + [col for col in columns_ordered if col in df.columns]
+    #sub_colors = ["#"+''.join([random.choice('0123456789ABCDEF') for j in range(6)]) for col in d]+[color_dict[col] for col in sub_cols_ordered]
+
+
+    df_gw[sub_cols_ordered].plot.area(stacked=True, color=sub_colors, ax=ax, linewidth=0)
+
+    if "Demand" in df_gw.columns.values:
+        df_gw[['Demand']].plot.line(color="Black", ax=ax, label='Demand')
+
+    max_stack = df_gw[sub_cols_ordered].sum(axis=1).max()
+    max_y = max(max_stack, df_gw.max().max())
+    ax.set_ylim(0, max_y*1.10)
+
+    handles, labels = ax.get_legend_handles_labels()
+
+    ax.legend(reversed(handles), reversed(labels),bbox_to_anchor=(1.05, 0.95))
+    ax.spines[['right', 'top']].set_visible(False)
+
+    ax.set_ylabel("Generation and Demand (GW)")
+    ax.set_xlabel("")
+
+    return ax
+
+# expects a dataframe with generation technologies and demand as columns and timestamps as index
+def plot_peak_demand_window(df, window_delta=3, ax=None):
+
+
+    """
+        Plots the stacked area chart for the peak demand window.
+        Finds the index of the max demand and calls the plot_stacked_area() method
+
+        Annotates the point of peak demand.
+
+        x-axis: Dataframe index, usually timestamps
+        y-axis: Power by Dispatch Technology in GW, (Wind, PV, etc)
+
+    """
+
+    if ax == None:
+        ax = plt.axes()
+
+    dfg = df.groupby(axis=1, level='Technology').sum()
+
+    delta = pd.Timedelta(days=window_delta)
+
+    idx_max = dfg['Demand'].idxmax()
+    max_demand_val = dfg['Demand'].loc[idx_max]/MW_to_GW
+    max_dispatch_val = dfg[[col for col in dfg.columns if col != "Demand"]].loc[idx_max-delta:idx_max+delta].sum(axis=1).max()/MW_to_GW
+    max_y = max(max_demand_val, max_dispatch_val)
+
+    ax = plot_stacked_area_window(dfg.loc[idx_max-delta:idx_max+delta], ax=ax)
+
+    #ax.xaxis.set_major_formatter(mdates.DateFormatter("%b-%d"))
+
+    # Set annotations
+
+    annotate_timestamp = idx_max - pd.Timedelta(days=2)
+    ax.annotate(f'Peak Demand: \n{max_demand_val:.2f} GW', xy=(idx_max, max_demand_val), xytext=(annotate_timestamp, max_y*1.2),
+            arrowprops=dict(facecolor='black', shrink=0.05, width=1))
+
+    ax.set_title("Period of Peak Demand")
+    ax.set_ylim(0, max_y*1.3)
+
+    return ax
+
+
+def plot_min_demand_window(df, window_delta=3, ax=None):
+
+
+    """
+        Plots the stacked area chart for the minimum demand window.
+        Finds the index of the minimum demand and calls the plot_stacked_area() method
+
+        Annotates the point of minimum demand.
+
+        x-axis: Dataframe index, usually timestamps
+        y-axis: Power by Dispatch Technology in GW, (Wind, PV, etc)
+
+    """
+
+    if ax == None:
+        ax = plt.axes()
+
+    delta = pd.Timedelta(days=window_delta)
+    dfg = df.groupby(axis=1, level='Technology').sum()
+
+    idx_min = dfg['Demand'].idxmin()
+    min_demand_val = dfg['Demand'].loc[idx_min]/MW_to_GW
+
+    max_demand_val = dfg['Demand'].loc[idx_min-delta:idx_min+delta].max()/MW_to_GW
+    max_dispatch_val = dfg[[col for col in dfg.columns if col != "Demand"]].loc[idx_min-delta:idx_min+delta].max(axis=1).max()/MW_to_GW
+    max_y = max(max_demand_val, max_dispatch_val)
+
+    ax = plot_stacked_area_window(dfg.loc[idx_min-delta:idx_min+delta], ax=ax)
+
+    annotate_timestamp = idx_min - pd.Timedelta(days=2)
+    ax.annotate(f'Minimum Demand: \n{min_demand_val:.2f} GW', xy=(idx_min, min_demand_val), xytext=(annotate_timestamp, max_y*1.3),
+            arrowprops=dict(facecolor='black', shrink=0.05, width=1))
+
+    ax.set_title("Period of Minimum Demand")
+    ax.set_ylim(0, max_y*1.5)
+
+    return ax
+
+
+## Common Reports
+
+
+## PLOTTING Functions
+
+# Expects dataframe with a column for each tech type [Nuclear, Coal, Gas, Hydro, etc.]
+# Expects all timestamps available
+def plot_annual_system_dispatch_stack(df, ax=None):
+
+    """
+    Plots a stacked bar of the various Power Generation technologies in the dataframe
+
+    If multi-year, plots a bar for each year.
+
+    Expects a DateTimeIndex and Resamples the dataframe to Yearly and calls,
+    plot_dispatch_stack_bar() method.
+
+    y-axis: Generation & Demand (TWh)
+    x-axis: Year in %Y format.
+
+    """
+
+    if ax == None:
+        ax = plt.axes()
+
+    system_dispatch = df.groupby(axis=1, level="Technology").sum()
+    system_dispatch_annual = system_dispatch.groupby(system_dispatch.index.year).sum()
+    system_dispatch_annual.index = system_dispatch_annual.index.astype(str)
+
+    ax = plot_dispatch_stack_bar(system_dispatch_annual, ax=ax)
+
+    ax.set_title("System - Annual Dispatch Stack")
+
+    plt.xticks(rotation=0)
+
+    return ax
+
+
+
+# Single figure with stacked bars for each month
+def plot_monthly_system_dispatch_stack(df, ax=None):
+
+    """
+    Plots a stacked bar of the various Power Generation technologies
+
+    Expects a DateTimeIndex and Resamples the dataframe to monthly and calls,
+    plot_dispatch_stack_bar() method.
+
+    y-axis: Generation & Demand (TWh)
+    x-axis: Year in %B format.
+    """
+
+
+    if ax == None:
+        ax = plt.axes()
+    system_dispatch_monthly = df.groupby(axis=1, level="Technology").sum().resample("M").sum()
+    system_dispatch_monthly.index = system_dispatch_monthly.index.strftime('%B')
+
+    ax = plot_dispatch_stack_bar(system_dispatch_monthly, ax=ax)
+    ax.set_title("System - Monthly Dispatch Stack")
+    ax.set_xticks(ax.get_xticks(), ax.get_xticklabels(), rotation=45, ha='right')
+
+
+    return ax
+
+
+
+
+# Single figure with stacked bars for each entity
+def plot_annual_entity_dispatch_stack(df, ax=None):
+
+
+    """
+    Plots a stacked bar of the various Power Generation technologies for each Entity
+    within the MultiIndex column.
+
+    If Multi-Year, aggregates all years together.
+
+    y-axis: Generation & Demand (TWh)
+    x-axis: Entity Name
+
+    """
+
+    if ax == None:
+        ax = plt.axes()
+
+    zonal_dispatch = df.groupby(axis=1, level=["Entity","Technology"]).sum()
+    zonal_dispatch_annual = zonal_dispatch.sum().unstack()
+
+    ax = plot_dispatch_stack_bar(zonal_dispatch_annual, ax=ax)
+    ax.set_title("Entity - Annual Dispatch Stack")
+    ax.set_xticks(ax.get_xticks(), ax.get_xticklabels(), rotation=45, ha='right')
+
+    return ax
+
+### Curtailment Stack
+def plot_annual_system_curtailment_stack(df, ax=None):
+
+
+    """
+    Plots a stacked bar of the various various Curtailable Power Generation technologies (Wind, PV)
+
+    If multi-year, plots a bar for each year.
+
+    Expects a DateTimeIndex and Resamples the dataframe to Yearly and calls,
+    plot_dispatch_stack_bar() method.
+
+    y-axis: Generation & Demand (TWh)
+    x-axis: Year in %Y format.
+
+    """
+    if ax == None:
+        ax = plt.axes()
+
+    curtailment_tech = df.groupby(axis=1, level='Technology').sum()
+    curtailment_tech_annual = curtailment_tech.groupby(curtailment_tech.index.year).sum()
+
+    ax = plot_dispatch_stack_bar(curtailment_tech_annual, ax=ax)
+
+    ax.set_title("System - Annual Curtailment Stack")
+    ax.set_ylabel("Curtailment (TWh)")
+    ax.set_xticks(ax.get_xticks(), ax.get_xticklabels(), rotation=0, ha='right')
+
+    return ax
+
+def plot_monthly_system_curtailment_stack(df, ax=None):
+
+
+    """
+    Plots a stacked bar of the various Curtailable Power Generation technologies (Wind, PV)
+
+    Expects a DateTimeIndex and Resamples the dataframe to monthly and calls,
+    plot_dispatch_stack_bar() method.
+
+    y-axis: Generation & Demand (TWh)
+    x-axis: Year in %B format.
+
+    """
+
+    if ax == None:
+        ax = plt.axes()
+
+    curtailment_tech_monthly = df.groupby(axis=1, level='Technology').sum().resample("M").sum()
+    curtailment_tech_monthly.index = curtailment_tech_monthly.index.strftime("%B")
+
+    ax = plot_dispatch_stack_bar(curtailment_tech_monthly, ax=ax)
+    ax.set_title("System - Monthly Curtailment Stack")
+    ax.set_ylabel("Curtailment (TWh)")
+    ax.set_xticks(ax.get_xticks(), ax.get_xticklabels(), rotation=45, ha='right')
+
+    return ax
+
+
+def plot_annual_entity_curtailment_stack(df, ax=None):
+
+    """
+    Expects a entity curtailment dataset with a MultiIndex column of 2 levels.
+    level 0: Entity (e.g. balancing area, ISO, Interconnect, any group of generators)
+    level 1: Technology type (e.g. PV, Wind, Offshore-Wind)
+
+    Returns a stacked bar plot with varying colors for each technology:
+    x-axis: Entity (e.g. balancing area, ISO, Interconnect, any group of generators)
+    y-axis: Total Geneartion (TWh)
+    """
+
+
+    if ax == None:
+        ax = plt.axes()
+
+    curt_tech_entity_annual = df.sum().unstack(level="Technology").fillna(0)
+
+    ax = plot_dispatch_stack_bar(curt_tech_entity_annual, ax=ax)
+
+    ax.set_title("Entity - Annual Curtailment Stack")
+    ax.set_xticks(ax.get_xticks(), ax.get_xticklabels(), rotation=45, ha='right')
+    ax.set_ylabel("Generation (TWh)")
+
+    return ax
+
+
+### FLOW PLOTS
+def plot_loading_ranked(loading_df, ax=None):
+
+    """
+    Calculated the mean and max loading and plots the line loading in ranked order.
+
+    Expects a line loading dataframe.
+    Can plot a raw flow dataframe, but labels/legend would not be accurate.
+
+    y-axis: Loading %
+    x-axis: Rank of line (0 - # of lines)
+    """
+
+
+    if ax == None:
+        ax = plt.axes()
+
+    load_ave_sorted = rank_series_values(loading_df.mean())
+    load_max_sorted = rank_series_values(loading_df.max())
+
+    load_ave_sorted.rename(columns={0: "Mean Load"}, inplace=True)
+    load_max_sorted.rename(columns={0: "Max Load"}, inplace=True)
+
+
+    load_ave_sorted.plot.line(x='rank', y='Mean Load', ax=ax, color='Blue', label="Loading (ave)")
+    load_max_sorted.plot.line(x='rank', y='Max Load', ax=ax, color='Gold',label = "Loading (max)",grid=True)
+
+    ax.set_ylabel("Loading %")
+    ax.set_xlabel("Number of Lines")
+
+    return ax
+
+
+# TODO clean up this.
+
+def plot_lines_utilization(utilization, ax=None):
+
+    """
+    Expects a dataframe with MultiIndex columns
+    Top level should be U75, U90, U95, U99
+    Bottom level should be a column for each line.
+
+    Plots the line utilization in Descending order for each
+    Utilization value.
+
+    y-axis: % of time above Utilization
+    x-axis: rank of line (from 0 to # of lines)
+    """
+
+    if ax == None:
+        ax = plt.axes()
+
+    #TODO be more flexible with possibly more threshold values
+    # Will need a color map to map U99, etc.
+
+    plot_ranked_series(utilization['U75'].sum().rename("U75"),ax=ax, color="Blue")
+    plot_ranked_series(utilization['U90'].sum().rename("U90"),ax=ax, color='Gold')
+    plot_ranked_series(utilization['U95'].sum().rename("U95"),ax=ax, color='Green')
+    plot_ranked_series(utilization['U99'].sum().rename("U99"),ax=ax, color='Red', grid=True)
+
+    ax.set_ylabel("Hours Above Utilization (%)")
+    ax.set_xlabel("Number of Lines")
+
+    return ax
+
+
+
+def plot_utilization(loading, ax=None):
+    """
+    Old, will be deprecated in favor of plot_lines_utilization()
+    """
+    if ax == None:
+        ax = plt.axes()
+
+    # TODO improve speed. In Great need of simplification.
+    print("Calculating above 90")
+    above_90 = loading.applymap(lambda x: above_threshold(x, 90.0))
+    print("Calculating above 95")
+    above_95 = loading.applymap(lambda x: above_threshold(x, 95.0))
+    print("Calculating above 99")
+    above_99 = loading.applymap(lambda x: above_threshold(x, 99.0))
+    print("Calculating above 75")
+    above_75 = loading.applymap(lambda x: above_threshold(x, 75.0))
+
+    above_90_sorted = rank_series_values(above_90.mean())
+    above_90_sorted.rename(columns={0: 'U90'}, inplace=True)
+
+    above_99_sorted = rank_series_values(above_99.mean())
+    above_99_sorted.rename(columns={0: 'U99'}, inplace=True)
+
+    above_95_sorted = rank_series_values(above_95.mean())
+    above_95_sorted.rename(columns={0: 'U95'}, inplace=True)
+
+    above_75_sorted = rank_series_values(above_75.mean())
+    above_75_sorted.rename(columns={0: 'U75'}, inplace=True)
+
+
+    above_75_sorted.plot.line(x='rank', y='U75', ax=ax, color='Blue')
+    above_90_sorted.plot.line(x='rank', y='U90', ax=ax, color='Gold')
+    above_95_sorted.plot.line(x='rank', y='U95', ax=ax, color='Green')
+    above_99_sorted.plot.line(x='rank', y='U99', ax=ax, color='Red', grid=True)
+
+    ax.set_xlabel("Number of Lines")
+    ax.set_ylabel("Share of Hours (p.u.)")
+
+    plt.axhline(y=0.05, color='Red', linestyle='--', xmin=0, xmax=1)
+    plt.axhline(y=0.2, color='Gold', linestyle='--', xmin=0, xmax=1)
+    plt.axhline(y=0.5, color='Blue', linestyle='--', xmin=0, xmax=1)
+
+    return ax
+
+
+# Assumes a series
+def plot_flow(flow, column, label, ax=None):
+
+
+
+    """
+    Plots Sorted flow of an individual column in a flow dataset.
+    This could be an interface between superzones.
+    An interface between regions, or any line or subset of transmission lines.
+    """
+
+    if ax == None:
+        ax = plt.axes()
+
+    flow[column].sort_values(ascending=False).reset_index().plot.line(y=column, ax=ax, label=label, color='Green', grid=True)
+
+    ax.axhline(0, 0,1, color="Grey")
+    ax.set_ylabel("Flow (MW)")
+    ax.set_xlabel("")
+    ax.set_title(f"Interface: {column}")
+
+
+    return ax
+
+
+def plot_ranked_series(series, ax=None, **kwargs):
+
+    """
+    Takes a series as input and plots the values in ranked order
+    Useful as a base for building plots like
+    1. Load Duration Curve.
+    2. Line Flow.
+
+    """
+
+    if ax == None:
+        ax = plt.axes()
+
+    series.sort_values(ascending=False).reset_index().plot.line(ax=ax, **kwargs)

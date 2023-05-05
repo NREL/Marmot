@@ -22,9 +22,12 @@ setup(
         "marmot.utils",
         "marmot.plottingmodules",
         "marmot.plottingmodules.plotutils",
+        "marmot.quickplots",
+        "marmot.scenariohandlers",
+        "marmot.datahelpers"
     ],
     install_requires=[
-        "h5py==2.10.0",
+        "h5py>=2.10.0",
         "numpy",
         "pandas>=1.0.5",
         "tables",
