@@ -21,3 +21,12 @@ input_files/mapping_folder/*
 !input_files/mapping_folder/Regions_Zones_Mapping_Full.csv
 marmot-env-JW.yml
 config.yml
+
+# Ignore byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+.venv
+.eggs/
+build/
+*.egg-info
+*.pq.gz
