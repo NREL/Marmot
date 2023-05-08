@@ -44,7 +44,6 @@ def load_map(map):
             print("path does not exist")
             return None
     else:
-        print("Unable to open map")
         return None
 
 class BaseScenario(ABC):
