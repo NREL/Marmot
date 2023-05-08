@@ -1,3 +1,14 @@
+"""
+A set of Concrete Classes for handling various PCM datasets. Each concrete class
+is responsible for generating column-oriented dataframes with a column for each
+generator or node.
+
+Each class inherits from a base class that generates more complex dataframes from the
+generator, availability or load datasets.
+
+@author: Micah Webb
+"""
+
 from abc import ABC, abstractmethod
 from marmot.datahelpers import calc_curtailment
 import pandas as pd
@@ -10,8 +21,8 @@ from marmot.datahelpers.parsers import *
 
 
 #Need a pre-determined set of curtailable technology. Global value that can be updated
+# TODO move this to a config section
 curt_tech = ['Wind',"Offshore-Wind", 'PV','dPV']
-
 
 def calc_curtailment(gen_tech, avail_tech):
 
@@ -40,10 +51,8 @@ class BaseScenario(ABC):
 
 
     def __init__(self, scenario_path, tech_map, gen_entity_map, load_entity_map, line_rating_map) -> None:
-        #super().__init__()
 
         # Can be single file or directory of multiple files.
-        # Up to the users
         self._scenario_path = scenario_path
         self._tech_map = load_map(tech_map)
         self._tech_simple = load_map(tech_map_simple)
@@ -320,10 +329,6 @@ class EGRETScenario(BaseScenario):
     def load_egret_file(self, file_path):
         return json.loads(open(file_path, 'r').read())
 
-    def parse_egret_files(self, file_path):
-
-        return NotImplemented
-
 
     def get_raw_generators(self):
         """Loops through the json files and aggregates to a generator dataframe"""
@@ -342,6 +347,7 @@ class EGRETScenario(BaseScenario):
 
         return pd.concat(frames)
 
+    #TODO add availability, load and flow data functions
     def get_raw_availability(self):
         return NotImplemented
 

@@ -1,3 +1,12 @@
+"""
+Functions for parsing PLEXOS h5 files
+to produce generation, availability, load and line flow datasets.
+
+Called in scenario handler concrete classes to generate "raw" dataframes.
+
+@author: Micah Webb
+"""
+
 import pandas as pd
 import os
 from glob import iglob
@@ -70,15 +79,10 @@ def extract_h5_data(file_path, freq, partition, dataset):
 
         piv_data = data.squeeze().transpose()
         df = pd.DataFrame(piv_data, columns=columns, index=timestamps[period_offset:period_offset+len(piv_data)])
-        #df.columns = pd.MultiIndex.from_tuples( ((col, dataset + f' ({units})') for col in df.columns) )
 
         return df
 
-# Inputs
-    # Directory, List of Filepaths,
 
-# Outputs
-    #
 
 def get_plexos_paths(plexos_dir):
 
@@ -167,16 +171,3 @@ def get_h5_region_region_map(file_path):
     return parse_h5_map(file_path, 'metadata/relations/nodes_region')
 
 
-
-
-
-
-
-
-# Plexos Handler from raw h5
-
-# Input = directory
-
-# Cache the maps, base datasets
-
-#
