@@ -1,5 +1,16 @@
-# Function to calculate total VRE available
-# Function to calculate Total VRE generated
+"""
+Stateless functions to perform commond data transformations.
+
+1. Calculating Curtailment - Needs Generation and Availability dataframes.
+
+Most functions are also present in the scenariohandlers Classes.
+
+
+@author: Micah Webb
+"""
+
+
+
 import pandas as pd
 import json
 import os
@@ -29,29 +40,13 @@ def scale_up_down(df):
     return df
 
 
-#color_dict = get_gen_color_map("colors.css")
 MW_to_TW = 1000000
 MW_to_GW = 1000
 
-{"start_unit":{"final_unit": "multiplication_factor"}}
-{"MW":{"GW":1000},
- "MW":{"TW":1000000},
- "GW":{"MW":1/1000},
- "GW":{"TW":1000},
- "TW":{"GW":1/1000},
- "TW":{"MW":1/1000000}
-}
-
-#columns_ordered = ['Other','Nuclear', 'Coal', 'Gas', 'Hydro','Wind','Offshore-Wind','PV','Battery', 'Curtailment']
-#colors = [color_dict[col] for col in columns_ordered]
 
 # minimum requirements
-
 # mapping to standard technology types
 # TODO remove this dependence?
-#tech_map_simple = json.loads(open("tech_map_simple.json", 'r').read())
-
-#curt_tech = ['WS', 'WT', 'PVe']
 curt_tech = ['Wind',"Offshore-Wind", 'PV']
 
 
@@ -90,7 +85,7 @@ def get_generators_tech(scenario_dir, tech_map):
     gen_df = get_raw_generators(scenario_dir)
 
     # TODO replace simple tech map with standard EIA tech map
-    gen_df.columns = pd.MultiIndex.from_tuples([(tech_map_simple[tech_map[col]], col) for col in gen_df.columns])
+    gen_df.columns = pd.MultiIndex.from_tuples([(tech_map[col], col) for col in gen_df.columns])
 
     return gen_df
 
@@ -99,7 +94,7 @@ def get_availability_tech(scenario_dir, tech_map):
     avail_df = get_raw_availability(scenario_dir)
 
     # TODO replace simple tech map with standard EIA tech map
-    avail_df.columns = pd.MultiIndex.from_tuples([(tech_map_simple[tech_map[col]], col) for col in avail_df.columns])
+    avail_df.columns = pd.MultiIndex.from_tuples([(tech_map[col], col) for col in avail_df.columns])
 
     return avail_df
 
@@ -205,16 +200,6 @@ def get_line_utilization(scenario_dir, line_ratings, threshold=95):
     """
 
     return
-
-
-# Level 0 - Geographic Entity (region, zone, interconnect etc.) -> required for region+tech aggs
-# Level 1 - Technology Type -> required for tech aggs
-# Level 2 - Generator ->
-
-# raw generator, availability datasets
-    # -> generator-tech, availability-tech -> generator-tech-curtailment
-    #
-
 
 
 
