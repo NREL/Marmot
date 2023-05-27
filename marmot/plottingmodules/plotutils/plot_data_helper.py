@@ -431,11 +431,10 @@ class PlotDataStoreAndProcessor(dict):
             else:
                 df = df.xs(zone_input, level=self.AGG_BY)
                 df = df.groupby(["timestamp"]).sum()
-            df = df.rename(columns={"values": ext_prop})
+            df = df.rename(columns={"values": ext_prop,0: ext_prop})
             extra_data_frames.append(df)
 
         extra_plot_data = pd.concat(extra_data_frames, axis=1).fillna(0)
-
         if extra_plot_data.columns.str.contains("Unserved_Energy").any():
             if (
                 extra_plot_data[f"{agg}_Unserved_Energy{data_resolution}"] == 0

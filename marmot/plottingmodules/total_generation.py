@@ -34,6 +34,7 @@ logger = logging.getLogger("plotter." + __name__)
 shift_leapday: bool = mconfig.parser("shift_leapday")
 plot_data_settings: dict = mconfig.parser("plot_data")
 curtailment_prop: str = mconfig.parser("plot_data", "curtailment_property")
+include_batteries: bool = mconfig.parser("plot_data","include_explicit_battery_objects")
 
 
 class TotalGeneration(PlotDataStoreAndProcessor):
@@ -141,7 +142,7 @@ class TotalGeneration(PlotDataStoreAndProcessor):
             (False, f"{agg}_Load", self.Scenarios),
             (False, f"{agg}_Demand", self.Scenarios),
             (False, f"{agg}_Unserved_Energy", self.Scenarios),
-            (False, "batterie_Generation", self.Scenarios),
+            #(False, "batterie_Generation", self.Scenarios),
         ]
 
         # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
@@ -189,10 +190,12 @@ class TotalGeneration(PlotDataStoreAndProcessor):
                 Total_Gen_Stack = self.add_curtailment_to_df(
                     Total_Gen_Stack, scenario, zone_input, self.gen_categories.vre
                 )
+
                 # Insert battery generation.
-                Total_Gen_Stack = self.add_battery_gen_to_df(
-                    Total_Gen_Stack, scenario, zone_input
-                )
+                if include_batteries:
+                    Total_Gen_Stack = self.add_battery_gen_to_df(
+                        Total_Gen_Stack, scenario, zone_input
+                    )
 
                 Total_Gen_Stack = Total_Gen_Stack / interval_count
 

@@ -13,8 +13,16 @@ Coal_ST_WI,Coal
 coal-igcc,Coal
 coal-new,Coal
 coaloldscr,Coal
-coal-ccs,Coal
-NG/CC,Gas-CC
+coal-ccs,Coal CCS
+ReEDS_coal-igcc_coal-ccs_mod,Coal CCS
+ReEDS_coal-igcc_coal-ccs_max,Coal CCS
+ReEDS_coaloldscr_coal-ccs_max,Coal CCS
+ReEDS_coalolduns_coal-ccs_max,Coal CCS
+ReEDS_coal-new_coal-ccs_max,Coal CCS
+ReEDS_coaloldscr_coal-ccs_mod,Coal CCS
+ReEDS_coalolduns_coal-ccs_mod,Coal CCS
+ReEDS_coal-new_coal-ccs_mod,Coal CCS
+ReEDS_coal-new_coal-ccs_mod,Gas-CC
 NG_CC_EI,Gas-CC
 NGCC_MX,Gas-CC
 GasCC_ERCOT,Gas-CC
@@ -102,7 +110,7 @@ ReEDS_biopower,Biopower
 ReEDS_geothermal,Geothermal
 ReEDS_caes_gas,Storage
 ReEDS_nuclear-nsp,Nuclear
-ReEDS_coal-ccs,Coal
+ReEDS_coal-ccs,Coal CCS
 ReEDS_cofirenew,Coal
 ReEDS_hydnd,Hydro
 ReEDS_o-g-s,Oil-Gas-Steam
@@ -151,6 +159,8 @@ ReEDS_wind-ofs,Wind
 ReEDS_nuclear,Nuclear
 ReEDS_csp,CSP
 ReEDS_gas-cc-ccs,Gas-CC CCS
+ReEDS_gas-cc_gas-cc-ccs_mod,Gas-CC CCS
+ReEDS_gas-cc_gas-cc-ccs_max,Gas-CC CCS
 ReEDS_hydsnd,Hydro
 Hydro_MonthlyEnergy,Hydro
 Hydro_FixedDispatch,Hydro
@@ -339,3 +349,12 @@ Wind-ofs_1,Wind
 CSU_pumpgas-cc-ccs-f2,Cold storage boost
 CSU_NGCCgas-cc-ccs-f2,Gas-CC CCS
 wind-ofs_1,Wind
+ReEDS_re-ct,RE-CT
+ReEDS_gas-cc_re-cc,RE-CC
+ReEDS_gas-ct_re-ct,RE-CT
+ReEDS_re-cc,RE-CC
+ReEDS_gas-ct_re-ct,RE-CT
+ReEDS_gas-cc-ccs_mod,Gas-CC CCS
+ReEDS_beccs_mod,BECCS
+ReEDS_gas-cc-ccs_max,Gas-CC CCS
+ReEDS_beccs_max,BECCS
