@@ -9,8 +9,6 @@ with up to 3 column levels ["Entity", "Technology", "Generator"].
 @author: Micah Webb
 """
 
-
-
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
@@ -651,6 +649,7 @@ def plot_ranked_series(series, ax=None, **kwargs):
 
     series.sort_values(ascending=False).reset_index().plot.line(ax=ax, **kwargs)
 
+    return ax
 
 def plot_hourly_boxplot(flow: pd.Series, ax=None, return_frame=False):
 
