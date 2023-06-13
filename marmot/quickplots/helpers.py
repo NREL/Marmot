@@ -12,14 +12,28 @@ with up to 3 column levels ["Entity", "Technology", "Generator"].
 
 
 import pandas as pd
+import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.patheffects as path_effects
 #from file_helpers import *
 import numpy as np
 from .config import color_dict
 import random
+import calendar
+
+# TODO move to config
+curt_tech = ['Wind',"Offshore-Wind", 'PV','dPV']
+
+month_map = {index:month for index, month in enumerate(calendar.month_name) if month}
 
 MW_to_TW = 1000000
 MW_to_GW = 1000
+
+def set_default_font(fontfamily):
+    matplotlib.rcParams['font.family'] = fontfamily
+
+# set default to arial
+set_default_font('arial')
 
 
 def get_gen_color_map(file):
@@ -187,7 +201,7 @@ def plot_stacked_area_window(df, ax=None):
     return ax
 
 # expects a dataframe with generation technologies and demand as columns and timestamps as index
-def plot_peak_demand_window(df, window_delta=3, ax=None):
+def plot_peak_demand_window(df, window_delta=3, ax=None, return_frame=False):
 
 
     """
@@ -209,14 +223,17 @@ def plot_peak_demand_window(df, window_delta=3, ax=None):
     delta = pd.Timedelta(days=window_delta)
 
     idx_max = dfg['Demand'].idxmax()
-    max_demand_val = dfg['Demand'].loc[idx_max]/MW_to_GW
-    max_dispatch_val = dfg[[col for col in dfg.columns if col != "Demand"]].loc[idx_max-delta:idx_max+delta].sum(axis=1).max()/MW_to_GW
+
+    dfg_window = dfg.loc[idx_max.round('D')-delta:idx_max.round('D')+delta]
+
+    max_demand_val = dfg_window['Demand'].loc[idx_max]/MW_to_GW
+    max_dispatch_val = dfg_window[[col for col in dfg.columns if col != "Demand"]].sum(axis=1).max()/MW_to_GW
+
     max_y = max(max_demand_val, max_dispatch_val)
 
-    ax = plot_stacked_area_window(dfg.loc[idx_max-delta:idx_max+delta], ax=ax)
+    ax = plot_stacked_area_window(dfg_window, ax=ax)
 
     # Set annotations
-
     annotate_timestamp = idx_max - pd.Timedelta(days=2)
     ax.annotate(f'Peak Demand: \n{max_demand_val:.2f} GW', xy=(idx_max, max_demand_val), xytext=(annotate_timestamp, max_y*1.2),
             arrowprops=dict(facecolor='black', shrink=0.05, width=1))
@@ -224,10 +241,13 @@ def plot_peak_demand_window(df, window_delta=3, ax=None):
     ax.set_title("Period of Peak Demand")
     ax.set_ylim(0, max_y*1.3)
 
-    return ax
+    if return_frame:
+        return ax, dfg_window
+    else:
+        return ax
 
 
-def plot_min_demand_window(df, window_delta=3, ax=None):
+def plot_min_demand_window(df, window_delta=3, ax=None, return_frame=False):
 
 
     """
@@ -248,13 +268,16 @@ def plot_min_demand_window(df, window_delta=3, ax=None):
     dfg = df.groupby(axis=1, level='Technology').sum()
 
     idx_min = dfg['Demand'].idxmin()
-    min_demand_val = dfg['Demand'].loc[idx_min]/MW_to_GW
 
-    max_demand_val = dfg['Demand'].loc[idx_min-delta:idx_min+delta].max()/MW_to_GW
-    max_dispatch_val = dfg[[col for col in dfg.columns if col != "Demand"]].loc[idx_min-delta:idx_min+delta].max(axis=1).max()/MW_to_GW
+    dfg_window = dfg.loc[idx_min.round('D')-delta:idx_min.round('D')+delta]
+
+    min_demand_val = dfg_window['Demand'].loc[idx_min]/MW_to_GW
+    max_demand_val = dfg_window['Demand'].max()/MW_to_GW
+    max_dispatch_val = dfg_window[[col for col in dfg.columns if col != "Demand"]].max(axis=1).max()/MW_to_GW
     max_y = max(max_demand_val, max_dispatch_val)
 
-    ax = plot_stacked_area_window(dfg.loc[idx_min-delta:idx_min+delta], ax=ax)
+
+    ax = plot_stacked_area_window(dfg_window, ax=ax)
 
     annotate_timestamp = idx_min - pd.Timedelta(days=2)
     ax.annotate(f'Minimum Demand: \n{min_demand_val:.2f} GW', xy=(idx_min, min_demand_val), xytext=(annotate_timestamp, max_y*1.3),
@@ -263,7 +286,10 @@ def plot_min_demand_window(df, window_delta=3, ax=None):
     ax.set_title("Period of Minimum Demand")
     ax.set_ylim(0, max_y*1.5)
 
-    return ax
+    if return_frame:
+        return ax, dfg_window
+    else:
+        return ax
 
 
 ## Common Reports
@@ -273,7 +299,7 @@ def plot_min_demand_window(df, window_delta=3, ax=None):
 
 # Expects dataframe with a column for each tech type [Nuclear, Coal, Gas, Hydro, etc.]
 # Expects all timestamps available
-def plot_annual_system_dispatch_stack(df, ax=None):
+def plot_annual_system_dispatch_stack(df, ax=None, return_frame=False):
 
     """
     Plots a stacked bar of the various Power Generation technologies in the dataframe
@@ -301,12 +327,15 @@ def plot_annual_system_dispatch_stack(df, ax=None):
 
     plt.xticks(rotation=0)
 
-    return ax
+    if return_frame:
+        return ax, system_dispatch_annual
+    else:
+        return ax
 
 
 
 # Single figure with stacked bars for each month
-def plot_monthly_system_dispatch_stack(df, ax=None):
+def plot_monthly_system_dispatch_stack(df, ax=None, return_frame=False):
 
     """
     Plots a stacked bar of the various Power Generation technologies
@@ -328,14 +357,16 @@ def plot_monthly_system_dispatch_stack(df, ax=None):
     ax.set_title("System - Monthly Dispatch Stack")
     ax.set_xticks(ax.get_xticks(), ax.get_xticklabels(), rotation=45, ha='right')
 
-
-    return ax
+    if return_frame:
+        return ax, system_dispatch_monthly
+    else:
+        return ax
 
 
 
 
 # Single figure with stacked bars for each entity
-def plot_annual_entity_dispatch_stack(df, ax=None):
+def plot_annual_entity_dispatch_stack(df, ax=None, return_frame=False):
 
 
     """
@@ -359,10 +390,13 @@ def plot_annual_entity_dispatch_stack(df, ax=None):
     ax.set_title("Entity - Annual Dispatch Stack")
     ax.set_xticks(ax.get_xticks(), ax.get_xticklabels(), rotation=45, ha='right')
 
-    return ax
+    if return_frame:
+        return ax, zonal_dispatch_annual
+    else:
+        return ax
 
 ### Curtailment Stack
-def plot_annual_system_curtailment_stack(df, ax=None):
+def plot_annual_system_curtailment_stack(df, ax=None, return_frame=False):
 
 
     """
@@ -389,9 +423,12 @@ def plot_annual_system_curtailment_stack(df, ax=None):
     ax.set_ylabel("Curtailment (TWh)")
     ax.set_xticks(ax.get_xticks(), ax.get_xticklabels(), rotation=0, ha='right')
 
-    return ax
+    if return_frame:
+        return ax, curtailment_tech_annual
+    else:
+        return ax
 
-def plot_monthly_system_curtailment_stack(df, ax=None):
+def plot_monthly_system_curtailment_stack(df, ax=None, return_frame=False):
 
 
     """
@@ -416,10 +453,13 @@ def plot_monthly_system_curtailment_stack(df, ax=None):
     ax.set_ylabel("Curtailment (TWh)")
     ax.set_xticks(ax.get_xticks(), ax.get_xticklabels(), rotation=45, ha='right')
 
-    return ax
+    if return_frame:
+        return ax, curtailment_tech_monthly
+    else:
+        return ax
 
 
-def plot_annual_entity_curtailment_stack(df, ax=None):
+def plot_annual_entity_curtailment_stack(df, ax=None, return_frame=False):
 
     """
     Expects a entity curtailment dataset with a MultiIndex column of 2 levels.
@@ -443,7 +483,10 @@ def plot_annual_entity_curtailment_stack(df, ax=None):
     ax.set_xticks(ax.get_xticks(), ax.get_xticklabels(), rotation=45, ha='right')
     ax.set_ylabel("Generation (TWh)")
 
-    return ax
+    if return_frame:
+        return ax, curt_tech_entity_annual
+    else:
+        return ax
 
 
 ### FLOW PLOTS
@@ -559,7 +602,7 @@ def plot_utilization(loading, ax=None):
 
 
 # Assumes a series
-def plot_flow(flow, column, label, ax=None):
+def plot_flow(flow, column, label, ax=None, annotate=True):
 
     """
     Plots Sorted flow of an individual column in a flow dataset.
@@ -571,6 +614,18 @@ def plot_flow(flow, column, label, ax=None):
         ax = plt.axes()
 
     flow[column].sort_values(ascending=False).reset_index().plot.line(y=column, ax=ax, label=label, color='Green', grid=True)
+
+    if annotate:
+
+        flow_stats = flow[column].apply(lambda x: x if x>=0 else 0.0).agg(['sum','max'])
+        rflow_stats = flow[column].apply(lambda x: abs(x) if x<0 else 0.0).agg(['sum','max'])
+        posFlow, posPeak = flow_stats['sum']/MW_to_TW, flow_stats['max']/MW_to_GW
+        negFlow, negPeak = rflow_stats['sum']/MW_to_TW, rflow_stats['max']/MW_to_GW
+
+        an_text = f'+{posFlow:.3g} | -{negFlow:.3g} TWh \n +{posPeak:.3g} | -{negPeak:.3g} GW'
+
+        ax.annotate(an_text,xy=(0.8,0.8),xycoords='axes fraction',fontsize=12, bbox=dict(boxstyle="round", fc="0.8", alpha=0.6,path_effects=[path_effects.withStroke()]))
+
 
     ax.axhline(0, 0,1, color="Grey")
     ax.set_ylabel("Flow (MW)")
@@ -595,3 +650,67 @@ def plot_ranked_series(series, ax=None, **kwargs):
         ax = plt.axes()
 
     series.sort_values(ascending=False).reset_index().plot.line(ax=ax, **kwargs)
+
+
+def plot_hourly_boxplot(flow: pd.Series, ax=None, return_frame=False):
+
+    """
+    Input: Timeseries of Flow data or Loading data
+    Output: Boxplot with box for each hour of the day
+    """
+
+    cflow = flow.copy().to_frame()
+    cflow['hour'] = cflow.index.hour+1
+    cflow['date'] = cflow.index.date
+
+    cflow_pivot = cflow.pivot(columns='hour', index='date').droplevel(0, axis=1)
+
+    ax = cflow_pivot.plot.box(ax=ax,
+            #color=dict(boxes='darkgreen', whiskers='blue', medians='black', caps='black'),
+            boxprops=dict(color='darkgreen',linestyle='-', linewidth=1.5, alpha=0.5),
+            flierprops=dict(linestyle='-', linewidth=1.5),
+            medianprops=dict(color='black',linestyle='-', linewidth=2.5),
+            whiskerprops=dict(linestyle='-', linewidth=1.5),
+            capprops=dict(linestyle='-', linewidth=1.5),
+            patch_artist=True,
+            showfliers=False, grid=False, rot=0
+    )
+
+    ax.hlines(0,xmin=1,xmax=24, color='grey', linestyle='--')
+    ax.set_title('Mean Hourly Flow Profile')
+    ax.spines[['right', 'top']].set_visible(False)
+    ax.set_xlabel('Hour of Day')
+    ax.set_ylabel('Flow Distribution (MW)')
+
+    if return_frame:
+        return ax, cflow_pivot
+    else:
+        return ax
+
+
+def plot_hourly_box_monthly(flow: pd.Series):
+
+    months = flow.index.month.unique()
+
+    fig, axs = plt.subplots(3,4, figsize=(18,12), sharex=False, sharey=True)
+
+    axs = trim_axs(axs, len(months))
+
+    i = 0
+    for ax in axs.reshape(-1)[0:len(months)]:
+
+        month = months[i]
+
+
+        sub_flow = flow.loc[flow.index.month == month].copy()
+
+        plot_hourly_boxplot(sub_flow, ax=ax)
+        ax.set_title(month_map[month])
+
+        if i < 4*3 - 4:
+            ax.set_xlabel(None)
+            ax.set_xticks([])
+            ax.spines[['right', 'top', 'bottom']].set_visible(False)
+        i = i + 1
+
+    return fig, axs
