@@ -672,10 +672,11 @@ def plot_hourly_boxplot(flow: pd.Series, ax=None, return_frame=False):
             whiskerprops=dict(linestyle='-', linewidth=1.5),
             capprops=dict(linestyle='-', linewidth=1.5),
             patch_artist=True,
-            showfliers=False, grid=False, rot=0
+            showfliers=False, grid=False, rot=0,zorder=2
     )
 
-    ax.hlines(0,xmin=1,xmax=24, color='grey', linestyle='--')
+    ax.hlines(0,xmin=0,xmax=24, color='grey', linestyle='--',linewidth=0.5,zorder=1)
+
     ax.set_title('Mean Hourly Flow Profile')
     ax.spines[['right', 'top']].set_visible(False)
     ax.set_xlabel('Hour of Day')
@@ -691,7 +692,7 @@ def plot_hourly_box_monthly(flow: pd.Series):
 
     months = flow.index.month.unique()
 
-    fig, axs = plt.subplots(3,4, figsize=(18,12), sharex=False, sharey=True)
+    fig, axs = plt.subplots(4,3, figsize=(18,12), sharex=False, sharey=True)
 
     axs = trim_axs(axs, len(months))
 
