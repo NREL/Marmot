@@ -1,6 +1,5 @@
 # Order matters here.
 color_dict = {
-'Other' :'#FF7FBB',
 'Nuclear':'#820000',
 'Geothermal' :'#A96235',
 'Coal' :'#222222',
@@ -20,6 +19,8 @@ color_dict = {
 'RE-CT':'#7FC340',
 'RE-CC':'#7FC340',
 'BECCS':'#A8C839',
+'PS' :'#000080',
+'Other' :'#FF7FBB',
 'Hydro' :'#187F94',
 'Ocean' :'#000080',
 'VRE':'#7FC340',
