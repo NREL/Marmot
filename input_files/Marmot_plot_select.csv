@@ -1,8 +1,14 @@
 Figure Output Name,Plot Graph,Plot Property,Y-Axis Max,Day Before,Day After,Timezone,Start date,End date,Timeseries Plot Resolution,Group by Scenario or Year-Scenario,Custom Data File,Marmot Module,Method
 Avg_Out_Committed,FALSE,,,,,EST,,,,Scenario,,capacity_factor,avg_output_when_committed
 Avg_Out_Committed_By_Year,FALSE,,,,,EST,2030,2050,,Year-Scenario,,capacity_factor,avg_output_when_committed
-Capacity_Factor,FALSE,,,,,EST,,,,Scenario,,capacity_factor,cf
+Capacity_Factor,FALSE,"ReEDS_beccs_max,ReEDS_coal-igcc_coal-ccs_max,ReEDS_coal-new_coal-ccs_max,ReEDS_coaloldscr_coal-ccs_max,ReEDS_coalolduns_coal-ccs_max,ReEDS_gas-cc_gas-cc-ccs_max",,,,EST,,,,Scenario,,capacity_factor,cf
 Capacity_Factor_By_Year,FALSE,,,,,EST,2030,2050,,Year-Scenario,,capacity_factor,cf
+CCS_Capacity_Factors,FALSE,"ReEDS_beccs_max,
+ ReEDS_coal-igcc_coal-ccs_max,
+ ReEDS_coal-new_coal-ccs_max,
+ ReEDS_coaloldscr_coal-ccs_max,
+ ReEDS_coalolduns_coal-ccs_max,
+ ReEDS_gas-cc_gas-cc-ccs_max",,,,,,,,,,capacity_factor,cf
 FLECCS_NGCC_Capacity_Factor,FALSE,,,,,,,,,,,capacity_factor,cf_singletech
 Time_at_Min_Gen,FALSE,,,,,,,,,Scenario,,capacity_factor,time_at_min_gen
 Capacity_Out_Stacked_annual,FALSE,,,,,EST,,,Annual ,,,capacity_out,capacity_out_stack
@@ -50,11 +56,11 @@ Unstacked_Gen_Facet_Grid,FALSE,,,,,EST,,,Interval,,,generation_unstack,gen_unsta
 Hydro_Versus_Continent_Net_Load,FALSE,,,,,,1/10/24,1/20/24,,,,hydro,hydro_continent_net_load
 Hydro_Versus_Net_Load,FALSE,,,,7,EST,,,,,,hydro,hydro_net_load
 Hydro_comparision_hourly,FALSE,,,,,,,,,,,hydro,hydro_timeseries
-All_Regions_Price_Duration_Curve,FALSE,,150,,,,,,,,,prices,pdc_all_regions
+All_Regions_Price_Duration_Curve,FALSE,,100,,,,,,,,,prices,pdc_all_regions
 Region_Price_Duration,FALSE,,,,,,,,,,,prices,region_pdc
-Region_Price_Duration_Threshold,FALSE,,150,,,,1/10/24,1/20/24,,,,prices,region_pdc
+Region_Price_Duration_Threshold,FALSE,,100,,,,,,,,,prices,region_pdc
 Region_Price_Timeseries,FALSE,,,,,,1/10/24,1/20/24,,,,prices,region_timeseries_price
-Region_Price_Timeseries_Threshold,FALSE,,150,,,,1/10/24,1/20/24,,,,prices,region_timeseries_price
+Region_Price_Timeseries_Threshold,FALSE,,100,,,,1/10/24,1/20/24,,,,prices,region_timeseries_price
 All_Regions_Price_Timeseries,FALSE,,,,,,1/10/24,1/20/24,,,,prices,timeseries_price_all_regions
 Node_Price_Duration_Curve,FALSE,"101,202",,,,,,,,,,prices,node_pdc
 Node_Price_Timeseries,FALSE,"101,202",,,,EST,1/10/24,1/20/24,,,,prices,node_timeseries_price
@@ -63,7 +69,7 @@ Node_Price_Histogram_Difference,FALSE,"101,202",,,,,,,,,,prices,node_price_hist_
 National Load-Weighted Average Price,FALSE,,150,,,,,,,,,prices,national_lwavg_price
 Detailed_Total_Generation_Cost,FALSE,,,,,,,,,Scenario,,production_cost,detailed_gen_cost
 Detailed_Total_Generation_Cost_by_year,FALSE,,,,,,2030,2050,,Year-Scenario,,production_cost,detailed_gen_cost
-Detailed_Total_Generation_Cost_Diff,FALSE,,,,,,2030,2050,,Scenario,,production_cost,detailed_gen_cost_diff
+Detailed_Total_Generation_Cost_Diff,FALSE,,,,,,,,,Scenario,,production_cost,detailed_gen_cost_diff
 Detailed_Total_Generation_Cost_Diff_by_year,FALSE,,,,,,,,,Year-Scenario,,production_cost,detailed_gen_cost_diff
 Production_Cost,FALSE,,,,,,,,,,,production_cost,prod_cost
 Total_System_Cost,FALSE,,,,,,,,,Scenario,,production_cost,sys_cost
@@ -102,11 +108,11 @@ Thermal_Capacity_Reserves,FALSE,,,,,EST,,,Interval,,,thermal_cap_reserve,thermal
 Thermal_Capacity_Reserves_by_year,FALSE,,,,,EST,,,Annual,,,thermal_cap_reserve,thermal_cap_reserves
 Total_Generation,FALSE,,,,,,,,,Scenario,,total_generation,total_gen
 Total_Generation_by_year,FALSE,,,,,,,,,Year-Scenario,,total_generation,total_gen
-Total_Generation_Monthly,FALSE,,,,,EST,1/2/40,2040,,,,total_generation,total_gen_monthly
+Total_Generation_Monthly,TRUE,,,,,EST,,,,,,total_generation,total_gen_monthly
 Monthly_Wind_Solar,FALSE,,,,,EST,2048,2050,,,,total_generation,monthly_vre_generation
 Monthly_Wind_Solar_Percentage,FALSE,,,,,EST,2048,2050,,,,total_generation,monthly_vre_generation_percentage
 Total_Generation_Pie,FALSE,,,,,EST,2020,2030,,,,total_generation,total_gen_pie
-Total_Generation_Diff,TRUE,,,,,,,,,Scenario,,total_generation,total_gen_diff
+Total_Generation_Diff,FALSE,,,,,,,,,Scenario,,total_generation,total_gen_diff
 Total_Generation_Diff_by_year,FALSE,,,,,,,,,Year-Scenario,,total_generation,total_gen_diff
 Total_Installed_Capacity,FALSE,,,,,,,,,Scenario,,total_installed_capacity,total_cap
 Total_Installed_Capacity_by_year,FALSE,,,,,,,,,Year-Scenario,,total_installed_capacity,total_cap

@@ -217,7 +217,7 @@ def createConfig(configfile_path: Path):
             include_timeseries_load_storage_charging_line=True,
             include_barplot_net_imports=True,
             include_stackplot_net_imports=True,
-            include_explicit_battery_objects=True
+            include_explicit_battery_objects=False,
         ),
         load_legend_names=dict(load="Demand +\nStorage Charging", demand="Demand"),
         formatter_settings=dict(
