@@ -736,6 +736,9 @@ class PlotDataStoreAndProcessor(dict):
             else:
                 divisor = 1000
                 units = "GW"
+        elif mconfig.parser("all_data_GW"):
+            divisor = 1000
+            units = "GW"
         else:
             # Disables auto unit conversion, all values in MW
             divisor = 1

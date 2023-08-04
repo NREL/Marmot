@@ -36,16 +36,15 @@ plot_data_settings: dict = mconfig.parser("plot_data")
 xdimension: int = mconfig.parser("figure_size", "xdimension")
 ydimension: int = mconfig.parser("figure_size", "ydimension")
 
-gen_names_dict = pd.read_csv('/Users/mschwarz/Marmot_local/Marmot/input_files/mapping_folder/gen_names_Standard.csv')
-gen_names_dict = gen_names_dict.set_index(gen_names_dict.columns[0]).squeeze().to_dict()
+# gen_names_dict = pd.read_csv('/Users/mschwarz/Marmot_local/Marmot/input_files/mapping_folder/gen_names_Standard.csv')
+# gen_names_dict = gen_names_dict.set_index(gen_names_dict.columns[0]).squeeze().to_dict()
 
 # self = CapacityFactor(
-#     Zones = ['USA'],
-#     AGG_BY = 'Country',
-#     #Scenarios = ['Linde_Ref150', 'Envergex_Ref150', 'CSU_Ref150', 'Rivers8_Ref150', 'Pitt_Ref150', 'MIT_Ref150', 'GA_Ref150', 'Luna_Ref150'],
-#     Scenarios = ['8Rivers_Ref150','CSU_Ref150'],
+#     Zones = ['p1'],
+#     AGG_BY = 'region',
+#     Scenarios = ['Cap100', 'Cap100_MinCF1', 'Cap100_MinCF6'],
 #     ordered_gen = ['Nuclear', 'Coal', 'Gas-CC', 'Gas-CC CCS', 'Gas-CT', 'Gas', 'Gas-Steam', 'Dual Fuel', 'DualFuel', 'Oil-Gas-Steam', 'Oil', 'Hydro', 'Ocean', 'Geothermal', 'Biomass', 'Biopower', 'Other', 'VRE', 'Wind', 'Offshore Wind', 'OffshoreWind', 'Solar', 'PV', 'dPV', 'CSP', 'PV-Battery', 'Battery', 'OSW-Battery', 'PHS', 'Storage', 'Net Imports', 'Curtailment', 'curtailment', 'Demand', 'Deamand + Storage Charging'],
-#     marmot_solutions_folder = '/Users/mschwarz/Library/CloudStorage/OneDrive-NREL',
+#     marmot_solutions_folder = '/Users/mschwarz/BVRE',
 #     gen_names_dict = gen_names_dict
 # )
 
@@ -363,8 +362,9 @@ class CapacityFactor(PlotDataStoreAndProcessor):
                     Cap, scenario, groupby=scenario_groupby
                 ).sum()
                 # Calculate CF
-                #ww changed from  CF = Total_Gen / (Cap * duration_hours)
-                CF = duration_hours
+                #ww changed from  
+                CF = Total_Gen / (Cap * duration_hours)
+                #CF = duration_hours
                 cf_scen_chunks.append(CF)
 
             if cf_scen_chunks:

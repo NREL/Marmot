@@ -217,6 +217,7 @@ def createConfig(configfile_path: Path):
             include_timeseries_load_storage_charging_line=True,
             include_barplot_net_imports=True,
             include_stackplot_net_imports=True,
+            include_explicit_battery_objects=True
         ),
         load_legend_names=dict(load="Demand +\nStorage Charging", demand="Demand"),
         formatter_settings=dict(
@@ -229,6 +230,7 @@ def createConfig(configfile_path: Path):
         figure_file_format="svg",
         shift_leapday=False,
         auto_convert_units=True,
+        all_data_GW=False,
         read_csv_properties=False,
         user_defined_inputs_file="Marmot_user_defined_inputs.csv",
         plot_select_file="Marmot_plot_select.csv",
