@@ -77,16 +77,20 @@ def extract_h5_data(file_path, freq, partition, dataset):
         period_offset = attributes['period_offset']
         units = attributes['units'].decode()
 
+
         piv_data = data.squeeze().transpose()
         df = pd.DataFrame(piv_data, columns=columns, index=timestamps[period_offset:period_offset+len(piv_data)])
-
+        df.index.name = 'Timestamp'
+        df.attrs['units'] = units
         return df
+
 
 
 
 def get_plexos_paths(plexos_dir):
 
     return [os.path.normpath(file) for file in iglob(f"{plexos_dir}/*.h5")]
+
 
 
 def agg_plexos_dataset(plexos_dir, freq, partition, dataset):
@@ -110,7 +114,44 @@ def agg_plexos_dataset(plexos_dir, freq, partition, dataset):
     return agg_df
 
 
+def agg_plexos_partition(plexos_dir, freq, partition):
+    """
+    Not ideal for larger datasets.
 
+    Takes a plexos partition and combines all datasets into a single dataframe
+
+    """
+    paths = get_plexos_paths(plexos_dir)
+    template_file = paths[0]
+
+    print(f"aggregating {freq} {partition}")
+
+    with h5py.File(template_file) as h5data:
+
+        datasets = [key for key in h5data[f'/data/ST/{freq}/{partition}'].keys()]
+
+    df_dict = {}
+    for ds in datasets:
+
+        print(f'aggregating dataset: {ds}')
+        dataset_df = agg_plexos_dataset(plexos_dir, freq, partition, ds)
+
+        df_dict[ds] = dataset_df.astype('float32')
+
+
+    print('formatting data')
+    frames = []
+    for dataset, df in df_dict.items():
+        units = df.attrs['units']
+
+        df.columns = pd.MultiIndex.from_tuples([(f'{dataset} ({units})', col) for col in df.columns], names=[None,partition])
+        frames.append(df)
+
+    print('combining frames')
+    partition_df = pd.concat(frames, axis=1).stack()
+    partition_df.index = partition_df.index.swaplevel(0,1)
+    partition_df.index.set_names([partition, 'Timestamp'])
+    return partition_df.sort_index()
 
 
 def agg_plexos_generation(plexos_dir):
@@ -128,7 +169,7 @@ def agg_plexos_availability(plexos_dir):
 
 def agg_plexos_load(plexos_dir):
 
-    return agg_plexos_dataset(plexos_dir, 'interval', 'nodes', 'Load')
+    return agg_plexos_dataset(plexos_dir, 'interval', 'regions', 'Load')
 
 
 def parse_h5_map(file_path, metadata_path, reverse=False):
@@ -157,9 +198,6 @@ def get_h5_gen_zone_map(file_path):
 
     return parse_h5_map(file_path, 'metadata/relations/zones_generators', reverse=True)
 
-def get_h5_region_zone_map(file_path):
-
-    return parse_h5_map(file_path, 'metadata/relations/nodes_zone')
 
 
 def get_h5_gen_region_map(file_path):
@@ -167,7 +205,22 @@ def get_h5_gen_region_map(file_path):
     return parse_h5_map(file_path, 'metadata/relations/regions_generators', reverse=True)
 
 def get_h5_region_region_map(file_path):
+    # identity map for regional load
+    map = parse_h5_map(file_path, 'metadata/objects/regions')
+    new_map = {key:key for key in map.keys()}
+    return new_map #parse_h5_map(file_path, 'metadata/relations/nodes_region')
 
-    return parse_h5_map(file_path, 'metadata/relations/nodes_region')
 
+def get_h5_region_zone_map(file_path):
+
+    gen_zone_map = get_h5_gen_zone_map(file_path)
+    gen_region_map = get_h5_gen_region_map(file_path)
+
+    region_zone_map = {}
+    for generator, region in gen_region_map.items():
+
+        zone = gen_zone_map[generator]
+        region_zone_map[region] = zone
+
+    return region_zone_map
 
