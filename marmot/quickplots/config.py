@@ -19,7 +19,7 @@ color_dict = {
 'RE-CT':'#7FC340',
 'RE-CC':'#7FC340',
 'BECCS':'#A8C839',
-'PS' :'#000080',
+'PS' :'#CC0079',
 'Other' :'#FF7FBB',
 'Hydro' :'#187F94',
 'Ocean' :'#000080',
