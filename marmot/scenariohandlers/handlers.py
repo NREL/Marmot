@@ -98,7 +98,7 @@ class BaseScenario(ABC):
 
             if os.path.exists(f'{self._scenario_path}/marmot_cache') == False:
                 os.makedirs(f'{self._scenario_path}/marmot_cache')
-            df.to_parquet(cache_path)
+            df.to_parquet(cache_path,compression='gzip')
             return df
 
 
@@ -112,7 +112,7 @@ class BaseScenario(ABC):
             df = self.get_raw_availability()
             if os.path.exists(f'{self._scenario_path}/marmot_cache') == False:
                 os.makedirs(f'{self._scenario_path}/marmot_cache')
-            df.to_parquet(cache_path)
+            df.to_parquet(cache_path,compression='gzip')
             return df
 
 
