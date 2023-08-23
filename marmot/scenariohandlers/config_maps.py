@@ -113,6 +113,7 @@ plexos_map_simple = {
     're-ct':'RE-CT',
     'wind-ofs':'Offshore-Wind',
     'beccs_mod':'BECCS',
+    'beccs':'BECCS',
     'geothermal':'Geothermal',
     'gas-cc-ccs_mod':'Gas',
     'caes':'Storage',
@@ -122,7 +123,11 @@ plexos_map_simple = {
     'coaloldscr':'Coal',
     'csp-ns':'Other',
     'coalolduns_coal-ccs_mod':'Coal',
-    'dupv':'dPV'
+    'dupv':'dPV',
+    'h2-ct':'H2-CT',
+    'hydnpnd': 'Hydro',
+    'gas-cc-ccs':'Gas-CC',
+    'geohydro':'Hydro'
 }
 
 
@@ -135,3 +140,18 @@ volt_line_width={
     765.0:1.5,
     735.0:1.5
 }
+
+
+def columns_to_simple(input_columns, input_map):
+    from difflib import get_close_matches
+
+    rmap = [] #list of tuples
+    for column in input_columns:
+        results = get_close_matches(column.lower(), list(input_map.keys()))
+        if results:
+            rmap.append((plexos_map_simple[results[0]], column))
+        # return same value if not mapped
+        else:
+            rmap.append((column, column))
+
+    return rmap

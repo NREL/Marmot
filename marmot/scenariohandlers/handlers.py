@@ -14,11 +14,10 @@ from marmot.datahelpers import calc_curtailment
 import pandas as pd
 import json
 import os
-from marmot.scenariohandlers.config_maps import tech_map_simple, egret_map_simple, plexos_map_simple
+from marmot.scenariohandlers.config_maps import *
 from functools import lru_cache
 from glob import iglob
 from marmot.datahelpers.parsers import *
-
 
 #Need a pre-determined set of curtailable technology. Global value that can be updated
 # TODO move this to a config section
@@ -45,6 +44,34 @@ def load_map(map):
             return None
     else:
         return None
+
+
+def get_winter_summer_peaks(dispatch, winter_months=[1,2,12]):
+
+
+    winter_mask = dispatch.index.month.isin(set(winter_months))
+
+    vre_cols = [tech for tech in curt_tech if tech in dispatch.columns.get_level_values('Technology').unique()]
+    total_demand = dispatch.groupby(axis=1, level='Technology').sum()['Demand']
+    total_vre = dispatch.groupby(axis=1, level='Technology').sum()[vre_cols].sum(axis=1)
+    total_net_load = total_demand - total_vre
+
+    peak_summer_demand = total_demand[~winter_mask].idxmax()
+    peak_summer_netload = total_net_load[~winter_mask].idxmax()
+
+    peak_winter_demand = total_demand[winter_mask].idxmax()
+    peak_winter_netload = total_net_load[winter_mask].idxmax()
+
+    peak_days = {
+        'Winter Peak Demand': peak_winter_demand,
+        'Winter Peak Net Load': peak_winter_netload,
+        'Summer Peak Demand': peak_summer_demand,
+        'Summer Peak Net Load': peak_summer_netload
+        }
+
+    return peak_days
+
+
 
 class BaseScenario(ABC):
 
@@ -76,6 +103,9 @@ class BaseScenario(ABC):
     def get_regional_load(self):
         ...
 
+    @abstractmethod
+    def get_installed_capacity(self):
+        ...
     @abstractmethod
     def get_line_flow_data(self):
         ...
@@ -114,7 +144,6 @@ class BaseScenario(ABC):
                 os.makedirs(f'{self._scenario_path}/marmot_cache')
             df.to_parquet(cache_path)
             return df
-
 
     def get_generators_tech(self):
 
@@ -201,6 +230,10 @@ class BaseScenario(ABC):
 
         return curt_entity.groupby(level=['Entity', 'Technology'], axis=1).sum()
 
+    def get_winter_summer_peaks(self, winter_months=[1,2,12]):
+        dispatch = self.get_entity_tech_load_aggregates()
+        return get_winter_summer_peaks(dispatch, winter_months=winter_months)
+
 
     # Flow APIs
 
@@ -267,6 +300,9 @@ class SIIPScenario(BaseScenario):
     def get_regional_load(self):
         return pd.read_parquet(f"{self._scenario_path}/regional_load.pq.gz")
 
+    def get_installed_capacity(self):
+        return NotImplemented
+
     def get_line_flow_data(self):
         return pd.read_parquet(f"{self._scenario_path}/power_flow_actual.pq.gz")
 
@@ -276,6 +312,7 @@ class PlexosScenario(BaseScenario):
     def __init__(self, scenario_path,  gen_entity_map=None, load_entity_map=None, line_rating_map=None) -> None:
         super().__init__(scenario_path, tech_map=None, gen_entity_map=gen_entity_map, load_entity_map=load_entity_map, line_rating_map=line_rating_map)
 
+        self._scenario_path = scenario_path
         self._template_file = get_plexos_paths(scenario_path)[0]
         self._tech_map = get_h5_gen_tech_map(self._template_file)
         self._tech_simple = load_map(plexos_map_simple)
@@ -294,8 +331,23 @@ class PlexosScenario(BaseScenario):
     def get_regional_load(self):
         return agg_plexos_load(self._scenario_path)
 
+
+    def get_installed_capacity(self):
+
+        df = extract_h5_data(f'{self._template_file}', 'year', 'generators','Installed Capacity', is_relation=False)
+        df.index = pd.MultiIndex.from_tuples([(
+        self._gen_entity_map[idx],
+        self.simplify_technology(self._tech_map[idx]),
+        idx) for idx in df.index], names=['Entity', 'Technology', 'Generator'])
+
+        return df.groupby(level=['Entity', 'Technology']).sum().unstack(level='Technology').droplevel(0, axis=1).fillna(0.0)
+
+
     def get_line_flow_data(self):
         return NotImplemented
+
+    def get_plexos_partition(self, freq, partition, is_relation=False ):
+        return agg_plexos_partition(self._scenario_path, freq=freq, partition=partition, is_relation=is_relation)
 
     def set_entity_map(self, entity_map: str ) -> None:
         if entity_map.lower() == 'zone':
@@ -304,6 +356,140 @@ class PlexosScenario(BaseScenario):
         elif entity_map.lower() == 'region':
             self._gen_entity_map = get_h5_gen_region_map(self._template_file)
             self._load_entity_map = get_h5_region_region_map(self._template_file)
+
+
+
+class ReEDsScenario(BaseScenario):
+
+    def __init__(self, scenario_path,analysis_year, tech_map=None, gen_entity_map=None, load_entity_map=None, line_rating_map=None) -> None:
+        super().__init__(scenario_path, tech_map=tech_map, gen_entity_map=gen_entity_map, load_entity_map=load_entity_map, line_rating_map=line_rating_map)
+
+        self._scenario_path = scenario_path
+        #self._tech_map = self.get_gen_tech_map()
+
+        #self._tech_simple = load_map(reeds_map_simple)
+
+        self._weather_year = 2012
+        self._analysis_year = analysis_year
+        self._entity_map = load_entity_map #maps the default entity to new entity
+
+
+    def get_gen_tech_map():
+        return NotImplemented
+
+    def get_raw_generators(self):
+        return NotImplemented
+
+    def get_raw_availability(self):
+        return NotImplemented
+
+    def set_entity_map(self, entity_map: str ) -> None:
+        self._entity_map = entity_map.lower()
+
+
+    def get_regional_load(self):
+        df = pd.read_hdf(f'{self._scenario_path}/inputs_case/load.h5')
+
+        weather_years = list(range(2007, 2014, 1)) # list of weather years simulated
+        w_idx = weather_years.index(self._weather_year)
+
+        index_start = 8760*w_idx
+        index_end = index_start+8759
+
+        df2 = df.loc[self._analysis_year].loc[index_start:index_end]
+        timestamp_index = pd.date_range(f'01-01-{self._analysis_year}', periods=8760, freq='H')
+
+        df3 = df2.reset_index().set_index(timestamp_index).drop(columns=['hour'])
+        df3.index.name = 'Timestamp'
+        df3.columns.name = 'Entity'
+
+        return df3
+
+    def get_entity_tech_aggregates(self):
+        return NotImplemented
+
+    @lru_cache(10)
+    def get_ivrt(self, file_name, analysis_year):
+        df = pd.read_csv(f'{self._scenario_path}/outputs/{file_name}')
+        df = df[df.t == analysis_year]
+        df['reeds_year'] = pd.to_datetime(df['t'].apply(lambda x: f'01-01-{x}'))
+        df['delta'] = df['allh'].apply(lambda x: pd.Timedelta(days = int(x.split('h')[0].split('d')[1]) , hours=int(x.split('h')[1]) ))
+        df['Timestamp'] = df['reeds_year'] + df['delta']
+
+        return df
+
+    def get_generators_tech(self):
+
+        df = self.get_ivrt('gen_h.csv', self._analysis_year)
+        df['Technology'] = [col[0] for col in columns_to_simple(df['i'], plexos_map_simple)]
+        df['Entity'] = df['r']
+
+        return df.pivot_table(index='Timestamp', columns=['Entity','Technology'], values='Value', aggfunc='sum', fill_value=0.0)
+
+    def get_availability_tech(self):
+
+        df = self.get_ivrt('cap_avail.csv', self._analysis_year)
+        df['Technology'] = [col[0] for col in columns_to_simple(df['i'], plexos_map_simple)]
+        df['Entity'] = df['r']
+
+        return df
+
+    def get_regional_curtailment(self):
+        df = self.get_ivrt('curt_h.csv', self._analysis_year)
+        df['Entity'] = df['r']
+
+        return df.pivot_table(index='Timestamp', columns=['Entity'], values='Value', aggfunc='sum', fill_value=0.0)
+
+    def get_gen_and_curtailment(self):
+        gen_tech = self.get_generators_tech()
+        reg_curt = self.get_regional_curtailment()
+
+        reg_curt.columns = pd.MultiIndex.from_tuples([(col, 'Curtailment') for col in reg_curt.columns])
+
+        return pd.merge(gen_tech, reg_curt, left_index=True, right_index=True)
+
+    def get_installed_capacity(self):
+        df = pd.read_csv(f'{self._scenario_path}/outputs/cap_ivrt.csv')
+
+        df = df.pivot_table(index=['t','r'], columns='i', values='Value', aggfunc='sum', fill_value=0.0).loc[self._analysis_year]
+
+        new_columns = columns_to_simple(df.columns, plexos_map_simple)
+
+        df.columns = pd.MultiIndex.from_tuples(new_columns)
+
+        df3 = df.groupby(level=0, axis=1).sum()
+        df3.columns.name = 'Technology'
+        df3.index.name = 'Entity'
+        if self._entity_map:
+            df3.index = [self._entity_map[ix] for ix in df3.index]
+            return df3.groupby(level=0).sum()
+        else:
+            return df3
+
+    def get_entity_tech_load_aggregates(self):
+
+        gen_curt = self.get_gen_and_curtailment()
+        load = self.get_regional_load()
+
+        load.columns = pd.MultiIndex.from_tuples([(col, 'Demand') for col in load.columns])
+
+        # TODO map to correct entitity
+        cdf = pd.merge(gen_curt, load, left_index=True, right_index=True)
+        cdf.columns.names = ['Entity', 'Technology']
+
+        if self._entity_map:
+            cdf.columns = pd.MultiIndex.from_tuples([
+                (self._entity_map[col[0]],
+                col[1])
+                for col in cdf.columns
+            ], names=['Entity', 'Technology'])
+            return cdf.groupby(level=['Entity','Technology'], axis=1).sum()
+        else:
+            return cdf
+
+
+    def get_line_flow_data(self):
+        return NotImplemented
 
 
 

@@ -53,7 +53,7 @@ def combine_frames_skip_prev(frames):
 
 
 
-def extract_h5_data(file_path, freq, partition, dataset):
+def extract_h5_data(file_path, freq, partition, dataset, is_relation):
 
 
     """
@@ -64,9 +64,13 @@ def extract_h5_data(file_path, freq, partition, dataset):
         without much modification /aggregation
     """
 
+    sub = 'objects'
+    if is_relation:
+        sub='relations'
+
     with h5py.File(file_path) as h5data:
 
-        headers = h5data[f'/metadata/objects/{partition}'][()]
+        headers = h5data[f'/metadata/{sub}/{partition}'][()]
         columns = [r[0].decode() for r in headers]
 
 
@@ -77,10 +81,20 @@ def extract_h5_data(file_path, freq, partition, dataset):
         period_offset = attributes['period_offset']
         units = attributes['units'].decode()
 
+        if freq == 'year':
+            print('new')
+            piv_data = data.squeeze().reshape(-1)
 
-        piv_data = data.squeeze().transpose()
-        df = pd.DataFrame(piv_data, columns=columns, index=timestamps[period_offset:period_offset+len(piv_data)])
-        df.index.name = 'Timestamp'
+            df = pd.DataFrame({dataset:piv_data}, index=columns)
+
+            return df
+            #df = pd.DataFrame(piv_data, columns=columns, index=timestamps[period_offset:period_offset+len(piv_data)])
+
+        else:
+            piv_data = data.squeeze().transpose()
+            df = pd.DataFrame(piv_data, columns=columns, index=timestamps[period_offset:period_offset+len(piv_data)])
+            df.index.name = 'Timestamp'
+
         df.attrs['units'] = units
         return df
 
@@ -93,7 +107,7 @@ def get_plexos_paths(plexos_dir):
 
 
 
-def agg_plexos_dataset(plexos_dir, freq, partition, dataset):
+def agg_plexos_dataset(plexos_dir, freq, partition, dataset, is_relation=False):
 
     """
         Input: directory of h5 files
@@ -105,7 +119,7 @@ def agg_plexos_dataset(plexos_dir, freq, partition, dataset):
     frames = []
     for path in paths:
 
-        df = extract_h5_data(path, freq, partition, dataset)
+        df = extract_h5_data(path, freq, partition, dataset, is_relation)
 
         frames.append(df)
 
@@ -114,7 +128,7 @@ def agg_plexos_dataset(plexos_dir, freq, partition, dataset):
     return agg_df
 
 
-def agg_plexos_partition(plexos_dir, freq, partition):
+def agg_plexos_partition(plexos_dir, freq, partition, is_relation=False):
     """
     Not ideal for larger datasets.
 
@@ -134,7 +148,7 @@ def agg_plexos_partition(plexos_dir, freq, partition):
     for ds in datasets:
 
         print(f'aggregating dataset: {ds}')
-        dataset_df = agg_plexos_dataset(plexos_dir, freq, partition, ds)
+        dataset_df = agg_plexos_dataset(plexos_dir, freq, partition, ds, is_relation)
 
         df_dict[ds] = dataset_df.astype('float32')
 
