@@ -269,7 +269,7 @@ def plot_min_demand_window(df, window_delta=3, ax=None, return_frame=False):
 
     idx_min = dfg['Demand'].idxmin()
 
-    dfg_window = dfg.loc[idx_min.round('D')-delta:idx_min.round('D')+delta]
+    dfg_window = dfg.loc[str(idx_min.round('D')-delta):str(idx_min.round('D')+delta)]
 
     min_demand_val = dfg_window['Demand'].loc[idx_min]/MW_to_GW
     max_demand_val = dfg_window['Demand'].max()/MW_to_GW
