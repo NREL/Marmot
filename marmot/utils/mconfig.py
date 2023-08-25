@@ -221,6 +221,7 @@ def createConfig(configfile_path: Path):
         load_legend_names=dict(load="Demand +\nStorage Charging", demand="Demand"),
         formatter_settings=dict(
             VoLL=10000,
+            discount_rate=0.0, #set to 0 if not being used
             skip_existing_properties=True,
             append_plexos_block_name=False,
             exclude_pumping_from_reeds_storage_gen=True,
