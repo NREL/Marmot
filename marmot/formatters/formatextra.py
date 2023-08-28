@@ -205,6 +205,25 @@ class ExtraPLEXOSProperties(ExtraProperties):
             pd.DataFrame: region_Cost_Unserved_Energy df
         """
         return df * mconfig.parser("formatter_settings", "VoLL")
+    
+    def add_npv_cost(self, df: pd.DataFrame, **_) -> pd.DataFrame:
+        """Creates a Net Present Value cost property for PLEXOS outputted costs
+
+        PLEXOS outputs non-discounted costs
+        This method calculates the NPV using the first year in the df as the base year and the discount rate
+        supplied in config.yaml. The discount rate is default set to 0.00 (0%).
+
+        Args:
+            df (pd.DataFrame): any cost df
+
+        Returns:
+            pd.DataFrame: NPV of the supplied cost df
+        """
+        discount_rate = mconfig.parser("formatter_settings", "discount_rate")
+        base_year = pd.DatetimeIndex(df.index.get_level_values("timestamp")).year[0]
+        df["values"] = df["values"] / (1 + discount_rate)**(pd.DatetimeIndex(df.index.get_level_values("timestamp")).year - base_year)
+        logger.info(f"NPV Cost calculated using discount rate of {discount_rate}")
+        return df
 
 
 class ExtraReEDSProperties(ExtraProperties):

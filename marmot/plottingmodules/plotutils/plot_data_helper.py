@@ -832,3 +832,21 @@ def set_x_y_dimension(region_number: int) -> Tuple[int, int]:
         ncols = 2
         nrows = 2
     return ncols, nrows
+
+def reorder_scenarios(df: pd.DataFrame, new_order: list, scenario_groupby: str) -> pd.DataFrame:
+    """Reorders scenarios for plotting purposes.
+
+    Args:
+        df (DataFrame): df to reorder before plotting
+        new_order (list): list of new scenario order
+        scenario_groupby (str): must be grouped by Scenario only, not Scenario-Year
+
+    Returns:
+        DataFrame: ordered according to new scenario order.
+    """
+    if scenario_groupby == "Scenario":
+        mapping = {scen: i for i, scen in enumerate(new_order)}
+        key = df.index.map(mapping)
+        df = df.iloc[key.argsort()]
+
+    return df

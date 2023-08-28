@@ -480,6 +480,30 @@ class MarmotFormat(SetupLogger):
                                                 f"{prop_name2} was not saved"
                                             )
 
+                    # Calculate PLEXOS-specific extra properties for cost data to find NPV costs
+                    if "Cost" in property_key_name and sim_model == "PLEXOS":
+                        prop_name = property_key_name + "_NPV"
+                        prop_function = extraprops_init.add_npv_cost
+                        if (
+                                prop_name not in h5py.File(output_file_path, "r")
+                                or not formatter_settings["skip_existing_properties"]
+                            ):
+
+                                self.logger.info(f"Processing {prop_name}")
+                                prop = prop_function(
+                                    Processed_Data_Out,
+                                    timescale=row["data_type"],
+                                )
+
+                                if prop.empty is False:
+                                    dataio.save_to_h5(
+                                        prop, output_file_path, key=prop_name
+                                    )
+                                else:
+                                    self.logger.warning(f"{prop_name} was not saved")
+                                    continue
+
+
                 else:
                     continue
 
