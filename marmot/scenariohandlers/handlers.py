@@ -413,14 +413,18 @@ class ReEDsScenario(BaseScenario):
         df = pd.read_csv(f'{self._scenario_path}/outputs/{file_name}')
         df = df[df.t == analysis_year]
         df['reeds_year'] = pd.to_datetime(df['t'].apply(lambda x: f'01-01-{x}'))
-        df['delta'] = df['allh'].apply(lambda x: pd.Timedelta(days = int(x.split('h')[0].split('d')[1]) , hours=int(x.split('h')[1]) ))
-        df['Timestamp'] = df['reeds_year'] + df['delta']
+
+        if 'allh' in df.columns:
+            df['delta'] = df['allh'].apply(lambda x: pd.Timedelta(days = int(x.split('h')[0].split('d')[1]) , hours=int(x.split('h')[1]) ))
+            df['Timestamp'] = df['reeds_year'] + df['delta']
+        else:
+            df['Timestamp'] = df['reeds_year']
 
         return df
 
-    def get_generators_tech(self):
+    def get_generators_tech(self, file='gen_ivrt.csv'):
 
-        df = self.get_ivrt('gen_h.csv', self._analysis_year)
+        df = self.get_ivrt(file, self._analysis_year)
         df['Technology'] = [col[0] for col in columns_to_simple(df['i'], plexos_map_simple)]
         df['Entity'] = df['r']
 
