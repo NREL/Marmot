@@ -15,6 +15,7 @@ import pandas as pd
 
 import marmot.utils.mconfig as mconfig
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
+from marmot.plottingmodules.plotutils.plot_data_helper import reorder_scenarios
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
@@ -30,10 +31,10 @@ logger = logging.getLogger("plotter." + __name__)
 
 
 class SystemCosts(PlotDataStoreAndProcessor):
-    """System operating cost plots.
+    """System total cost plots.
 
-    The production_cost.py module contains methods that are
-    related related to the cost of operating the power system.
+    The cost.py module contains methods that are
+    related to the capital and operating cost of the power system.
 
     SystemCosts inherits from the PlotDataStoreAndProcessor class to assist
     in creating figures.
@@ -252,9 +253,9 @@ class SystemCosts(PlotDataStoreAndProcessor):
         scenario_groupby: str = "Scenario",
         **_,
     ):
-        """Creates a stacked bar plot of Total Generation Cost and Cost of Unserved Energy.
+        """Creates a stacked bar plot of Total Operational Cost, Capital Cost, and Cost of Unserved Energy.
 
-        Plot only shows totals and is NOT broken down into technology or cost type
+        Plot only shows totals and is NOT broken down into technology or cost type beyond operational/capital 
         specific values.
         Each sceanrio is plotted as a separate bar.
 
@@ -288,6 +289,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
         # scenarios must be a list.
         properties = [
             (True, "generator_Total_Generation_Cost", self.Scenarios),
+            (True, "generator_Build_Cost", self.Scenarios),
             (False, f"{agg}_Cost_Unserved_Energy", self.Scenarios),
         ]
 
@@ -314,7 +316,17 @@ class SystemCosts(PlotDataStoreAndProcessor):
                 except KeyError:
                     logger.warning(f"No Generators found in : {zone_input}")
                     continue
-                gen_cost = gen_cost.rename(columns={"values": "Total Generation Cost"})
+                gen_cost = gen_cost.rename(columns={"values": "Total Operational Cost"})
+
+                cap_cost: pd.DataFrame = self["generator_Build_Cost"].get(
+                    scenario
+                )
+                try:
+                    cap_cost = cap_cost.xs(zone_input, level=self.AGG_BY)
+                except KeyError:
+                    logger.warning(f"No Generators found in : {zone_input}")
+                    continue
+                cap_cost = cap_cost.rename(columns={"values": "Total Capital Cost"})
 
                 cost_unserved_energy: pd.DataFrame = self[
                     f"{agg}_Cost_Unserved_Energy"
@@ -332,24 +344,30 @@ class SystemCosts(PlotDataStoreAndProcessor):
                 )
 
                 if pd.notna(start_date_range):
-                    gen_cost, cost_unserved_energy = set_timestamp_date_range(
-                        [gen_cost, cost_unserved_energy],
+                    gen_cost, cap_cost, cost_unserved_energy = set_timestamp_date_range(
+                        [gen_cost, cap_cost, cost_unserved_energy],
                         start_date_range,
                         end_date_range,
                     )
                     if gen_cost.empty is True:
                         logger.warning("No generation in selected Date Range")
                         continue
+                    if cap_cost.empty is True:
+                        logger.warning("No generation capital costs in selected Date Range")
+                        continue
 
                 gen_cost = self.year_scenario_grouper(
                     gen_cost, scenario, groupby=scenario_groupby
+                ).sum()
+                cap_cost = self.year_scenario_grouper(
+                    cap_cost, scenario, groupby=scenario_groupby
                 ).sum()
                 cost_unserved_energy = self.year_scenario_grouper(
                     cost_unserved_energy, scenario, groupby=scenario_groupby
                 ).sum()
 
                 system_cost_chunk.append(
-                    pd.concat([gen_cost, cost_unserved_energy], axis=1)
+                    pd.concat([cap_cost, gen_cost, cost_unserved_energy], axis=1)
                 )
 
             # Checks if gen_cost_out_chunks contains data, if not skips zone and does not return a plot
@@ -470,12 +488,15 @@ class SystemCosts(PlotDataStoreAndProcessor):
         # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
-            (False, "generator_FOM_Cost", self.Scenarios),
-            (False, "generator_VOM_Cost", self.Scenarios),
-            (False, "generator_Fuel_Cost", self.Scenarios),
-            (False, "generator_Start_and_Shutdown_Cost", self.Scenarios),
-            (False, "generator_Reserves_VOM_Cost", self.Scenarios),
-            (False, "generator_Emissions_Cost", self.Scenarios),
+            (False, "generator_FOM_Cost_NPV", self.Scenarios),
+            (False, "generator_VOM_Cost_NPV", self.Scenarios),
+            (False, "generator_Fuel_Cost_NPV", self.Scenarios),
+            (False, "generator_Start_and_Shutdown_Cost_NPV", self.Scenarios),
+            (False, "generator_Reserves_VOM_Cost_NPV", self.Scenarios),
+            (False, "generator_Emissions_Cost_NPV", self.Scenarios),
+            (False, "generator_Annualized_Build_Cost_NPV", self.Scenarios),
+            (False, "generator_Annualized_One_Time_Cost_NPV", self.Scenarios),
+            (False, "generator_UoS_Cost_NPV", self.Scenarios),
         ]
 
         # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
@@ -506,7 +527,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
                             logger.warning(f"No Generators found in: {zone_input}")
                             break
 
-                    if prop_name[1] == "generator_VOM_Cost":
+                    if (prop_name[1] == "generator_VOM_Cost" or prop_name[1] == "generator_VOM_Cost_NPV"):
                         df["values"].to_numpy()[df["values"].to_numpy() < 0] = 0
                     df = df.rename(columns={"values": prop_name[1]})
                     data_frames_lst.append(df)
@@ -514,12 +535,15 @@ class SystemCosts(PlotDataStoreAndProcessor):
                 detailed_gen_cost = pd.concat(data_frames_lst, axis=1).fillna(0)
                 detailed_gen_cost = detailed_gen_cost.rename(
                     columns={
-                        "generator_FOM_Cost": "FO&M Cost",
-                        "generator_VOM_Cost": "VO&M Cost",
-                        "generator_Fuel_Cost": "Fuel Cost",
-                        "generator_Start_and_Shutdown_Cost": "Start & Shutdown Cost",
-                        "generator_Reserves_VOM_Cost": "Reserves VO&M Cost",
-                        "generator_Emissions_Cost": "Emissions Cost",
+                        "generator_FOM_Cost_NPV": "FO&M Cost",
+                        "generator_VOM_Cost_NPV": "VO&M Cost",
+                        "generator_Fuel_Cost_NPV": "Fuel Cost",
+                        "generator_Start_and_Shutdown_Cost_NPV": "Start & Shutdown Cost",
+                        "generator_Reserves_VOM_Cost_NPV": "Reserves VO&M Cost",
+                        "generator_Emissions_Cost_NPV": "Emissions Cost",
+                        "generator_Annualized_Build_Cost_NPV":"Annualized Build Cost",
+                        "generator_Annualized_One_Time_Cost_NPV":"Annualized Spur Line Cost",
+                        "generator_UoS_Cost_NPV":"Production Tax Credit",
                     }
                 )
 
@@ -565,61 +589,104 @@ class SystemCosts(PlotDataStoreAndProcessor):
 
             # Data table of values to return to main program
             Data_Table_Out = detailed_gen_cost_out.add_suffix(" (Million $)")
+            
+            #new_order = ["NoNewRE", "Base", "RPS"]
+            if scenario_groupby == "Scenario": 
+                # Reorder scenarios for plotting
+                #detailed_gen_cost_out = reorder_scenarios(detailed_gen_cost_out, new_order, scenario_groupby=scenario_groupby)
+                net_cost = [detailed_gen_cost_out.copy().sum(axis=1)]
+                detailed_gen_cost_out = [detailed_gen_cost_out.copy()]
 
-            # Set x-tick labels
-            if self.custom_xticklabels:
-                tick_labels = self.custom_xticklabels
-            else:
-                tick_labels = detailed_gen_cost_out.index
+                mplt = PlotLibrary(squeeze = False, ravel_axs=True)
+ 
+            
+            else: #scenario groupby = Scenario-Year
+                # Create a facet plot per scenario
+                mplt = PlotLibrary(ncols = len(self.Scenarios), sharey=True)
+                mplt.add_facet_labels(xlabels = self.Scenarios)
+                temp = detailed_gen_cost_out.copy()
+                detailed_gen_cost_out = []
+                net_cost = []
+                for scen in self.Scenarios:
+                    sub_df = temp[temp.index.str.contains(scen)]
+                    sub_df.index = sub_df.index.str.split(":").str[0]
+                    detailed_gen_cost_out.append(sub_df)
+                    net_cost.append(sub_df.sum(axis=1))
 
-            mplt = PlotLibrary()
+
             fig, ax = mplt.get_figure()
 
-            mplt.barplot(
-                detailed_gen_cost_out, stacked=True, custom_tick_labels=tick_labels
-            )
-            ax.axhline(y=0)
-            ax.set_ylabel(
-                "Total Generation Cost (Million $)", color="black", rotation="vertical"
-            )
-            ax.margins(x=0.01)
+            n=0
+            while n < len(self.Scenarios):
+                # Set x-tick labels
+                if self.custom_xticklabels:
+                    tick_labels = self.custom_xticklabels
+                else:
+                    tick_labels = detailed_gen_cost_out[n].index
+
+                mplt.barplot(
+                    detailed_gen_cost_out[n], sub_pos = n, stacked=True, custom_tick_labels=tick_labels
+                )
+                ax[n].axhline(y=0, color = "grey", linewidth = 0.5, linestyle = "--")
+                ax[n].set_ylabel(
+                "Cumulative Net Present Value Cost (Million $)", color="black", rotation="vertical"
+                )
+
+                # Add net cost line
+                for i, scenario in enumerate(detailed_gen_cost_out[n].index.unique()):
+                    x = [
+                        ax[n].patches[i].get_x(),
+                        ax[n].patches[i].get_x() + ax[n].patches[i].get_width(),
+                    ]
+                    y_net = [net_cost[n].loc[scenario]] * 2
+                    ax[n].plot(x, y_net, c="black", linewidth = 1.5, label = "Net Cost")
+
+                ax[n].margins(x=0.01)
+                if scenario_groupby == "Scenario":
+                    n = len(self.Scenarios)
+                else:
+                    ax[n].set_xlabel(self.Scenarios[n])
+                    n += 1
+                    
+
             mplt.add_legend(reverse_legend=True)
             if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
 
-            cost_totals = detailed_gen_cost_out.sum(axis=1)  # holds total of each bar
+
+            #cost_totals = detailed_gen_cost_out.sum(axis=1)  # holds total of each bar
 
             # inserts values into bar stacks
-            for patch in ax.patches:
-                width, height = patch.get_width(), patch.get_height()
-                if height <= 2:
-                    continue
-                x, y = patch.get_xy()
-                ax.text(
-                    x + width / 2,
-                    y + height / 2,
-                    "{:,.0f}".format(height),
-                    horizontalalignment="center",
-                    verticalalignment="center",
-                    fontsize=12,
-                )
+            #for patch in ax.patches:
+            #    width, height = patch.get_width(), patch.get_height()
+            #    if height <= 2:
+            #        continue
+            #    x, y = patch.get_xy()
+            #    ax.text(
+            #        x + width / 2,
+            #        y + height / 2,
+            #        "{:,.0f}".format(height),
+            #        horizontalalignment="center",
+            #        verticalalignment="center",
+            #        fontsize=12,
+            #    )
 
             # inserts total bar value above each bar
-            for k, patch in enumerate(ax.patches):
-                height = cost_totals[k]
-                width = patch.get_width()
-                x, y = patch.get_xy()
-                ax.text(
-                    x + width / 2,
-                    y + height + 0.05 * max(ax.get_ylim()),
-                    "{:,.0f}".format(height),
-                    horizontalalignment="center",
-                    verticalalignment="center",
-                    fontsize=15,
-                    color="red",
-                )
-                if k >= len(cost_totals) - 1:
-                    break
+            #for k, patch in enumerate(ax.patches):
+            #    height = cost_totals[k]
+            #    width = patch.get_width()
+            #    x, y = patch.get_xy()
+            #    ax.text(
+            #        x + width / 2,
+            #        y + height + 0.05 * max(ax.get_ylim()),
+            #        "{:,.0f}".format(height),
+            #        horizontalalignment="center",
+            #        verticalalignment="center",
+            #        fontsize=15,
+            #        color="red",
+            #    )
+            #   if k >= len(cost_totals) - 1:
+            #        break
 
             outputs[zone_input] = {"fig": fig, "data_table": Data_Table_Out}
         return outputs
@@ -768,12 +835,13 @@ class SystemCosts(PlotDataStoreAndProcessor):
         scenario_groupby: str = "Scenario",
         **_,
     ):
-        """Creates stacked barplots of Total Generation Cost and Cost of Unserved Energy relative to a base scenario.
+        """Creates stacked barplots of Total Generation Cost, Total Capital Cost, and Cost of Unserved Energy 
+        relative to a base scenario.
 
-        Barplots show the change in total total generation cost relative to a base scenario.
-        The default is to comapre against the first scenario provided in the inputs list.
-        Plot only shows totals and is NOT broken down into technology or cost type specific values.
-        Each sceanrio is plotted as a separate bar.
+        Barplots show the change in total generation cost relative to a base scenario.
+        The default is to compare against the first scenario provided in the inputs list.
+        Plot only shows totals and is NOT broken down into technology or cost type specific values beyond capital vs operational.
+        Each scenario is plotted as a separate bar.
 
         Args:
             start_date_range (str, optional): Defines a start date at which to represent data from.
@@ -801,8 +869,10 @@ class SystemCosts(PlotDataStoreAndProcessor):
         # List of properties needed by the plot, properties are a set of tuples and
         # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
-        properties = [
-            (True, "generator_Total_Generation_Cost", self.Scenarios),
+        # make sure to start this list with a required property
+        properties = [ 
+            (False, "generator_Total_Generation_Cost", self.Scenarios), 
+            (False, "generator_Build_Cost", self.Scenarios), 
             (False, f"{agg}_Cost_Unserved_Energy", self.Scenarios),
         ]
 
@@ -821,49 +891,53 @@ class SystemCosts(PlotDataStoreAndProcessor):
             for scenario in self.Scenarios:
                 logger.info(f"Scenario = {scenario}")
 
-                gen_cost: pd.DataFrame = self["generator_Total_Generation_Cost"].get(
-                    scenario
-                )
-                try:
-                    gen_cost = gen_cost.xs(zone_input, level=self.AGG_BY)
-                except KeyError:
-                    logger.warning(f"No Generators found in : {zone_input}")
-                    continue
-                gen_cost = gen_cost.rename(columns={"values": "Total Generation Cost"})
+                data_frames_lst = []
 
-                cost_unserved_energy: pd.DataFrame = self[
-                    f"{agg}_Cost_Unserved_Energy"
-                ][scenario]
-                if cost_unserved_energy.empty:
-                    cost_unserved_energy = self["generator_Total_Generation_Cost"][
-                        scenario
-                    ].copy()
-                    cost_unserved_energy.iloc[:, 0] = 0
-                cost_unserved_energy = cost_unserved_energy.xs(
-                    zone_input, level=self.AGG_BY
+                for prop_name in properties:
+                    df: pd.DataFrame = self[prop_name[1]].get(scenario)
+                    if df.empty:
+                        continue
+                    else:
+                        try:
+                            df = df.xs(zone_input, level=self.AGG_BY)
+                            df = df.groupby("timestamp").sum()
+                        except:
+                            logger.warning(f"No Generators found in: {zone_input} {prop_name[1]}")
+                            break
+                    
+                    if prop_name[1] == "generator_VOM_Cost":
+                        try:
+                            df["values"].to_numpy()[df["values"].to_numpy() < 0] = 0
+                        except:
+                            df[0].to_numpy()[df[0].to_numpy() < 0] = 0
+                    df = df.rename(columns={"values": prop_name[1], 0: prop_name[1]})
+                    data_frames_lst.append(df)
+
+                sys_gen_cost = pd.concat(data_frames_lst, axis=1).fillna(0)
+                sys_gen_cost = sys_gen_cost.rename(
+                    columns={
+                        "generator_Total_Generation_Cost":"Total Operational Cost",
+                        "generator_Build_Cost":"Generator Build Cost",
+                        f"{agg}_Cost_Unserved_Energy":"Cost of Unserved Energy",
+                    }
                 )
-                cost_unserved_energy = cost_unserved_energy.rename(
-                    columns={"values": "Cost Unserved Energy"}
-                )
+                
 
                 if pd.notna(start_date_range):
-                    gen_cost, cost_unserved_energy = set_timestamp_date_range(
-                        [gen_cost, cost_unserved_energy],
+                    sys_gen_cost = set_timestamp_date_range(
+                        sys_gen_cost,
                         start_date_range,
                         end_date_range,
                     )
-                    if gen_cost.empty is True:
+                    
+                    if sys_gen_cost.empty is True:
                         logger.warning("No generation in selected Date Range")
                         continue
-
-                gen_cost = self.year_scenario_grouper(
-                    gen_cost, scenario, groupby=scenario_groupby
-                ).sum()
-                cost_unserved_energy = self.year_scenario_grouper(
-                    cost_unserved_energy, scenario, groupby=scenario_groupby
-                ).sum()
+                
                 system_cost_chunk.append(
-                    pd.concat([gen_cost, cost_unserved_energy], axis=1)
+                    self.year_scenario_grouper(
+                        sys_gen_cost, scenario, groupby=scenario_groupby
+                    ).sum()
                 )
 
             # Checks if total_cost_chunk contains data, if not skips zone and does not return a plot
@@ -871,21 +945,22 @@ class SystemCosts(PlotDataStoreAndProcessor):
                 outputs[zone_input] = MissingZoneData()
                 continue
 
-            total_systems_cost_out = pd.concat(system_cost_chunk, axis=0, sort=False)
-            total_systems_cost_out = (
-                total_systems_cost_out / 1000000
-            )  # Convert cost to millions
-            # Ensures region has generation, else skips
             try:
                 # Change to a diff on first scenario
-                scen_base = total_systems_cost_out.index[0]
-                total_systems_cost_out = (
-                    total_systems_cost_out - total_systems_cost_out.xs(scen_base)
-                )
+                # Convert cost to millions
+                #scen_base = total_systems_cost_out.index[0]
+                scen_base = system_cost_chunk[0] / 1000000
+                diff_system_cost_chunk = []
+                for scen in system_cost_chunk[1:]:
+                    scen = scen/1000000
+                    diff_scen = scen.sub(scen_base.values, axis='columns')
+                    diff_system_cost_chunk.append(diff_scen)
+                total_systems_cost_out = pd.concat(diff_system_cost_chunk, axis=0, sort=False)
+
             except KeyError:
                 outputs[zone_input] = MissingZoneData()
                 continue
-            total_systems_cost_out.drop(scen_base, inplace=True)  # Drop base entry
+            #total_systems_cost_out.drop(scen_base, inplace=True)  # Drop base entry
 
             # Checks if total_systems_cost_out contains data, if not skips zone and does not return a plot
             if total_systems_cost_out.empty:
@@ -903,7 +978,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
 
             ax.axhline(y=0, color="black")
             ax.set_ylabel(
-                f"Generation Cost Change (Million $) \n relative to {scen_base}",
+                f"Generation Cost Change (Million $) \n relative to {self.Scenarios[0]} Scenario",
                 color="black",
                 rotation="vertical",
             )
@@ -913,6 +988,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
 
             if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
+            fig.tight_layout()
 
             outputs[zone_input] = {"fig": fig, "data_table": Data_Table_Out}
         return outputs
@@ -1059,11 +1135,12 @@ class SystemCosts(PlotDataStoreAndProcessor):
         **_,
     ):
         """Creates stacked barplots of Total Generation Cost by by cost type
-        (fuel, emission, start cost etc.) relative to a base scenario.
+        (fuel, emission, start cost etc.) relative to a base scenario each year.
 
         Barplots show the change in total total generation cost relative to a base scenario.
         The default is to comapre against the first scenario provided in the inputs list.
-        Each sceanrio is plotted as a separate bar.
+        Each sceanrio is plotted as a separate bar if scenario_groupby = Scenario.
+        Each scenario is plotted in its own facet plot if scenario_groupby = Scenario-Year.
 
         Args:
             start_date_range (str, optional): Defines a start date at which to represent data from.
@@ -1087,12 +1164,15 @@ class SystemCosts(PlotDataStoreAndProcessor):
         # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
-            (False, "generator_FOM_Cost", self.Scenarios),
-            (False, "generator_VOM_Cost", self.Scenarios),
-            (False, "generator_Fuel_Cost", self.Scenarios),
-            (False, "generator_Start_and_Shutdown_Cost", self.Scenarios),
-            (False, "generator_Reserves_VOM_Cost", self.Scenarios),
-            (False, "generator_Emissions_Cost", self.Scenarios),
+            (False, "generator_FOM_Cost_NPV", self.Scenarios),
+            (False, "generator_VOM_Cost_NPV", self.Scenarios),
+            (False, "generator_Fuel_Cost_NPV", self.Scenarios),
+            (False, "generator_Start_and_Shutdown_Cost_NPV", self.Scenarios),
+            (False, "generator_Reserves_VOM_Cost_NPV", self.Scenarios),
+            (False, "generator_Emissions_Cost_NPV", self.Scenarios),
+            (False, "generator_Annualized_Build_Cost_NPV", self.Scenarios),
+            (False, "generator_Annualized_One_Time_Cost_NPV", self.Scenarios),
+            (False, "generator_UoS_Cost_NPV", self.Scenarios),
         ]
 
         # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
@@ -1123,7 +1203,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
                             logger.warning(f"No Generators found in: {zone_input}")
                             break
 
-                    if prop_name[1] == "generator_VOM_Cost":
+                    if (prop_name[1] == "generator_VOM_Cost" or prop_name[1] == "generator_VOM_Cost_NPV"):
                         df["values"].to_numpy()[df["values"].to_numpy() < 0] = 0
                     df = df.rename(columns={"values": prop_name[1]})
                     data_frames_lst.append(df)
@@ -1131,12 +1211,15 @@ class SystemCosts(PlotDataStoreAndProcessor):
                 detailed_gen_cost = pd.concat(data_frames_lst, axis=1).fillna(0)
                 detailed_gen_cost = detailed_gen_cost.rename(
                     columns={
-                        "generator_FOM_Cost": "FO&M Cost",
-                        "generator_VOM_Cost": "VO&M Cost",
-                        "generator_Fuel_Cost": "Fuel Cost",
-                        "generator_Start_and_Shutdown_Cost": "Start & Shutdown Cost",
-                        "generator_Reserves_VOM_Cost": "Reserves VO&M Cost",
-                        "generator_Emissions_Cost": "Emissions Cost",
+                        "generator_FOM_Cost_NPV": "FO&M Cost",
+                        "generator_VOM_Cost_NPV": "VO&M Cost",
+                        "generator_Fuel_Cost_NPV": "Fuel Cost",
+                        "generator_Start_and_Shutdown_Cost_NPV": "Start & Shutdown Cost",
+                        "generator_Reserves_VOM_Cost_NPV": "Reserves VO&M Cost",
+                        "generator_Emissions_Cost_NPV": "Emissions Cost",
+                        "generator_Annualized_Build_Cost_NPV":"Annualized Build Cost",
+                        "generator_Annualized_One_Time_Cost_NPV":"Annualized Spur Line Cost",
+                        "generator_UoS_Cost_NPV":"Production Tax Credit",
                     }
                 )
 
@@ -1159,28 +1242,28 @@ class SystemCosts(PlotDataStoreAndProcessor):
             if not gen_cost_out_chunks:
                 outputs[zone_input] = MissingZoneData()
                 continue
-
-            detailed_gen_cost_out = pd.concat(gen_cost_out_chunks, axis=0, sort=False)
-            detailed_gen_cost_out = (
-                detailed_gen_cost_out / 1000000
-            )  # Convert cost to millions
-            # TODO: Add $ unit conversion.
-
-            # Ensures region has generation, else skips
+            
             try:
                 # Change to a diff on first scenario
-                scen_base = detailed_gen_cost_out.index[0]
-                detailed_gen_cost_out = (
-                    detailed_gen_cost_out - detailed_gen_cost_out.xs(scen_base)
-                )  # Change to a diff on first scenario
+                # Convert cost to millions
+                #scen_base = total_systems_cost_out.index[0]
+                scen_base = gen_cost_out_chunks[0] / 1000000
+                diff_gen_cost_out_chunks = []
+                for scen in gen_cost_out_chunks[1:]:
+                    scen = scen/1000000
+                    diff_scen = scen.sub(scen_base.values, axis='columns')
+                    diff_gen_cost_out_chunks.append(diff_scen)
+                detailed_gen_cost_out = pd.concat(diff_gen_cost_out_chunks, axis=0, sort=False)
 
             except KeyError:
                 outputs[zone_input] = MissingZoneData()
                 continue
-            # Drop base entry
-            detailed_gen_cost_out.drop(scen_base, inplace=True)
 
-            net_cost = detailed_gen_cost_out.sum(axis=1)
+            # TODO: Add $ unit conversion.
+
+            # Ensures region has generation, else skips
+            # Drop base entry
+            # detailed_gen_cost_out.drop(scen_base, inplace=True)
 
             # Deletes columns that are all 0
             detailed_gen_cost_out = detailed_gen_cost_out.loc[
@@ -1196,30 +1279,58 @@ class SystemCosts(PlotDataStoreAndProcessor):
             # Data table of values to return to main program
             Data_Table_Out = detailed_gen_cost_out.add_suffix(" (Million $)")
 
-            mplt = PlotLibrary()
+            #new_order = ["NoNewRE","RPS"]
+            if scenario_groupby == "Scenario":
+                # Reorder scenarios for plotting
+                #detailed_gen_cost_out = reorder_scenarios(detailed_gen_cost_out, new_order=new_order, scenario_groupby=scenario_groupby)
+                net_cost = [detailed_gen_cost_out.copy().sum(axis=1)]
+                detailed_gen_cost_out = [detailed_gen_cost_out.copy()]
+                mplt = PlotLibrary(squeeze = False, ravel_axs = True)
+            else: #scenario_groupby == "Scenario-Year"
+                # Create a facet plot per scenario instead
+                mplt = PlotLibrary(ncols = len(self.Scenarios)-1, sharey = True)
+                temp = detailed_gen_cost_out.copy()
+                detailed_gen_cost_out = []
+                net_cost = []
+                for scen in self.Scenarios[1:]:
+                    sub_df = temp[temp.index.str.contains(scen)]
+                    sub_df.index = sub_df.index.str.split(":").str[0]
+                    detailed_gen_cost_out.append(sub_df)
+                    net_cost.append(sub_df.sum(axis=1))
+
             fig, ax = mplt.get_figure()
+            
+            n = 0
+            while n < len(self.Scenarios)-1:
 
-            mplt.barplot(detailed_gen_cost_out, stacked=True)
+                mplt.barplot(detailed_gen_cost_out[n], sub_pos = n, stacked=True)
 
-            ax.axhline(y=0, linewidth=0.5, linestyle="--", color="grey")
+                ax[n].axhline(y=0, linewidth=0.5, linestyle="--", color="grey")
 
-            ax.set_ylabel(
-                f"Generation Cost Change \n relative to {scen_base} (Million $)",
-                color="black",
-                rotation="vertical",
-            )  # TODO: Add $ unit conversion.
-            ax.margins(x=0.01)
+                ax[n].set_ylabel(
+                    f"Generation Cost Change \n relative to {self.Scenarios[0]} Scenario (Million $)",
+                    color="black",
+                    rotation="vertical",
+                )  # TODO: Add $ unit conversion.
+                ax[n].margins(x=0.01)
 
-            # Add net cost line.
-            for n, scenario in enumerate(detailed_gen_cost_out.index.unique()):
-                x = [
-                    ax.patches[n].get_x(),
-                    ax.patches[n].get_x() + ax.patches[n].get_width(),
-                ]
-                y_net = [net_cost.loc[scenario]] * 2
-                ax.plot(x, y_net, c="black", linewidth=1.5, label="Net Cost Change")
+                # Add net cost line.
+                for i, scenario in enumerate(detailed_gen_cost_out[n].index.unique()):
+                    x = [
+                        ax[n].patches[i].get_x(),
+                        ax[n].patches[i].get_x() + ax[n].patches[i].get_width(),
+                    ]
+                    y_net = [net_cost[n].loc[scenario]] * 2
+                    ax[n].plot(x, y_net, c="black", linewidth=1.5, label="Net Cost Change")
+                
+                if scenario_groupby == "Scenario":
+                    n = len(self.Scenarios)-1
+                else:
+                    ax[n].set_xlabel(self.Scenarios[n+1])
+                    n += 1
 
             mplt.add_legend()
+                
 
             if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
