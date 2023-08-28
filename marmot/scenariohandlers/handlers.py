@@ -438,8 +438,8 @@ class ReEDsScenario(BaseScenario):
 
         return df
 
-    def get_regional_curtailment(self):
-        df = self.get_ivrt('curt_h.csv', self._analysis_year)
+    def get_regional_curtailment(self, file='curt_ann.csv'):
+        df = self.get_ivrt(file, self._analysis_year)
         df['Entity'] = df['r']
 
         return df.pivot_table(index='Timestamp', columns=['Entity'], values='Value', aggfunc='sum', fill_value=0.0)
@@ -448,7 +448,7 @@ class ReEDsScenario(BaseScenario):
         gen_tech = self.get_generators_tech()
         reg_curt = self.get_regional_curtailment()
 
-        reg_curt.columns = pd.MultiIndex.from_tuples([(col, 'Curtailment') for col in reg_curt.columns])
+        reg_curt.columns = pd.MultiIndex.from_tuples([(col, 'Curtailment') for col in reg_curt.columns], names=['Entity', 'Technology'])
 
         return pd.merge(gen_tech, reg_curt, left_index=True, right_index=True)
 
