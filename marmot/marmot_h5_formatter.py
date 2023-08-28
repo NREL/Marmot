@@ -215,6 +215,45 @@ class MarmotFormat(SetupLogger):
             self.logger.error(msg)
             raise NotImplementedError(msg)
 
+    def save_to_h5(
+        self,
+        df: pd.DataFrame,
+        file_name: Path,
+        key: str,
+        mode: str = "a",
+        complevel: int = 9,
+        complib: str = "blosc:zlib",
+        **kwargs,
+    ) -> None:
+        """"
+        Saves data to formatted hdf5 file
+
+        Args:
+            df (pd.DataFrame): Dataframe to save
+            file_name (Path): name of hdf5 file
+            key (str): formatted property identifier,
+                e.g generator_Generation
+            mode (str, optional): file access mode.
+                Defaults to "a".
+            complevel (int, optional): compression level.
+                Defaults to 9.
+            complib (str, optional): compression library.
+                Defaults to 'blosc:zlib'.
+            **kwargs
+                These parameters will be passed pandas.to_hdf function.
+        """
+        self.logger.info("Saving data to h5 file...")
+        df.to_hdf(
+            file_name,
+            key=key,
+            mode=mode,
+            complevel=complevel,
+            complib=complib,
+            **kwargs,
+        )
+
+        self.logger.info("Data saved to h5 file successfully\n")
+
     def run_formatter(
         self,
         sim_model: str = "PLEXOS",
@@ -222,7 +261,8 @@ class MarmotFormat(SetupLogger):
         append_block_name: bool = False,
         process_subset_years: list = None,
     ) -> None:
-        """Main method to call to begin formatting simulation model results
+        """
+        Main method to call to begin formatting simulation model results
 
         Args:
             sim_model (str, optional): Name of simulation model to
@@ -259,7 +299,6 @@ class MarmotFormat(SetupLogger):
 
         output_folder = self.marmot_solutions_folder.joinpath("Processed_HDF5_folder")
         output_folder.mkdir(exist_ok=True)
-
         output_file_path = output_folder.joinpath(hdf5_output_name)
         process_sim_model: Process = process_class(
             input_folder,

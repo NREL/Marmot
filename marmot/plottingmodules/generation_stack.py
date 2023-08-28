@@ -37,7 +37,19 @@ plot_data_settings: dict = mconfig.parser("plot_data")
 shift_leapday: bool = mconfig.parser("shift_leapday")
 load_legend_names: dict = mconfig.parser("load_legend_names")
 curtailment_prop: str = mconfig.parser("plot_data", "curtailment_property")
+include_batteries: bool = mconfig.parser("plot_data","include_explicit_battery_objects")
 
+# gen_names_dict = pd.read_csv('/Users/mschwarz/Marmot_local/Marmot/input_files/mapping_folder/gen_names.csv')
+# gen_names_dict = gen_names_dict.set_index(gen_names_dict.columns[0]).squeeze().to_dict()
+
+# self = GenerationStack(
+#     Zones = ['CAISO'],
+#     AGG_BY = 'BA',
+#     Scenarios = ['ACDH90by35_2035', 'LimDH90by35_2035'],
+#     ordered_gen = ['Nuclear', 'Coal', 'Gas-CC', 'Gas-CC CCS', 'Gas-CT', 'Gas', 'Gas-Steam', 'Dual Fuel', 'DualFuel', 'Oil-Gas-Steam', 'Oil', 'Hydro', 'Ocean', 'Geothermal', 'Biomass', 'Biopower', 'Other', 'VRE', 'Wind', 'Offshore Wind', 'OffshoreWind', 'Solar', 'PV', 'dPV', 'CSP', 'PV-Battery', 'Battery', 'OSW-Battery', 'PHS', 'Storage', 'Net Imports', 'Curtailment', 'curtailment', 'Demand', 'Deamand + Storage Charging'],
+#     marmot_solutions_folder = '/Users/mschwarz/NTPS_local',
+#     gen_names_dict = gen_names_dict
+# )
 
 class GenerationStack(PlotDataStoreAndProcessor):
     """Timeseries generation stacked area plots.
@@ -363,7 +375,7 @@ class GenerationStack(PlotDataStoreAndProcessor):
             (False, f"{agg}_Load{data_resolution}", self.Scenarios),
             (False, f"{agg}_Demand{data_resolution}", self.Scenarios),
             (False, f"{agg}_Unserved_Energy{data_resolution}", self.Scenarios),
-            (False, f"batterie_Generation{data_resolution}", self.Scenarios),
+            #(False, f"batterie_Generation{data_resolution}", self.Scenarios),
         ]
 
         # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
@@ -434,12 +446,13 @@ class GenerationStack(PlotDataStoreAndProcessor):
                 else:
                     vre_gen_cat = self.gen_categories.vre
                 # Insert battery generation.
-                stacked_gen_df = self.add_battery_gen_to_df(
-                    stacked_gen_df,
-                    scenario,
-                    zone_input,
-                    data_resolution=data_resolution,
-                )
+                if include_batteries:
+                    stacked_gen_df = self.add_battery_gen_to_df(
+                        stacked_gen_df,
+                        scenario,
+                        zone_input,
+                        data_resolution=data_resolution,
+                    )
 
                 # Zoom in on selected date range.
                 if pd.notna(start_date_range):

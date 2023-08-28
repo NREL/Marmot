@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import List
 
 import pandas as pd
+import numpy as np
 
 import marmot.utils.mconfig as mconfig
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
@@ -295,7 +296,11 @@ class UnservedEnergy(PlotDataStoreAndProcessor):
                 f" ({unitconversion['units']})"
             )
 
+            unserved_energy_out = unserved_energy_out.T
+
             # create color dictionary
+            self.color_list = np.repeat('red',len(unserved_energy_out.columns)).tolist()
+
             color_dict = dict(zip(unserved_energy_out.columns, self.color_list))
 
             # Set scenarios as column names
@@ -306,7 +311,6 @@ class UnservedEnergy(PlotDataStoreAndProcessor):
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = unserved_energy_out.columns
-
             mplt.barplot(
                 unserved_energy_out, color=color_dict, custom_tick_labels=tick_labels
             )
@@ -319,7 +323,7 @@ class UnservedEnergy(PlotDataStoreAndProcessor):
             ax.xaxis.set_visible(False)
             ax.margins(x=0.01)
 
-            mplt.add_legend()
+            #mplt.add_legend()
             if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
             for patch in ax.patches:

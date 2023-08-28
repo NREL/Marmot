@@ -44,6 +44,7 @@ Module_CLASS_MAPPING = {
     "capacity_out": "CapacityOut",
     "curtailment": "Curtailment",
     "emissions": "Emissions",
+    "fleccs_operation": "FLECCSOperation",
     "generation_stack": "GenerationStack",
     "generation_unstack": "GenerationUnStack",
     "hydro": "Hydro",

@@ -32,6 +32,10 @@ Battery discharge,#FF4A88
 Battery,#FF4A88
 Other,#FF7FBB
 Net Imports,#2762c4
-Curtailment,#E1E1E1
+Curtailment,gray
 Offshore Wind,#106BA7
 OffshoreWind,#106BA7
+BECCS,#A8C839
+Coal CCS,#707685
+RE-CT,#7FC340
+RE-CC,#7FC340
