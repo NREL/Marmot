@@ -21,3 +21,4 @@ input_files/mapping_folder/*
 !input_files/mapping_folder/Regions_Zones_Mapping_Full.csv
 marmot-env-JW.yml
 config.yml
+bin/spur_line_formatter.py
