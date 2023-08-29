@@ -488,17 +488,35 @@ class SystemCosts(PlotDataStoreAndProcessor):
         # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
-            (False, "generator_FOM_Cost_NPV", self.Scenarios),
-            (False, "generator_VOM_Cost_NPV", self.Scenarios),
-            (False, "generator_Fuel_Cost_NPV", self.Scenarios),
-            (False, "generator_Start_and_Shutdown_Cost_NPV", self.Scenarios),
-            (False, "generator_Reserves_VOM_Cost_NPV", self.Scenarios),
-            (False, "generator_Emissions_Cost_NPV", self.Scenarios),
-            (False, "generator_Annualized_Build_Cost_NPV", self.Scenarios),
-            (False, "generator_Annualized_One_Time_Cost_NPV", self.Scenarios),
-            (False, "generator_UoS_Cost_NPV", self.Scenarios),
+            (False, "generator_FOM_Cost", self.Scenarios),
+            (False, "generator_VOM_Cost", self.Scenarios),
+            (False, "generator_Fuel_Cost", self.Scenarios),
+            (False, "generator_Start_and_Shutdown_Cost", self.Scenarios),
+            (False, "generator_Reserves_VOM_Cost", self.Scenarios),
+            (False, "generator_Emissions_Cost", self.Scenarios),
+            (False, "generator_Annualized_Build_Cost", self.Scenarios),
+            (False, "generator_Annualized_One_Time_Cost", self.Scenarios),
+            (False, "generator_UoS_Cost", self.Scenarios),
         ]
 
+        column_dict = {
+                        "generator_FOM_Cost": "FO&M Cost",
+                        "generator_VOM_Cost": "VO&M Cost",
+                        "generator_Fuel_Cost": "Fuel Cost",
+                        "generator_Start_and_Shutdown_Cost": "Start & Shutdown Cost",
+                        "generator_Reserves_VOM_Cost": "Reserves VO&M Cost",
+                        "generator_Emissions_Cost": "Emissions Cost",
+                        "generator_Annualized_Build_Cost":"Annualized Build Cost",
+                        "generator_Annualized_One_Time_Cost":"Annualized Spur Line Cost",
+                        "generator_UoS_Cost":"Production Tax Credit",
+        }
+
+        if scenario_groupby == "Scenario":
+            for i in range(len(properties)):
+                column_dict[properties[i][1] + "_NPV"] = column_dict[properties[i][1]]
+                del column_dict[properties[i][1]]
+                properties[i] = (properties[i][0], properties[i][1] + "_NPV", properties[i][2])
+                
         # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
@@ -534,17 +552,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
 
                 detailed_gen_cost = pd.concat(data_frames_lst, axis=1).fillna(0)
                 detailed_gen_cost = detailed_gen_cost.rename(
-                    columns={
-                        "generator_FOM_Cost_NPV": "FO&M Cost",
-                        "generator_VOM_Cost_NPV": "VO&M Cost",
-                        "generator_Fuel_Cost_NPV": "Fuel Cost",
-                        "generator_Start_and_Shutdown_Cost_NPV": "Start & Shutdown Cost",
-                        "generator_Reserves_VOM_Cost_NPV": "Reserves VO&M Cost",
-                        "generator_Emissions_Cost_NPV": "Emissions Cost",
-                        "generator_Annualized_Build_Cost_NPV":"Annualized Build Cost",
-                        "generator_Annualized_One_Time_Cost_NPV":"Annualized Spur Line Cost",
-                        "generator_UoS_Cost_NPV":"Production Tax Credit",
-                    }
+                    columns=column_dict
                 )
 
                 if pd.notna(start_date_range):
@@ -608,7 +616,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
                 detailed_gen_cost_out = []
                 net_cost = []
                 for scen in self.Scenarios:
-                    sub_df = temp[temp.index.str.contains(scen)]
+                    sub_df = temp[temp.index.str.endswith(scen)]
                     sub_df.index = sub_df.index.str.split(":").str[0]
                     detailed_gen_cost_out.append(sub_df)
                     net_cost.append(sub_df.sum(axis=1))
@@ -628,9 +636,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
                     detailed_gen_cost_out[n], sub_pos = n, stacked=True, custom_tick_labels=tick_labels
                 )
                 ax[n].axhline(y=0, color = "grey", linewidth = 0.5, linestyle = "--")
-                ax[n].set_ylabel(
-                "Cumulative Net Present Value Cost (Million $)", color="black", rotation="vertical"
-                )
+
 
                 # Add net cost line
                 for i, scenario in enumerate(detailed_gen_cost_out[n].index.unique()):
@@ -643,9 +649,15 @@ class SystemCosts(PlotDataStoreAndProcessor):
 
                 ax[n].margins(x=0.01)
                 if scenario_groupby == "Scenario":
+                    ax[n].set_ylabel(
+                        "Cumulative NPV Cost (Million $)", color="black", rotation="vertical"
+                    ) 
                     n = len(self.Scenarios)
                 else:
                     ax[n].set_xlabel(self.Scenarios[n])
+                    ax[n].set_ylabel(
+                        "Annual Cost (Million $)", color="black", rotation="vertical"
+                    )
                     n += 1
                     
 
@@ -1164,16 +1176,34 @@ class SystemCosts(PlotDataStoreAndProcessor):
         # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
-            (False, "generator_FOM_Cost_NPV", self.Scenarios),
-            (False, "generator_VOM_Cost_NPV", self.Scenarios),
-            (False, "generator_Fuel_Cost_NPV", self.Scenarios),
-            (False, "generator_Start_and_Shutdown_Cost_NPV", self.Scenarios),
-            (False, "generator_Reserves_VOM_Cost_NPV", self.Scenarios),
-            (False, "generator_Emissions_Cost_NPV", self.Scenarios),
-            (False, "generator_Annualized_Build_Cost_NPV", self.Scenarios),
-            (False, "generator_Annualized_One_Time_Cost_NPV", self.Scenarios),
-            (False, "generator_UoS_Cost_NPV", self.Scenarios),
+            (False, "generator_FOM_Cost", self.Scenarios),
+            (False, "generator_VOM_Cost", self.Scenarios),
+            (False, "generator_Fuel_Cost", self.Scenarios),
+            (False, "generator_Start_and_Shutdown_Cost", self.Scenarios),
+            (False, "generator_Reserves_VOM_Cost", self.Scenarios),
+            (False, "generator_Emissions_Cost", self.Scenarios),
+            (False, "generator_Annualized_Build_Cost", self.Scenarios),
+            (False, "generator_Annualized_One_Time_Cost", self.Scenarios),
+            (False, "generator_UoS_Cost", self.Scenarios),
         ]
+
+        column_dict = {
+                        "generator_FOM_Cost": "FO&M Cost",
+                        "generator_VOM_Cost": "VO&M Cost",
+                        "generator_Fuel_Cost": "Fuel Cost",
+                        "generator_Start_and_Shutdown_Cost": "Start & Shutdown Cost",
+                        "generator_Reserves_VOM_Cost": "Reserves VO&M Cost",
+                        "generator_Emissions_Cost": "Emissions Cost",
+                        "generator_Annualized_Build_Cost":"Annualized Build Cost",
+                        "generator_Annualized_One_Time_Cost":"Annualized Spur Line Cost",
+                        "generator_UoS_Cost":"Production Tax Credit",
+        }
+
+        if scenario_groupby == "Scenario":
+            for i in range(len(properties)):
+                column_dict[properties[i][1] + "_NPV"] = column_dict[properties[i][1]]
+                del column_dict[properties[i][1]]
+                properties[i] = (properties[i][0], properties[i][1] + "_NPV", properties[i][2])
 
         # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
@@ -1210,17 +1240,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
 
                 detailed_gen_cost = pd.concat(data_frames_lst, axis=1).fillna(0)
                 detailed_gen_cost = detailed_gen_cost.rename(
-                    columns={
-                        "generator_FOM_Cost_NPV": "FO&M Cost",
-                        "generator_VOM_Cost_NPV": "VO&M Cost",
-                        "generator_Fuel_Cost_NPV": "Fuel Cost",
-                        "generator_Start_and_Shutdown_Cost_NPV": "Start & Shutdown Cost",
-                        "generator_Reserves_VOM_Cost_NPV": "Reserves VO&M Cost",
-                        "generator_Emissions_Cost_NPV": "Emissions Cost",
-                        "generator_Annualized_Build_Cost_NPV":"Annualized Build Cost",
-                        "generator_Annualized_One_Time_Cost_NPV":"Annualized Spur Line Cost",
-                        "generator_UoS_Cost_NPV":"Production Tax Credit",
-                    }
+                    columns=column_dict
                 )
 
                 if pd.notna(start_date_range):
@@ -1252,6 +1272,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
                 for scen in gen_cost_out_chunks[1:]:
                     scen = scen/1000000
                     diff_scen = scen.sub(scen_base.values, axis='columns')
+                    diff_scen = -1*diff_scen
                     diff_gen_cost_out_chunks.append(diff_scen)
                 detailed_gen_cost_out = pd.concat(diff_gen_cost_out_chunks, axis=0, sort=False)
 
@@ -1288,12 +1309,12 @@ class SystemCosts(PlotDataStoreAndProcessor):
                 mplt = PlotLibrary(squeeze = False, ravel_axs = True)
             else: #scenario_groupby == "Scenario-Year"
                 # Create a facet plot per scenario instead
-                mplt = PlotLibrary(ncols = len(self.Scenarios)-1, sharey = True)
+                mplt = PlotLibrary(ncols = len(self.Scenarios)-1, sharey = True, squeeze=False, ravel_axs = True)
                 temp = detailed_gen_cost_out.copy()
                 detailed_gen_cost_out = []
                 net_cost = []
                 for scen in self.Scenarios[1:]:
-                    sub_df = temp[temp.index.str.contains(scen)]
+                    sub_df = temp[temp.index.str.endswith(scen)]
                     sub_df.index = sub_df.index.str.split(":").str[0]
                     detailed_gen_cost_out.append(sub_df)
                     net_cost.append(sub_df.sum(axis=1))
@@ -1308,7 +1329,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
                 ax[n].axhline(y=0, linewidth=0.5, linestyle="--", color="grey")
 
                 ax[n].set_ylabel(
-                    f"Generation Cost Change \n relative to {self.Scenarios[0]} Scenario (Million $)",
+                    f"Generation Savings \n relative to {self.Scenarios[0]} Scenario (Million $)",
                     color="black",
                     rotation="vertical",
                 )  # TODO: Add $ unit conversion.
