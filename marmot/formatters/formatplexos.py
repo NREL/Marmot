@@ -35,6 +35,7 @@ class ProcessPLEXOS(Process):
     PROPERTY_MAPPING: dict = {
         "generator_Start_&_Shutdown_Cost": "generator_Start_and_Shutdown_Cost",
         "generator_VO&M_Cost": "generator_VOM_Cost",
+        "generator_FO&M_Cost": "generator_FOM_Cost",
         "generator_Reserves_VO&M_Cost": "generator_Reserves_VOM_Cost",
     }
     """Maps simulation model property names to Marmot property names"""
