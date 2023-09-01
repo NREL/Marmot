@@ -510,26 +510,32 @@ class PlotDataStoreAndProcessor(dict):
         scenario: str,
         zone_input: str,
         data_resolution: str = "",
+        battery_prop: str = "Generation",
+        battery_discharge_name: str = "",
     ) -> pd.DataFrame:
-        """Adds Battery generation to the passed dataframe.
+        """Adds Battery generation (or a different property if specified) to the passed dataframe.
 
         Args:
-            df (pd.DataFrame): DataFrame to add battery generation to.
+            df (pd.DataFrame): DataFrame to add battery generation (or battery_prop) to.
             scenario (str): scenario to pull data from
             zone_input (str): zone to subset by
             data_resolution (str, optional):  Specifies the data resolution to
                 pull from the formatted data and plot.
                 Defaults to "".
+            battery_prop (str, optional): battery property to extract, defaults to Generation.
+            battery_discharge_name: column name to assign to new battery column, defaults to name 
+                from gen_names_dict if not given
 
         Returns:
             pd.DataFrame: DataFrame with added battery gen column.
         """
-        battery_gen: pd.DataFrame = self[f"batterie_Generation{data_resolution}"].get(
+        battery_gen: pd.DataFrame = self[f"batterie_{battery_prop}{data_resolution}"].get(
             scenario
         )
-        battery_discharge_name = self.gen_names_dict.get("battery", "Storage")
+        if battery_discharge_name == "":
+            battery_discharge_name = self.gen_names_dict.get("battery", "Storage")
         if battery_gen.empty is True:
-            logger.info("No Battery generation in selected Date Range")
+            logger.info(f"No Battery {battery_prop} in selected Date Range")
         else:
             if shift_leapday:
                 battery_gen = adjust_for_leapday(battery_gen)
