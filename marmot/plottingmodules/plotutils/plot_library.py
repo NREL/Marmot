@@ -919,6 +919,69 @@ class PlotLibrary(SetupSubplot):
         ax.plot(plot_data, linestyle=linestyle, color=color, alpha=alpha, **kwargs)
 
         self.set_yaxis_major_tick_format(tick_format=ytick_major_fmt, sub_pos=sub_pos)
+    
+    def multilineplot(
+        self,
+        df: pd.DataFrame,
+        color: Union[dict, list] = None,
+        sub_pos: Union[int, Tuple[int, int]] = 0,
+        custom_tick_labels: list = None,
+        ytick_major_fmt: str = "standard",
+        legend=False,
+        **kwargs,
+    ):
+        """Creates a bar plot.
+
+        Wrapper around pandas.plot.bar
+
+        Args:
+            df (pd.DataFrame): DataFrame of data to plot.
+            color (dict): dictionary of colors, dict keys should be
+                found in df columns.
+            stacked (bool, optional): Whether to stack bar values.
+                Defaults to False.
+            sub_pos (Union[int, Tuple[int, int]], optional): Position of subplot,
+                can be either a integer or a tuple of 2 integers depending on
+                how SetupSubplot was instantiated.
+                Defaults to 0
+            custom_tick_labels (list, optional): List of custom tick
+                labels to use.
+                Defaults to None
+            ytick_major_fmt (str, optional): Sets the ytick major format.
+                Value gets passed to the set_yaxis_major_tick_format method
+                Defaults to 'standard'
+            **kwargs
+                These parameters will be passed to matplotlib.axes.Axes.plot
+                function.
+        """
+        ax = self._check_if_array(sub_pos)
+
+        if isinstance(color, dict):
+            color_list = [color.get(x, "#333333") for x in df.columns]
+        elif isinstance(color, list):
+            color_list = color
+        else:
+            color_list = None
+
+        df.plot.line(
+            color=color_list,
+            ax=ax,
+            legend=legend,
+            **kwargs,
+        )
+
+        self.set_yaxis_major_tick_format(tick_format=ytick_major_fmt, sub_pos=sub_pos)
+
+        # ax.grid(which='both', axis='both', linewidth=0.5)
+        # Set x-tick labels
+        if isinstance(custom_tick_labels, pd.Index):
+            custom_tick_labels = list(custom_tick_labels)
+        if custom_tick_labels:
+            tick_labels = custom_tick_labels
+        else:
+            tick_labels = df.index
+        ax.set(xticks = list(range(len(tick_labels))))
+        self.set_barplot_xticklabels(tick_labels, sub_pos=sub_pos)
 
     def histogram(
         self,
