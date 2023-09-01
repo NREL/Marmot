@@ -32,6 +32,7 @@ from marmot.plottingmodules.total_generation import TotalGeneration
 
 logger = logging.getLogger("plotter." + __name__)
 plot_data_settings: dict = mconfig.parser("plot_data")
+include_batteries: bool = mconfig.parser("plot_data","include_explicit_battery_objects")
 
 
 class InstalledCapacity(PlotDataStoreAndProcessor):
@@ -124,7 +125,9 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
         # List of properties needed by the plot, properties are a set of tuples and
         # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
-        properties = [(True, "generator_Installed_Capacity", self.Scenarios)]
+        properties = [(True, "generator_Installed_Capacity", self.Scenarios),
+                      (False, "batterie_Installed_Capacity", self.Scenarios),
+                      ]
 
         # Runs get_data to populate mplot_data_dict with all required properties,
         # returns a 1 if required data is missing
@@ -169,6 +172,13 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
                 Total_Installed_Capacity = self.df_process_gen_inputs(
                     Total_Installed_Capacity
                 )
+
+                # Insert battery generation.
+                if include_batteries:
+                    Total_Installed_Capacity = self.add_battery_gen_to_df(
+                        Total_Installed_Capacity, scenario, zone_input,
+                        battery_prop="Installed_Capacity"
+                    )
 
                 if pd.notna(start_date_range):
                     Total_Installed_Capacity = set_timestamp_date_range(
@@ -628,7 +638,9 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
         # List of properties needed by the plot, properties are a set of tuples and
         # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
-        properties = [(True, "generator_Installed_Capacity", self.Scenarios)]
+        properties = [(True, "generator_Installed_Capacity", self.Scenarios),
+                      #(False, "batterie_Installed_Capacity", self.Scenarios),
+                      (False, "batterie_Generation_Capacity_Built", self.Scenarios)]
 
         # Runs get_data to populate mplot_data_dict with all required properties,
         # returns a 1 if required data is missing
@@ -686,6 +698,14 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
 
                 installed_capacity = self.df_process_gen_inputs(installed_capacity)
 
+                # Insert battery generation.
+                if include_batteries:
+                    installed_capacity = self.add_battery_gen_to_df(
+                        installed_capacity, scenario, zone_input,
+                        battery_prop="Generation_Capacity_Built"
+                    )
+                    installed_capacity["Storage"] = installed_capacity.Storage.cumsum()
+
                 if pd.notna(start_date_range):
                     installed_capacity = set_timestamp_date_range(
                         installed_capacity, start_date_range, end_date_range
@@ -705,6 +725,10 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
                 installed_capacity_grouped = (
                     installed_capacity_grouped / unitconversion["divisor"]
                 )
+                # Delete columns of all zeros
+                installed_capacity_grouped = installed_capacity_grouped.loc[
+                    :, (installed_capacity_grouped != 0).any(axis=0)
+                ]
 
                 data_tables.append(installed_capacity_grouped)
 
