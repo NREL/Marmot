@@ -142,7 +142,7 @@ class TotalGeneration(PlotDataStoreAndProcessor):
             (False, f"{agg}_Load", self.Scenarios),
             (False, f"{agg}_Demand", self.Scenarios),
             (False, f"{agg}_Unserved_Energy", self.Scenarios),
-            #(False, "batterie_Generation", self.Scenarios),
+            (False, "batterie_Generation", self.Scenarios),
         ]
 
         # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
@@ -175,17 +175,6 @@ class TotalGeneration(PlotDataStoreAndProcessor):
                     continue
                 Total_Gen_Stack = self.df_process_gen_inputs(Total_Gen_Stack)
 
-                if pd.notna(start_date_range):
-                    Total_Gen_Stack = set_timestamp_date_range(
-                        Total_Gen_Stack, start_date_range, end_date_range
-                    )
-                    if Total_Gen_Stack.empty is True:
-                        logger.warning("No Generation in selected Date Range")
-                        continue
-
-                # Calculates interval step to correct for MWh of generation
-                interval_count = get_sub_hour_interval_count(Total_Gen_Stack)
-
                 # Insert Curtailment into gen stack if it exists in database
                 Total_Gen_Stack = self.add_curtailment_to_df(
                     Total_Gen_Stack, scenario, zone_input, self.gen_categories.vre
@@ -197,7 +186,18 @@ class TotalGeneration(PlotDataStoreAndProcessor):
                         Total_Gen_Stack, scenario, zone_input
                     )
 
-                Total_Gen_Stack = Total_Gen_Stack / interval_count
+                if pd.notna(start_date_range):
+                    Total_Gen_Stack = set_timestamp_date_range(
+                        Total_Gen_Stack, start_date_range, end_date_range
+                    )
+                    if Total_Gen_Stack.empty is True:
+                        logger.warning("No Generation in selected Date Range")
+                        continue
+
+                # Calculates interval step to correct for MWh of generation
+                #interval_count = get_sub_hour_interval_count(Total_Gen_Stack)
+
+                #Total_Gen_Stack = Total_Gen_Stack / interval_count
 
                 # Process extra optional properties
                 extra_property_names = [
@@ -209,7 +209,7 @@ class TotalGeneration(PlotDataStoreAndProcessor):
                     extra_property_names, scenario, zone_input, agg
                 )
 
-                extra_plot_data = extra_plot_data / interval_count
+                #extra_plot_data = extra_plot_data / interval_count
                 extra_plot_data = extra_plot_data.loc[
                     Total_Gen_Stack.index.min() : Total_Gen_Stack.index.max()
                 ]
@@ -253,6 +253,7 @@ class TotalGeneration(PlotDataStoreAndProcessor):
             total_generation_stack_out = (
                 total_generation_stack_out / unitconversion["divisor"]
             )
+            
             extra_data_out = extra_data_out / unitconversion["divisor"]
 
             # Data table of values to return to main program
@@ -979,7 +980,8 @@ class TotalGeneration(PlotDataStoreAndProcessor):
         # List of properties needed by the plot, properties are a set of tuples and
         # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
-        properties = [(True, "generator_Generation", self.Scenarios)]
+        properties = [(True, "generator_Generation", self.Scenarios),
+                      (False, "batterie_Generation", self.Scenarios)]
 
         # Runs get_data to populate mplot_data_dict with all required properties,
         # returns a 1 if required data is missing
@@ -1033,6 +1035,12 @@ class TotalGeneration(PlotDataStoreAndProcessor):
 
                 generation = self.df_process_gen_inputs(generation)
 
+                # Insert battery generation.
+                if include_batteries:
+                    generation = self.add_battery_gen_to_df(
+                        generation, scenario, zone_input
+                    )
+
                 if pd.notna(start_date_range):
                     generation = set_timestamp_date_range(
                         generation, start_date_range, end_date_range
@@ -1050,6 +1058,11 @@ class TotalGeneration(PlotDataStoreAndProcessor):
                         generation_grouped, self.Scenarios, sum_values=True
                     )
                 generation_grouped = generation_grouped / unitconversion["divisor"]
+
+                # Delete columns of all zeros
+                generation_grouped = generation_grouped.loc[
+                    :, (generation_grouped != 0).any(axis=0)
+                ]
 
                 data_tables.append(generation_grouped)
 
@@ -1093,13 +1106,309 @@ class TotalGeneration(PlotDataStoreAndProcessor):
             # works for all values in spacing
             labelpad = 40
             plt.ylabel(
-                f"Total Generation ({unitconversion['units']})",
+                f"Total Generation ({unitconversion['units']}h)",
                 color="black",
                 rotation="vertical",
                 labelpad=labelpad,
             )
 
             Data_Table_Out = pd.concat(data_tables)
-            Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
+            Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']}h)")
+            outputs[zone_input] = {"fig": fig, "data_table": Data_Table_Out}
+        return outputs
+    
+    def re_gen_percentage(
+            self,
+            start_date_range: str = None,
+            end_date_range: str = None,
+            scenario_groupby: str = "Year-Scenario",
+            **_,
+    ):
+        """Creates a line plot of % renewable contributions each year with a line for each scenario.
+        effect.
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from.
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+            scenario_groupby (str, optional): Specifies whether to group data by Scenario
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
+                plotting data which covers multiple years such as ReEDS.
+                Defaults to Scenario.
+
+                .. versionadded:: 0.10.0
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
+        """
+        outputs: dict = {}
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
+        # scenarios must be a list.
+        properties = [(True, "generator_Generation", self.Scenarios),
+                      (False, "batterie_Generation", self.Scenarios),
+                      ]
+
+        # Runs get_data to populate mplot_data_dict with all required properties,
+        # returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
+
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = MissingInputData()
+            return outputs
+
+        for zone_input in self.Zones:
+
+            logger.info(f"Zone = {zone_input}")
+
+            mplt = PlotLibrary()
+            fig, ax = mplt.get_figure()
+
+            scen_tables = []
+
+            for i, scenario in enumerate(self.Scenarios):
+                logger.info(f"Scenario = {scenario}")
+
+                total_generation = self["generator_Generation"].get(scenario)
+
+                try:
+                    generation = total_generation.xs(zone_input, level=self.AGG_BY)
+                except KeyError:
+                    logger.warning(f"No installed capacity in {zone_input}")
+                    outputs[zone_input] = MissingZoneData()
+                    continue
+
+                generation = self.df_process_gen_inputs(generation)
+
+
+                # Insert battery generation.
+                if include_batteries:
+                    generation = self.add_battery_gen_to_df(
+                        generation, scenario, zone_input
+                    )
+
+                if pd.notna(start_date_range):
+                    generation = set_timestamp_date_range(
+                        generation, start_date_range, end_date_range
+                    )
+                    if generation.empty is True:
+                        logger.warning("No Data in selected Date Range")
+                        continue
+                generation_grouped = self.year_scenario_grouper(
+                    generation, scenario, groupby=scenario_groupby
+                ).sum()
+
+                # Calculate percentages
+                generation_grouped["Total Generation"] = generation_grouped[list(generation_grouped.columns)].sum(axis=1)
+                for col in generation_grouped.columns:
+                    generation_grouped[col] = generation_grouped[col] / generation_grouped["Total Generation"] * 100
+
+                # Extract only the renewable columns
+                generation_grouped = generation_grouped[generation_grouped.columns.intersection(self.gen_categories.re)]
+
+                generation_grouped[scenario] = generation_grouped[list(generation_grouped.columns)].sum(axis=1)
+                generation_grouped = generation_grouped[[scenario]]
+                generation_grouped.index = generation_grouped.index.str.split(":").str[0]
+                generation_grouped.index.names = ["Year"]
+
+                scen_tables.append(generation_grouped)
+
+            if not scen_tables:
+                outputs[zone_input] = MissingZoneData()
+                continue
+            
+            generation_grouped = pd.concat(scen_tables, axis=1)
+
+            # Set x-tick labels
+            if self.custom_xticklabels:
+                tick_labels = self.custom_xticklabels
+            else:
+                tick_labels = generation_grouped.index
+        
+            mplt.multilineplot(
+                generation_grouped,
+                custom_tick_labels=tick_labels,
+            )
+            # Add legend
+            mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
+            # Add title
+            if plot_data_settings["plot_title_as_region"]:
+                mplt.add_main_title(zone_input)
+
+            # Ylabel should change if there are facet labels, leave at 40 for now,
+            # works for all values in spacing
+            ax.set_ylabel(
+                f"Contribution of Renewables\n to Annual Generation (%)",
+                color="black",
+                rotation="vertical",
+            )
+            ax.set_ylim([0,100])
+
+            Data_Table_Out = generation_grouped
+            Data_Table_Out = Data_Table_Out.add_suffix("%")
+            outputs[zone_input] = {"fig": fig, "data_table": Data_Table_Out}
+        return outputs 
+           
+    def fuel_offtake_facet(
+        self,
+        start_date_range: str = None,
+        end_date_range: str = None,
+        scenario_groupby: str = "Scenario",
+        **_,
+    ):
+        """Creates a stacked barplot of total fuel offtake.
+        Each scenario will be plotted in a separate bar subplot.
+        This plot is particularly useful for plotting ReEDS results or
+        other models than span multiple years with changing capacity.
+        Ensure scenario_groupby is set to 'Year-Sceanrio' to observe this
+        effect.
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from.
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+            scenario_groupby (str, optional): Specifies whether to group data by Scenario
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
+                plotting data which covers multiple years such as ReEDS.
+                Defaults to Scenario.
+
+                .. versionadded:: 0.10.0
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
+        """
+        outputs: dict = {}
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
+        # scenarios must be a list.
+        properties = [(True, "generator_Fuel_Offtake", self.Scenarios),
+                    ]
+
+        # Runs get_data to populate mplot_data_dict with all required properties,
+        # returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
+
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = MissingInputData()
+            return outputs
+
+        for zone_input in self.Zones:
+
+            logger.info(f"Zone = {zone_input}")
+
+            # sets up x, y dimensions of plot
+            ncols, nrows = set_facet_col_row_dimensions(
+                self.xlabels, self.ylabels, multi_scenario=self.Scenarios
+            )
+            grid_size = ncols * nrows
+            # Used to calculate any excess axis to delete
+            plot_number = len(self.Scenarios)
+            excess_axs = grid_size - plot_number
+
+            mplt = PlotLibrary(nrows, ncols, sharey=True, squeeze=False, ravel_axs=True)
+            fig, axs = mplt.get_figure()
+
+            plt.subplots_adjust(wspace=0.05, hspace=0.5)
+
+            # If creating a facet plot the font is scaled by 9% for each added x dimesion fact plot
+            if ncols > 1:
+                font_scaling_ratio = 1 + ((ncols - 1) * 0.09)
+                plt.rcParams["xtick.labelsize"] *= font_scaling_ratio
+                plt.rcParams["ytick.labelsize"] *= font_scaling_ratio
+                plt.rcParams["legend.fontsize"] *= font_scaling_ratio
+                plt.rcParams["axes.labelsize"] *= font_scaling_ratio
+                plt.rcParams["axes.titlesize"] *= font_scaling_ratio
+
+            data_tables = []
+
+            for i, scenario in enumerate(self.Scenarios):
+                logger.info(f"Scenario = {scenario}")
+
+                total_generation = self["generator_Fuel_Offtake"].get(scenario)
+
+                try:
+                    generation = total_generation.xs(zone_input, level=self.AGG_BY)
+                except KeyError:
+                    logger.warning(f"No fuel offtake in {zone_input}")
+                    outputs[zone_input] = MissingZoneData()
+                    continue
+
+                generation = self.df_process_gen_inputs(generation)
+
+                if pd.notna(start_date_range):
+                    generation = set_timestamp_date_range(
+                        generation, start_date_range, end_date_range
+                    )
+                    if generation.empty is True:
+                        logger.warning("No Data in selected Date Range")
+                        continue
+                generation_grouped = self.year_scenario_grouper(
+                    generation, scenario, groupby=scenario_groupby
+                ).sum()
+
+                # Change units to thousands of MMBTUs
+                generation_grouped = generation_grouped / 1000
+
+                # Delete columns of all zeros
+                generation_grouped = generation_grouped.loc[
+                    :, (generation_grouped != 0).any(axis=0)
+                ]
+
+                data_tables.append(generation_grouped)
+
+                # Set x-tick labels
+                if self.custom_xticklabels:
+                    tick_labels = self.custom_xticklabels
+                elif scenario_groupby == "Year-Scenario":
+                    tick_labels = [x.split(":")[0] for x in generation_grouped.index]
+                else:
+                    tick_labels = generation_grouped.index
+
+                mplt.barplot(
+                    generation_grouped,
+                    color=self.marmot_color_dict,
+                    stacked=True,
+                    custom_tick_labels=tick_labels,
+                    sub_pos=i,
+                )
+
+                if scenario_groupby == "Year-Scenario":
+                    axs[i].set_xlabel(scenario)
+                else:
+                    axs[i].set_xlabel("")
+
+            if not data_tables:
+                outputs[zone_input] = MissingZoneData()
+                continue
+
+            # Add facet labels
+            if self.xlabels or self.ylabels:
+                mplt.add_facet_labels(xlabels=self.xlabels, ylabels=self.ylabels)
+            # Add legend
+            mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
+            # Remove extra axes
+            mplt.remove_excess_axs(excess_axs, grid_size)
+            # Add title
+            if plot_data_settings["plot_title_as_region"]:
+                mplt.add_main_title(zone_input)
+
+            # Ylabel should change if there are facet labels, leave at 40 for now,
+            # works for all values in spacing
+            labelpad = 40
+            plt.ylabel(
+                f"Quanity of Fuel (Thousand MMBTUs)",
+                color="black",
+                rotation="vertical",
+                labelpad=labelpad,
+            )
+
+            Data_Table_Out = pd.concat(data_tables)
+            Data_Table_Out = Data_Table_Out.add_suffix(f" (Thousand MMBTUs)")
             outputs[zone_input] = {"fig": fig, "data_table": Data_Table_Out}
         return outputs
