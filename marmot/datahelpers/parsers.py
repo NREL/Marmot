@@ -183,7 +183,7 @@ def agg_plexos_availability(plexos_dir):
 
 def agg_plexos_load(plexos_dir):
 
-    return agg_plexos_dataset(plexos_dir, 'interval', 'regions', 'Load')
+    return agg_plexos_dataset(plexos_dir, 'interval', 'regions', 'Native Load')
 
 
 def parse_h5_map(file_path, metadata_path, reverse=False):

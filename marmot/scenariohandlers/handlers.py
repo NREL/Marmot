@@ -315,7 +315,9 @@ class PlexosScenario(BaseScenario):
         self._scenario_path = scenario_path
         self._template_file = get_plexos_paths(scenario_path)[0]
         self._tech_map = get_h5_gen_tech_map(self._template_file)
-        self._tech_simple = load_map(plexos_map_simple)
+
+        self._tech_simple = { map[1]:map[0] for map in columns_to_simple( list(self._tech_map.values()), plexos_map_simple)}
+
 
         self._gen_entity_map = get_h5_gen_region_map(self._template_file)
         self._load_entity_map = get_h5_region_region_map(self._template_file)
@@ -386,7 +388,7 @@ class ReEDsScenario(BaseScenario):
     def set_entity_map(self, entity_map: str ) -> None:
         self._entity_map = entity_map.lower()
 
-
+    """
     def get_regional_load(self):
         df = pd.read_hdf(f'{self._scenario_path}/inputs_case/load.h5')
 
@@ -404,9 +406,35 @@ class ReEDsScenario(BaseScenario):
         df3.columns.name = 'Entity'
 
         return df3
+    """
+
+    def get_regional_load(self):
+        file_path = os.path.join(self._scenario_path,'outputs/load_cat.csv')
+        df = pd.read_csv(file_path)
+        df = df[df.loadtype.isin({'end_use','h2_prod','dist_loss','trans_loss'})]
+        df['Timestamp'] = pd.to_datetime(df['t'].apply(lambda x: f'01-01-{x}'))
+
+        df = df.set_index('t').loc[self._analysis_year]
+        ldf = df.pivot_table(index='Timestamp', columns=['r','loadtype'], values='Value', fill_value=0.0)
+        ldf.columns.names=['Entity', 'Technology']
+        return ldf
+
 
     def get_entity_tech_aggregates(self):
-        return NotImplemented
+
+        dispatch = self.get_gen_and_curtailment()
+
+        dispatch.columns = pd.MultiIndex.from_tuples([
+            (
+                self._entity_map[col[0]],
+                col[1]
+            ) for col in dispatch.columns
+        ], names=['Entity', 'Technology'])
+        #df = self.get_ivrt(file, self._analysis_year)
+        #df['Technology'] = [col[0] for col in columns_to_simple(df['i'], plexos_map_simple)]
+        #df['Entity'] = df['r'].map(self._entity_map)
+
+        return dispatch.groupby(level=[0,1], axis=1).sum()
 
     @lru_cache(10)
     def get_ivrt(self, file_name, analysis_year):
@@ -452,6 +480,17 @@ class ReEDsScenario(BaseScenario):
 
         return pd.merge(gen_tech, reg_curt, left_index=True, right_index=True)
 
+
+    def get_entity_load(self):
+
+        df = self.get_regional_load()
+
+        df.columns = pd.MultiIndex.from_tuples([
+            (self._entity_map[col[0]], col[1]) for col in df.columns
+        ], names=['Entity', 'Technology'])
+
+        return df
+
     def get_installed_capacity(self):
         df = pd.read_csv(f'{self._scenario_path}/outputs/cap_ivrt.csv')
 
@@ -470,6 +509,7 @@ class ReEDsScenario(BaseScenario):
         else:
             return df3
 
+    """
     def get_entity_tech_load_aggregates(self):
 
         gen_curt = self.get_gen_and_curtailment()
@@ -490,7 +530,7 @@ class ReEDsScenario(BaseScenario):
             return cdf.groupby(level=['Entity','Technology'], axis=1).sum()
         else:
             return cdf
-
+    """
 
     def get_line_flow_data(self):
         return NotImplemented
