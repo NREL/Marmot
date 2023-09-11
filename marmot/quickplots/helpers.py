@@ -138,12 +138,12 @@ def plot_dispatch_stack_bar(df, ax=None):
         if len(df_tw) == 1:
             xmin = [i-0.25 for i in range(len(df_tw.index))]
             xmax = [i+0.25 for i in range(len(df_tw.index))]
-            ax.hlines(y=df_tw['Demand'].values, color='Black', linestyle='-', xmin=xmin, xmax=xmax, label='Demand')
+            ax.hlines(y=df_tw['Demand'].values, color='Black', linestyle='--', xmin=xmin, xmax=xmax, label='Demand')
 
         else:
             xmin = [i-0.25 for i in range(len(df_tw.index))]
             xmax = [i+0.25 for i in range(len(df_tw.index))]
-            ax.hlines(df_tw['Demand'].values, xmin=xmin, xmax=xmax, colors='Black', label='Demand')
+            ax.hlines(df_tw['Demand'].values, xmin=xmin, xmax=xmax, colors='Black',linestyle='--', label='Demand')
 
     handles, labels = ax.get_legend_handles_labels()
 
