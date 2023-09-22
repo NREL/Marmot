@@ -13,7 +13,7 @@ from glob import iglob
 import h5py
 
 
-def combine_frames_skip_prev(frames):
+def combine_frames_skip_prev(frames: pd.DataFrame) -> pd.DataFrame:
 
     """
     Combines multiple dataframes and skips previously simulated dates
@@ -53,7 +53,7 @@ def combine_frames_skip_prev(frames):
 
 
 
-def extract_h5_data(file_path, freq, partition, dataset, is_relation):
+def extract_h5_data(file_path: str, schedule: str, freq:str, group:str, dataset:str, is_relation:str):
 
 
     """
@@ -70,14 +70,14 @@ def extract_h5_data(file_path, freq, partition, dataset, is_relation):
 
     with h5py.File(file_path) as h5data:
 
-        headers = h5data[f'/metadata/{sub}/{partition}'][()]
+        headers = h5data[f'/metadata/{sub}/{group}'][()]
         columns = [r[0].decode() for r in headers]
 
 
-        data = h5data[f'/data/ST/{freq}/{partition}/{dataset}'][()]
+        data = h5data[f'/data/{schedule}/{freq}/{group}/{dataset}'][()]
         timestamps = pd.to_datetime([val.decode() for val in h5data[f'/metadata/times/{freq}'][()]])
 
-        attributes = h5data[f'/data/ST/{freq}/{partition}/{dataset}'].attrs
+        attributes = h5data[f'/data/{schedule}/{freq}/{group}/{dataset}'].attrs
         period_offset = attributes['period_offset']
         units = attributes['units'].decode()
 
@@ -88,7 +88,6 @@ def extract_h5_data(file_path, freq, partition, dataset, is_relation):
             df = pd.DataFrame({dataset:piv_data}, index=columns)
 
             return df
-            #df = pd.DataFrame(piv_data, columns=columns, index=timestamps[period_offset:period_offset+len(piv_data)])
 
         else:
             piv_data = data.squeeze().transpose()
@@ -101,13 +100,13 @@ def extract_h5_data(file_path, freq, partition, dataset, is_relation):
 
 
 
-def get_plexos_paths(plexos_dir):
+def get_plexos_paths(plexos_dir: str) ->  list:
 
     return [os.path.normpath(file) for file in iglob(f"{plexos_dir}/*.h5")]
 
 
 
-def agg_plexos_dataset(plexos_dir, freq, partition, dataset, is_relation=False):
+def agg_plexos_dataset(plexos_dir: str, schedule: str, freq:str, group:str, dataset:str, is_relation=False):
 
     """
         Input: directory of h5 files
@@ -119,7 +118,7 @@ def agg_plexos_dataset(plexos_dir, freq, partition, dataset, is_relation=False):
     frames = []
     for path in paths:
 
-        df = extract_h5_data(path, freq, partition, dataset, is_relation)
+        df = extract_h5_data(path, schedule, freq, group, dataset, is_relation)
 
         frames.append(df)
 
@@ -128,27 +127,27 @@ def agg_plexos_dataset(plexos_dir, freq, partition, dataset, is_relation=False):
     return agg_df
 
 
-def agg_plexos_partition(plexos_dir, freq, partition, is_relation=False):
+def agg_plexos_group(plexos_dir: str, schedule: str, freq: str, group: str, is_relation=False) -> pd.DataFrame:
     """
     Not ideal for larger datasets.
 
-    Takes a plexos partition and combines all datasets into a single dataframe
+    Takes a plexos group and combines all datasets into a single dataframe
 
     """
     paths = get_plexos_paths(plexos_dir)
     template_file = paths[0]
 
-    print(f"aggregating {freq} {partition}")
+    print(f"aggregating {freq} {group}")
 
     with h5py.File(template_file) as h5data:
 
-        datasets = [key for key in h5data[f'/data/ST/{freq}/{partition}'].keys()]
+        datasets = [key for key in h5data[f'/data/{schedule}/{freq}/{group}'].keys()]
 
     df_dict = {}
     for ds in datasets:
 
         print(f'aggregating dataset: {ds}')
-        dataset_df = agg_plexos_dataset(plexos_dir, freq, partition, ds, is_relation)
+        dataset_df = agg_plexos_dataset(plexos_dir, schedule, freq, group, ds, is_relation)
 
         df_dict[ds] = dataset_df.astype('float32')
 
@@ -158,32 +157,34 @@ def agg_plexos_partition(plexos_dir, freq, partition, is_relation=False):
     for dataset, df in df_dict.items():
         units = df.attrs['units']
 
-        df.columns = pd.MultiIndex.from_tuples([(f'{dataset} ({units})', col) for col in df.columns], names=[None,partition])
+        df.columns = pd.MultiIndex.from_tuples([(f'{dataset} ({units})', col) for col in df.columns], names=[None,group])
         frames.append(df)
 
     print('combining frames')
-    partition_df = pd.concat(frames, axis=1).stack()
-    partition_df.index = partition_df.index.swaplevel(0,1)
-    partition_df.index.set_names([partition, 'Timestamp'])
-    return partition_df.sort_index()
+    group_df = pd.concat(frames, axis=1).stack()
+    group_df.index = group_df.index.swaplevel(0,1)
+    group_df.index.set_names([group, 'Timestamp'])
+    return group_df.sort_index()
 
+
+# Defaults
 
 def agg_plexos_generation(plexos_dir):
     """
         Input: directory of h5 files
         Output: dataframe of combined files
     """
-    return agg_plexos_dataset(plexos_dir, 'interval', 'generators', 'Generation')
+    return agg_plexos_dataset(plexos_dir,'ST', 'interval', 'generators', 'Generation')
 
 
 def agg_plexos_availability(plexos_dir):
 
-    return agg_plexos_dataset(plexos_dir, 'interval','generators', 'Available Capacity')
+    return agg_plexos_dataset(plexos_dir,'ST', 'interval','generators', 'Available Capacity')
 
 
 def agg_plexos_load(plexos_dir):
 
-    return agg_plexos_dataset(plexos_dir, 'interval', 'regions', 'Native Load')
+    return agg_plexos_dataset(plexos_dir,'ST', 'interval', 'regions', 'Load')
 
 
 def parse_h5_map(file_path, metadata_path, reverse=False):
@@ -202,12 +203,6 @@ def get_h5_gen_tech_map(file_path):
     return parse_h5_map(file_path, 'metadata/objects/generators')
 
 
-def get_h5_gen_entity_map(file_path, entity):
-
-    return
-
-
-
 def get_h5_gen_zone_map(file_path):
 
     return parse_h5_map(file_path, 'metadata/relations/zones_generators', reverse=True)
@@ -222,7 +217,7 @@ def get_h5_region_region_map(file_path):
     # identity map for regional load
     map = parse_h5_map(file_path, 'metadata/objects/regions')
     new_map = {key:key for key in map.keys()}
-    return new_map #parse_h5_map(file_path, 'metadata/relations/nodes_region')
+    return new_map
 
 
 def get_h5_region_zone_map(file_path):

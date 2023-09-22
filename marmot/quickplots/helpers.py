@@ -691,6 +691,8 @@ def plot_hourly_boxplot(flow: pd.Series, ax=None, return_frame=False):
 
 def plot_hourly_box_monthly(flow: pd.Series):
 
+    """Creates a facet of hourly boxplots"""
+
     months = flow.index.month.unique()
 
     fig, axs = plt.subplots(4,3, figsize=(18,12), sharex=False, sharey=True)

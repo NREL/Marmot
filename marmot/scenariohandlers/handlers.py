@@ -18,6 +18,7 @@ from marmot.scenariohandlers.config_maps import *
 from functools import lru_cache
 from glob import iglob
 from marmot.datahelpers.parsers import *
+import warnings
 
 #Need a pre-determined set of curtailable technology. Global value that can be updated
 # TODO move this to a config section
@@ -105,13 +106,14 @@ class BaseScenario(ABC):
 
     @abstractmethod
     def get_installed_capacity(self):
+        """ Gets the installed capacity for each technology"""
         ...
     @abstractmethod
     def get_line_flow_data(self):
         ...
 
     def simplify_technology(self, tech):
-
+        """ Simplifies the tech to the standard technologies used for quickplots"""
         if tech in self._tech_simple:
             return self._tech_simple[tech]
         else:
@@ -145,7 +147,7 @@ class BaseScenario(ABC):
             df.to_parquet(cache_path,compression='gzip')
             return df
 
-    def get_generators_tech(self):
+    def get_generators_tech(self) -> pd.DataFrame:
 
         """Returns a Dataframe with a column for each generator along with technology category"""
 
@@ -160,7 +162,9 @@ class BaseScenario(ABC):
         gen_df.attrs["Units"] = "MW"
         return gen_df
 
-    def get_availability_tech(self, simplify=True):
+    def get_availability_tech(self, simplify=True) -> pd.DataFrame:
+
+        """Gets the availability for each generator"""
         avail_df = self.get_availability()
 
         # TODO replace simple tech map with standard EIA tech map
@@ -173,14 +177,26 @@ class BaseScenario(ABC):
         avail_df.attrs["Units"] = "MW"
         return avail_df
 
-    def get_curtailment(self):
+    def get_curtailment(self) -> pd.DataFrame:
+
+        """ Calculates the curtailment for each generator based on which technologies are configured as curtailable"""
         gen_tech = self.get_generators_tech()
         avail_tech = self.get_availability_tech()
 
         curt_tech = calc_curtailment(gen_tech, avail_tech)
         return curt_tech
 
-    def get_gen_and_curtailment(self):
+    # Dispatch
+
+
+    def get_dispatch(self) -> pd.DataFrame:
+        """Gets hourly dispatch for each technology group"""
+        return
+
+
+    def get_gen_and_curtailment(self) -> pd.DataFrame:
+        """Gets the hourly generation and curtailment for each node"""
+
         gen_tech = self.get_generators_tech()
         avail_tech = self.get_availability_tech()
 
@@ -190,8 +206,36 @@ class BaseScenario(ABC):
 
         return pd.merge(gen_tech, curt_tech, left_index=True, right_index=True)
 
+
+    def get_entity_dispatch(self, include_load=True) -> pd.DataFrame:
+
+
+        """Gets hourly dispatch for each technogloy and entity"""
+
+        gen_curt_tech = self.get_gen_and_curtailment()
+
+        gen_curt_tech.columns = pd.MultiIndex.from_tuples([(self._gen_entity_map[col[1]], col[0],col[1]) for col in gen_curt_tech.columns], names=['Entity','Technology','Generator'])
+
+        gen_curt_tech = gen_curt_tech.groupby(axis=1, level=['Entity','Technology']).sum()
+
+
+        if include_load:
+            regional_load = self.get_entity_load()
+            regional_load_agg = regional_load.groupby(axis=1, level=0).sum()
+            regional_load_agg.columns = pd.MultiIndex.from_tuples([(col, "Demand") for col in regional_load_agg.columns], names=['Entity', 'Technology'])
+
+
+            gen_curt_tech = gen_curt_tech.merge(regional_load_agg, left_index=True, right_index=True).sort_index(axis=1)
+
+
+        gen_curt_tech.attrs['units'] = 'MW'
+
+
+        return gen_curt_tech
+
     # aggregates across generators
-    def get_entity_tech_aggregates(self):
+    def get_entity_tech_aggregates(self) -> pd.DataFrame: # TODO this does not do any aggregations
+        """ gets the hourly generation and curtailment by each entity and technology"""
 
         gen_curt_tech = self.get_gen_and_curtailment()
 
@@ -199,8 +243,8 @@ class BaseScenario(ABC):
 
         return gen_curt_tech
 
-    def get_entity_load(self):
-
+    def get_entity_load(self) -> pd.DataFrame:
+        """ Gets the hourly load by entity"""
         df = self.get_regional_load()
 
         df.columns = pd.MultiIndex.from_tuples([
@@ -209,7 +253,11 @@ class BaseScenario(ABC):
 
         return df
 
-    def get_entity_tech_load_aggregates(self):
+    def get_entity_tech_load_aggregates(self) -> pd.DataFrame:
+        warnings.warn("Use get_entity_dispatch() instead", DeprecationWarning, stacklevel=2)
+        """
+            Gets the hourly Generation by technology, curtailment and load for each entity.
+        """
 
         regional_load = self.get_entity_load()
         regional_load_agg = regional_load.groupby(axis=1, level=0).sum()
@@ -224,20 +272,29 @@ class BaseScenario(ABC):
 
         return gen_tech_load_entity
 
-    def get_entity_curtailment_aggregates(self):
+
+    def get_entity_curtailment_aggregates(self) -> pd.DataFrame:
+        """Gets the hourly curtailment for each available technology category and entity"""
+
         curt_entity = self.get_curtailment()
         curt_entity.columns = pd.MultiIndex.from_tuples([(self._gen_entity_map[col[1]], col[0],col[1]) for col in curt_entity.columns], names=['Entity', 'Technology','Generator'])
 
         return curt_entity.groupby(level=['Entity', 'Technology'], axis=1).sum()
 
-    def get_winter_summer_peaks(self, winter_months=[1,2,12]):
+    def get_winter_summer_peaks(self, winter_months=[1,2,12]) -> dict:
+        """
+            Gets the timestamp for winter and summer peaks for Net Load and Total Load.
+        """
+
         dispatch = self.get_entity_tech_load_aggregates()
         return get_winter_summer_peaks(dispatch, winter_months=winter_months)
 
 
     # Flow APIs
 
-    def get_line_loading(self):
+    def get_line_loading(self)->pd.DataFrame:
+
+        """ Gets the line loading as a % based on _line_rating_map"""
 
         flow = self.get_line_flow_data()
 
@@ -246,8 +303,8 @@ class BaseScenario(ABC):
         return loading
 
 
-    def get_line_utilization(self, threshold=[99,95,90,75]):
-
+    def get_line_utilization(self, threshold=[99,95,90,75])->pd.DataFrame:
+        """ Calculates a flag for each hour on whether the line is overloaded by 75, 90, 95, or 99%"""
         loading = self.get_line_loading()
         frames = []
         for thresh in threshold:
@@ -259,8 +316,8 @@ class BaseScenario(ABC):
         return pd.concat(frames, axis=1)
 
     @lru_cache(1)
-    def get_line_congestion_hours(self, threshold=100.0):
-
+    def get_line_congestion_hours(self, threshold=100.0)->pd.DataFrame:
+        """Calculates a boolean flag for each hour and line congested"""
         loading = self.get_line_loading()
 
         congestion = loading.applymap(lambda x: False if x < threshold else True)
@@ -324,19 +381,24 @@ class PlexosScenario(BaseScenario):
 
 
     def get_raw_generators(self):
+        """Get the generation data with a column for each generator used as a low level api to implement base class."""
+
         return agg_plexos_generation(self._scenario_path)
 
     def get_raw_availability(self):
+        """Get the availability data with a column for each generator. Used as a low level api to implement base class."""
         return agg_plexos_availability(self._scenario_path)
 
 
     def get_regional_load(self):
+        """Get the load data with a column for each region. Used as a low level api to implement base class."""
         return agg_plexos_load(self._scenario_path)
 
 
     def get_installed_capacity(self):
 
-        df = extract_h5_data(f'{self._template_file}', 'year', 'generators','Installed Capacity', is_relation=False)
+
+        df = extract_h5_data(f'{self._template_file}','ST', 'year', 'generators','Installed Capacity', is_relation=False)
         df.index = pd.MultiIndex.from_tuples([(
         self._gen_entity_map[idx],
         self.simplify_technology(self._tech_map[idx]),
@@ -348,8 +410,22 @@ class PlexosScenario(BaseScenario):
     def get_line_flow_data(self):
         return NotImplemented
 
-    def get_plexos_partition(self, freq, partition, is_relation=False ):
-        return agg_plexos_partition(self._scenario_path, freq=freq, partition=partition, is_relation=is_relation)
+    def get_plexos_h5group(self, schedule, freq, group, is_relation=False) -> pd.DataFrame:
+        """
+        Combines datasets from a group for all h5 files into a single dataframe. Each column represents
+        an h5 dataset with the units appended in ().
+
+        Expects The following
+        Plexos Schedule (ST, MT, LT)
+        Frequency - interval or day
+        Group - The h5 group of the data you want to extract
+
+        """
+        return agg_plexos_group(self._scenario_path,schedule=schedule, freq=freq, group=group, is_relation=is_relation)
+
+    def get_plexos_h5dataset(self, schedule, freq, group, dataset, is_relation=False) -> pd.DataFrame:
+
+        return agg_plexos_dataset(self._scenario_path, schedule, freq, group, dataset, is_relation)
 
     def set_entity_map(self, entity_map: str ) -> None:
         if entity_map.lower() == 'zone':
@@ -420,7 +496,7 @@ class ReEDsScenario(BaseScenario):
         return ldf
 
 
-    def get_entity_tech_aggregates(self):
+    def get_dispatch(self):
 
         dispatch = self.get_gen_and_curtailment()
 
