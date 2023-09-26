@@ -370,14 +370,33 @@ class PlexosScenario(BaseScenario):
         super().__init__(scenario_path, tech_map=None, gen_entity_map=gen_entity_map, load_entity_map=load_entity_map, line_rating_map=line_rating_map)
 
         self._scenario_path = scenario_path
-        self._template_file = get_plexos_paths(scenario_path)[0]
-        self._tech_map = get_h5_gen_tech_map(self._template_file)
+        self._files = get_plexos_paths(scenario_path)
+        self._template_file = self._files[0]
+
+        # need to merge metadata across files.
+
+        #self._tech_map = get_h5_gen_tech_map(self._template_file)
+        self._tech_map = self.generate_map(get_h5_gen_tech_map)
 
         self._tech_simple = { map[1]:map[0] for map in columns_to_simple( list(self._tech_map.values()), plexos_map_simple)}
 
 
-        self._gen_entity_map = get_h5_gen_region_map(self._template_file)
-        self._load_entity_map = get_h5_region_region_map(self._template_file)
+        #self._gen_entity_map = get_h5_gen_region_map(self._template_file)
+        self._gen_entity_map = self.generate_map(get_h5_gen_region_map)
+        #self._load_entity_map = get_h5_region_region_map(self._template_file)
+        self._load_entity_map = self.generate_map(get_h5_region_region_map)
+
+
+    def generate_map(self, map_generator):
+
+        tech_map = {}
+
+        for file in self._files:
+            map_instance = map_generator(file)
+            tech_map.update(map_instance)
+        return tech_map
+
+
 
 
     def get_raw_generators(self):
