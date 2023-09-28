@@ -12,10 +12,13 @@ from pathlib import Path
 from typing import List
 
 import pandas as pd
+import matplotlib.pyplot as plt
 
 import marmot.utils.mconfig as mconfig
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
-from marmot.plottingmodules.plotutils.plot_data_helper import reorder_scenarios
+from marmot.plottingmodules.plotutils.plot_data_helper import (
+    PlotDataStoreAndProcessor,
+    set_facet_col_row_dimensions,
+)
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
@@ -62,6 +65,8 @@ class SystemCosts(PlotDataStoreAndProcessor):
         ordered_gen: List[str],
         marmot_solutions_folder: Path,
         marmot_color_dict: dict = None,
+        ylabels: List[str] = None,
+        xlabels: List[str] = None,
         custom_xticklabels: List[str] = None,
         **kwargs,
     ):
@@ -75,6 +80,10 @@ class SystemCosts(PlotDataStoreAndProcessor):
             marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
             marmot_color_dict (dict, optional): Dictionary of colors to use for
                 generation technologies.
+                Defaults to None.
+            ylabels (List[str], optional): y-axis labels for facet plots.
+                Defaults to None.
+            xlabels (List[str], optional): x-axis labels for facet plots.
                 Defaults to None.
             custom_xticklabels (List[str], optional): List of custom x labels to
                 apply to barplots. Values will overwite existing ones.
@@ -91,6 +100,8 @@ class SystemCosts(PlotDataStoreAndProcessor):
             ).color_dict
         else:
             self.marmot_color_dict = marmot_color_dict
+        self.ylabels = ylabels
+        self.xlabels = xlabels
         self.custom_xticklabels = custom_xticklabels
 
     def prod_cost(
@@ -464,7 +475,235 @@ class SystemCosts(PlotDataStoreAndProcessor):
 
             outputs[zone_input] = {"fig": fig, "data_table": Data_Table_Out}
         return outputs
+    def detailed_gen_cost_facet(
+        self,
+        start_date_range: str = None,
+        end_date_range: str = None,
+        custom_data_file_path: Path = None,
+        scenario_groupby: str = "Scenario",
+        **_,
+    ):
+        """Creates stacked bar plot of total generation cost by cost type (fuel, emission, start cost etc.)
 
+        Creates a more detailed system cost plot.
+        Each scenario is plotted as a separate bar subplot.
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from.
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+            custom_data_file_path (Path, optional): Path to custom data file to concat extra
+                data. Index and column format should be consistent with output data csv.
+            scenario_groupby (str, optional): Specifies whether to group data by Scenario
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
+                plotting data which covers multiple years such as ReEDS.
+                Defaults to Scenario.
+
+                .. versionadded:: 0.10.0
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
+        """
+        outputs: dict = {}
+
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
+        # scenarios must be a list.
+        properties = [
+            (False, "generator_Fuel_Cost", self.Scenarios),
+            (False, "generator_FOM_Cost", self.Scenarios),
+            (False, "generator_VOM_Cost", self.Scenarios),
+            (False, "generator_Start_and_Shutdown_Cost", self.Scenarios),
+            (False, "generator_Reserves_VOM_Cost", self.Scenarios),
+            (False, "generator_Emissions_Cost", self.Scenarios),
+            (False, "generator_Fossil_Annualized_Build_Cost", self.Scenarios),
+            (False, "generator_RE_Annualized_Build_Cost", self.Scenarios),
+            (False, "generator_UoS_Cost", self.Scenarios),
+            (False, "generator_Annualized_One_Time_Cost", self.Scenarios),
+            (False, "batterie_Annualized_Build_Cost", self.Scenarios),
+        ]
+
+        column_dict = {
+                        "generator_Fuel_Cost": "Fuel",
+                        "generator_FOM_Cost": "FO&M",
+                        "generator_VOM_Cost": "VO&M",
+                        "generator_Start_and_Shutdown_Cost": "Start & Shutdown",
+                        "generator_Reserves_VOM_Cost": "Reserves VO&M",
+                        "generator_Emissions_Cost": "Emissions",
+                        "generator_Fossil_Annualized_Build_Cost":"Non-Renewable Capacity",
+                        "generator_RE_Annualized_Build_Cost":"Renewable Purchases",
+                        "generator_UoS_Cost":"Production Tax Credit",
+                        "generator_Annualized_One_Time_Cost":"Spur Line",
+                        "batterie_Annualized_Build_Cost":"Annualized Storage Build",
+        }
+
+        if scenario_groupby == "Scenario":
+            for i in range(len(properties)):
+                column_dict[properties[i][1] + "_NPV"] = column_dict[properties[i][1]]
+                del column_dict[properties[i][1]]
+                properties[i] = (properties[i][0], properties[i][1] + "_NPV", properties[i][2])
+                
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
+
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            return MissingInputData()
+
+        for zone_input in self.Zones:
+            logger.info(f"Zone = {zone_input}")
+            gen_cost_out_chunks = []
+
+            # sets up x, y dimensions of plot
+            ncols, nrows = set_facet_col_row_dimensions(
+                self.xlabels, self.ylabels, multi_scenario=self.Scenarios
+            )
+            grid_size = ncols * nrows
+            # Used to calculate any excess axis to delete
+            plot_number = len(self.Scenarios)
+            excess_axs = grid_size - plot_number
+
+            mplt = PlotLibrary(nrows, ncols, sharey=True, squeeze=False, ravel_axs=True)
+            fig, axs = mplt.get_figure()
+
+            plt.subplots_adjust(wspace = 0.05, hspace = 0.5)
+
+            # If creating a facet plot the font is scaled by 9% for each added x dimesion fact plot
+            if ncols > 1:
+                font_scaling_ratio = 1 + ((ncols - 1) * 0.09)
+                plt.rcParams["xtick.labelsize"] *= font_scaling_ratio
+                plt.rcParams["ytick.labelsize"] *= font_scaling_ratio
+                plt.rcParams["legend.fontsize"] *= font_scaling_ratio
+                plt.rcParams["axes.labelsize"] *= font_scaling_ratio
+                plt.rcParams["axes.titlesize"] *= font_scaling_ratio
+
+            for i, scenario in enumerate(self.Scenarios):
+                logger.info(f"Scenario = {scenario}")
+
+                data_frames_lst = []
+                for prop_name in properties:
+                    df: pd.DataFrame = self[prop_name[1]].get(scenario)
+                    if df.empty:
+                        continue
+                    else:
+                        try:
+                            df = df.xs(zone_input, level=self.AGG_BY)
+                            df = df.groupby(["timestamp"]).sum()
+                        except KeyError:
+                            logger.warning(f"No Generators found in: {zone_input}")
+                            break
+
+                    if (prop_name[1] == "generator_VOM_Cost" or prop_name[1] == "generator_VOM_Cost_NPV"):
+                        try:
+                            df["values"].to_numpy()[df["values"].to_numpy() < 0] = 0
+                        except:
+                            df[0].to_numpy()[df[0].to_numpy() < 0] = 0
+                    df = df.rename(columns={"values": prop_name[1],0: prop_name[1]})
+
+                    data_frames_lst.append(df)
+
+                detailed_gen_cost = pd.concat(data_frames_lst, axis=1).fillna(0)
+                detailed_gen_cost = detailed_gen_cost.rename(
+                    columns=column_dict
+                )
+
+                if pd.notna(start_date_range):
+                    detailed_gen_cost = set_timestamp_date_range(
+                        detailed_gen_cost, start_date_range, end_date_range
+                    )
+                    if detailed_gen_cost.empty is True:
+                        logger.warning("No Generation in selected Date Range")
+                        continue
+                detailed_gen_cost = self.year_scenario_grouper(
+                        detailed_gen_cost, scenario, groupby=scenario_groupby
+                ).sum()
+                # Convert costs to millions
+                detailed_gen_cost = detailed_gen_cost / 1000000
+
+                detailed_gen_cost["Non-Renewable Capacity"] = detailed_gen_cost["Non-Renewable Capacity"] + detailed_gen_cost["Annualized Storage Build"]
+                detailed_gen_cost["Renewable Purchases"] = detailed_gen_cost["Renewable Purchases"] + detailed_gen_cost["Production Tax Credit"]
+                detailed_gen_cost.drop(["Annualized Storage Build", "Production Tax Credit"], axis= "columns", inplace = True)
+
+                # Delete columns that are all 0
+                detailed_gen_cost = detailed_gen_cost.loc[
+                    :, (detailed_gen_cost != 0).any(axis=0)
+                ]
+
+                gen_cost_out_chunks.append(detailed_gen_cost)
+                net_cost = detailed_gen_cost.sum(axis=1)
+
+                # Set x-tick labels
+                if self.custom_xticklabels:
+                    tick_labels = self.custom_xticklabels
+                elif scenario_groupby == "Year-Scenario":
+                    tick_labels = [
+                        x.split(":")[0] for x in detailed_gen_cost.index
+                    ]
+                else:
+                    tick_labels = detailed_gen_cost.index
+                
+                mplt.barplot(
+                    detailed_gen_cost,
+                    stacked = True,
+                    custom_tick_labels=tick_labels, 
+                    sub_pos=i
+                )
+                axs[i].axhline(y=0, color = "grey", linewidth = 0.5, linestyle = "--")
+
+                # Add net cost line
+                for k, idx in enumerate(detailed_gen_cost.index.unique()):
+                    x = [
+                        axs[i].patches[k].get_x(),
+                        axs[i].patches[k].get_x() + axs[i].patches[k].get_width(),
+                    ]
+                    y_net = [net_cost.loc[idx]] * 2
+                    axs[i].plot(x, y_net, c="black", linewidth = 1.5, label = "Net Cost")
+                
+                if scenario_groupby == "Year-Scenario":
+                    axs[i].set_xlabel(scenario)
+                    ylabel = "Annual Cost (Million $)"
+                else:
+                    axs[i].set_xlabel("")
+                    ylabel = "Cumulative NPV Cost (Million $)"
+
+                #ax[i].margins(x=0.01)
+
+            # Checks if gen_cost_out_chunks contains data,
+            # if not skips zone and does not return a plot
+            if not gen_cost_out_chunks:
+                outputs[zone_input] = MissingZoneData()
+                continue
+
+
+            # Add facet labels
+            if self.xlabels or self.ylabels:
+                mplt.add_facet_labels(xlabels=self.xlabels, ylabels= self.ylabels)
+            # Add legend
+            mplt.add_legend(reverse_legend = True)
+            # Remove extra axes
+            mplt.remove_excess_axs(excess_axs, grid_size)
+            # Add title
+            if plot_data_settings["plot_title_as_region"]:
+                mplt.add_main_title(zone_input)
+
+            # Ylabel should change if there are facet labels, leave at 40 for now,
+            # works for all values in spacing
+            labelpad = 20
+            plt.ylabel(
+                ylabel, 
+                color = "black",
+                rotation = "vertical",
+                labelpad=labelpad,
+            )
+            # Data table of values to return to main program
+            detailed_gen_cost_out = pd.concat(gen_cost_out_chunks, axis=0, sort=False)
+            Data_Table_Out = detailed_gen_cost_out.add_suffix(" (Million $)")
+            outputs[zone_input] = {"fig": fig, "data_table": Data_Table_Out}
+        return outputs
+    
     def detailed_gen_cost(
         self,
         start_date_range: str = None,

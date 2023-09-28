@@ -86,6 +86,8 @@ def main():
             print("generator_Capacity_Built not found in formatted solutions file: ",scenario_formatted_path)
 
         #Read spur line cost data and append ITC and PTC to generator names as per PLEXOS solutions
+        print("MAKE SURE TO UPDATE WIND SPUR LINE COST FILE")
+        print("\n\n\n")
         spur_cost = pd.read_csv("C:\\Users\\lstreitm\\Documents\\Railbelt_local\\cheapest_3GW_wind.csv")
         spur_cost = spur_cost[["gen_name_full","spur_line_cost"]];
         spur_cost.rename({"gen_name_full":"gen_name"},axis=1, inplace=True)

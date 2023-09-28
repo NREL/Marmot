@@ -375,7 +375,7 @@ class GenerationStack(PlotDataStoreAndProcessor):
             (False, f"{agg}_Load{data_resolution}", self.Scenarios),
             (False, f"{agg}_Demand{data_resolution}", self.Scenarios),
             (False, f"{agg}_Unserved_Energy{data_resolution}", self.Scenarios),
-            #(False, f"batterie_Generation{data_resolution}", self.Scenarios),
+            (False, f"batterie_Generation{data_resolution}", self.Scenarios),
         ]
 
         # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
