@@ -336,7 +336,6 @@ class CapacityFactor(PlotDataStoreAndProcessor):
                     continue
                 if prop: Gen = Gen.loc[Gen.index.isin(prop, level="tech")]
                 Gen = self.df_process_gen_inputs(Gen)
-
                 Cap = self["generator_Installed_Capacity"].get(scenario)
                 Cap = Cap.xs(zone_input, level=self.AGG_BY)
                 if prop: Cap.loc[Cap.index.isin(prop, level="tech")]
@@ -363,15 +362,13 @@ class CapacityFactor(PlotDataStoreAndProcessor):
 
                 Total_Gen = self.year_scenario_grouper(
                     Gen, scenario, groupby=scenario_groupby
-                ).sum()
+                    ).sum()
                 Cap = self.year_scenario_grouper(
                     Cap, scenario, groupby=scenario_groupby
-                ).sum()
+                    ).sum()
                 # Calculate CF
-                #ww changed from  CF = Total_Gen / (Cap * duration_hours)
-                CF = duration_hours
+                CF = Total_Gen / (Cap * duration_hours)
                 cf_scen_chunks.append(CF)
-
             if cf_scen_chunks:
                 CF_all_scenarios = pd.concat(cf_scen_chunks, axis=0, sort=False).T
                 CF_all_scenarios = CF_all_scenarios.fillna(0, axis=0)

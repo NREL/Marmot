@@ -540,7 +540,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
                             logger.warning(f"No Generators found in: {zone_input}")
                             break
 
-                    if prop_name[1] == "generator_VOM_Cost" or prop_name[1] == "generator_VOM_Cost_NPV"):
+                    if prop_name[1] == "generator_VOM_Cost" or prop_name[1] == "generator_VOM_Cost_NPV":
                         try:
                             df["values"].to_numpy()[df["values"].to_numpy() < 0] = 0
                         except:
@@ -1220,7 +1220,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
                             logger.warning(f"No Generators found in: {zone_input}")
                             break
 
-                    if prop_name[1] == "generator_VOM_Cost" or prop_name[1] == "generator_VOM_Cost_NPV"):
+                    if prop_name[1] == "generator_VOM_Cost" or prop_name[1] == "generator_VOM_Cost_NPV":
                         try:
                             df["values"].to_numpy()[df["values"].to_numpy() < 0] = 0
                         except:

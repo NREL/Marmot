@@ -358,3 +358,5 @@ ReEDS_gas-cc-ccs_mod,Gas-CC CCS
 ReEDS_beccs_mod,BECCS
 ReEDS_gas-cc-ccs_max,Gas-CC CCS
 ReEDS_beccs_max,BECCS
+Wind-offshore,Offshore Wind
+Wind-onshore,Wind

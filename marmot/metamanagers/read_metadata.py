@@ -152,7 +152,7 @@ class MetaData:
             gen_category.rename(
                 columns={"name": "gen_name", "category": "tech"}, inplace=True
             )
-            gen_category = gen_category.applymap(
+            gen_category = gen_category.map(
                 lambda x: x.decode("utf-8") if isinstance(x, bytes) else x
             )
         except KeyError:
@@ -184,7 +184,7 @@ class MetaData:
             region_gen.rename(
                 columns={"child": "gen_name", "parent": "region"}, inplace=True
             )
-            region_gen = region_gen.applymap(
+            region_gen = region_gen.apply(
                 lambda x: x.decode("utf-8") if isinstance(x, bytes) else x
             )
             region_gen.drop_duplicates(
@@ -238,7 +238,7 @@ class MetaData:
             zone_gen.rename(
                 columns={"child": "gen_name", "parent": "zone"}, inplace=True
             )
-            zone_gen = zone_gen.applymap(
+            zone_gen = zone_gen.apply(
                 lambda x: x.decode("utf-8") if isinstance(x, bytes) else x
             )
             zone_gen.drop_duplicates(
@@ -287,7 +287,7 @@ class MetaData:
             region_batt.rename(
                 columns={"child": "battery_name", "parent": "region"}, inplace=True
             )
-            region_batt = region_batt.applymap(
+            region_batt = region_batt.map(
                 lambda x: x.decode("utf-8") if isinstance(x, bytes) else x
             )
             region_batt.drop_duplicates(
@@ -385,7 +385,7 @@ class MetaData:
             gen_storage.rename(
                 columns={"child": "name", "parent": "gen_name"}, inplace=True
             )
-            gen_storage = gen_storage.applymap(
+            gen_storage = gen_storage.map(
                 lambda x: x.decode("utf-8") if isinstance(x, bytes) else x
             )
         except:
@@ -414,7 +414,7 @@ class MetaData:
             node_region.rename(
                 columns={"child": "region", "parent": "node"}, inplace=True
             )
-            node_region = node_region.applymap(
+            node_region = node_region.map(
                 lambda x: x.decode("utf-8") if isinstance(x, bytes) else x
             )
             node_region = node_region.sort_values(by=["node"]).set_index("region")
@@ -442,7 +442,7 @@ class MetaData:
                     self.h5_filepath, key=f"{self.start_index}/relations/node_zone"
                 )
             node_zone.rename(columns={"child": "zone", "parent": "node"}, inplace=True)
-            node_zone = node_zone.applymap(
+            node_zone = node_zone.map(
                 lambda x: x.decode("utf-8") if isinstance(x, bytes) else x
             )
             node_zone = node_zone.sort_values(by=["node"]).set_index("zone")
@@ -474,7 +474,7 @@ class MetaData:
             generator_node.rename(
                 columns={"child": "node", "parent": "gen_name"}, inplace=True
             )
-            generator_node = generator_node.applymap(
+            generator_node = generator_node.map(
                 lambda x: x.decode("utf-8") if isinstance(x, bytes) else x
             )
             # generators_nodes = generators_nodes.sort_values(by=['generator'
@@ -502,7 +502,7 @@ class MetaData:
                 regions = pd.read_hdf(
                     self.h5_filepath, key=f"{self.start_index}/objects/region"
                 )
-            regions = regions.applymap(
+            regions = regions.apply(
                 lambda x: x.decode("utf-8") if isinstance(x, bytes) else x
             )
             regions.rename(columns={"name": "region"}, inplace=True)
@@ -531,7 +531,7 @@ class MetaData:
                 zones = pd.read_hdf(
                     self.h5_filepath, key=f"{self.start_index}/objects/zone"
                 )
-            zones = zones.applymap(
+            zones = zones.map(
                 lambda x: x.decode("utf-8") if isinstance(x, bytes) else x
             )
         except KeyError:
@@ -558,7 +558,7 @@ class MetaData:
                 lines = pd.read_hdf(
                     self.h5_filepath, key=f"{self.start_index}/objects/line"
                 )
-            lines = lines.applymap(
+            lines = lines.map(
                 lambda x: x.decode("utf-8") if isinstance(x, bytes) else x
             )
             lines.rename(columns={"name": "line_name"}, inplace=True)
@@ -580,7 +580,7 @@ class MetaData:
             region_regions = pd.read_hdf(
                 self.h5_filepath, key=f"{self.start_index}/relations/region_regions"
             )
-            region_regions = region_regions.applymap(
+            region_regions = region_regions.map(
                 lambda x: x.decode("utf-8") if isinstance(x, bytes) else x
             )
         except KeyError:
@@ -609,7 +609,7 @@ class MetaData:
                     key=f"{self.start_index}/relations/region_interregionalline",
                 )
 
-            region_interregionallines = region_interregionallines.applymap(
+            region_interregionallines = region_interregionallines.map(
                 lambda x: x.decode("utf-8") if isinstance(x, bytes) else x
             )
             region_interregionallines.rename(
@@ -665,7 +665,7 @@ class MetaData:
                             ),
                         ]
                     ).drop_duplicates()
-            region_intraregionallines = region_intraregionallines.applymap(
+            region_intraregionallines = region_intraregionallines.map(
                 lambda x: x.decode("utf-8") if isinstance(x, bytes) else x
             )
             region_intraregionallines.rename(
@@ -707,7 +707,7 @@ class MetaData:
                     self.h5_filepath,
                     key=f"{self.start_index}/relations/region_exportingline",
                 )
-            region_exportinglines = region_exportinglines.applymap(
+            region_exportinglines = region_exportinglines.map(
                 lambda x: x.decode("utf-8") if isinstance(x, bytes) else x
             )
             region_exportinglines = region_exportinglines.rename(
@@ -745,7 +745,7 @@ class MetaData:
                     self.h5_filepath,
                     key=f"{self.start_index}/relations/region_importingline",
                 )
-            region_importinglines = region_importinglines.applymap(
+            region_importinglines = region_importinglines.map(
                 lambda x: x.decode("utf-8") if isinstance(x, bytes) else x
             )
             region_importinglines = region_importinglines.rename(
@@ -784,7 +784,7 @@ class MetaData:
                     key=f"{self.start_index}/relations/zone_interzonalline",
                 )
 
-            zone_interzonallines = zone_interzonallines.applymap(
+            zone_interzonallines = zone_interzonallines.map(
                 lambda x: x.decode("utf-8") if isinstance(x, bytes) else x
             )
             zone_interzonallines.rename(
@@ -816,7 +816,7 @@ class MetaData:
                     self.h5_filepath,
                     key=f"{self.start_index}/relations/zone_intrazonalline",
                 )
-            zone_intrazonallines = zone_intrazonallines.applymap(
+            zone_intrazonallines = zone_intrazonallines.map(
                 lambda x: x.decode("utf-8") if isinstance(x, bytes) else x
             )
             zone_intrazonallines.rename(
@@ -850,7 +850,7 @@ class MetaData:
                     self.h5_filepath,
                     key=f"{self.start_index}/relations/zone_exportingline",
                 )
-            zone_exportinglines = zone_exportinglines.applymap(
+            zone_exportinglines = zone_exportinglines.map(
                 lambda x: x.decode("utf-8") if isinstance(x, bytes) else x
             )
             zone_exportinglines = zone_exportinglines.rename(
@@ -882,7 +882,7 @@ class MetaData:
                     self.h5_filepath,
                     key=f"{self.start_index}/relations/zone_importingline",
                 )
-            zone_importinglines = zone_importinglines.applymap(
+            zone_importinglines = zone_importinglines.map(
                 lambda x: x.decode("utf-8") if isinstance(x, bytes) else x
             )
             zone_importinglines = zone_importinglines.rename(
@@ -914,7 +914,7 @@ class MetaData:
                     self.h5_filepath,
                     key=f"{self.start_index}/relations/interfaces_lines",
                 )
-            interface_lines = interface_lines.applymap(
+            interface_lines = interface_lines.map(
                 lambda x: x.decode("utf-8") if isinstance(x, bytes) else x
             )
             interface_lines = interface_lines.rename(
@@ -968,7 +968,7 @@ class MetaData:
                 reserves = pd.read_hdf(
                     self.h5_filepath, key=f"{self.start_index}/objects/reserve"
                 )
-            reserves = reserves.applymap(
+            reserves = reserves.map(
                 lambda x: x.decode("utf-8") if isinstance(x, bytes) else x
             )
         except KeyError:
@@ -996,7 +996,7 @@ class MetaData:
                     self.h5_filepath,
                     key=f"{self.start_index}/relations/reserve_generators",
                 )
-            reserves_generators = reserves_generators.applymap(
+            reserves_generators = reserves_generators.map(
                 lambda x: x.decode("utf-8") if isinstance(x, bytes) else x
             )
             reserves_generators = reserves_generators.rename(

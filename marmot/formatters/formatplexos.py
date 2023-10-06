@@ -241,7 +241,8 @@ class ProcessPLEXOS(Process):
         if (
             prop_class == "region"
             and prop == "Unserved Energy"
-            and int(df.sum(axis=0)) > 0
+            #and int(df.sum(axis=0)) > 0
+            and int(df.iloc[0]) > 0
         ):
             logger.warning(
                 f"Scenario contains Unserved Energy: " f"{int(df.sum(axis=0))} MW\n"

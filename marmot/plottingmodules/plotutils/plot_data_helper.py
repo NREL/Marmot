@@ -389,7 +389,7 @@ class PlotDataStoreAndProcessor(dict):
         net_imports = net_imports.fillna(0)
         gen_df = pd.concat([gen_df, net_imports], axis=1)
         # In the event of two Net Imports columns combine here
-        gen_df = gen_df.groupby(level=0, axis=1, observed=True).sum()
+        gen_df = gen_df.T.groupby(level=0, observed=True).sum()
         gen_df = self.create_categorical_tech_index(gen_df, axis=1)
         return gen_df
 

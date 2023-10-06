@@ -5,6 +5,8 @@ Nuclear_MX,Nuclear
 Nuclear_WI,Nuclear
 nuclear,Nuclear
 Nuclear,Nuclear
+nuclear-smr,Nuclear
+smr,Nuclear
 Coal/Steam,Coal
 Coal_ST_EI,Coal
 Coal_ST_ERCOT,Coal
@@ -64,6 +66,7 @@ MotorLoad_WI,Other
 Other_MX,Other
 2024_Wind,Wind
 wind-ons,Wind
+wind-ofs,Offshore Wind
 CSP,CSP
 CSP-TES_WI,CSP
 CSP-noTES_WI,CSP
@@ -91,6 +94,7 @@ ReEDS_csp-ns,CSP
 ReEDS_wind-ons,Wind
 ReEDS_coaloldscr,Coal
 ReEDS_hydud,Hydro
+hydund,Hydro
 ReEDS_caes,Storage
 ReEDS_hydund,Hydro
 ReEDS_gas-ct,Gas-CT
@@ -151,6 +155,7 @@ ReEDS_wind-ofs,Wind
 ReEDS_nuclear,Nuclear
 ReEDS_csp,CSP
 ReEDS_gas-cc-ccs,Gas-CC CCS
+gas-cc_gas-cc-ccs_max,Gas-CC CCS
 ReEDS_hydsnd,Hydro
 Hydro_MonthlyEnergy,Hydro
 Hydro_FixedDispatch,Hydro
@@ -300,6 +305,7 @@ hydND,Hydro
 hydUD,Hydro
 hydUND,Hydro
 hydED,Hydro
+hydnpnd,Hydro
 hydNPND,Hydro
 hydEND,Hydro
 ReEDS_hyded,Hydro
@@ -342,10 +348,22 @@ wind-ofs_1,Wind
 ReEDS_coal-igcc_coal-ccs_max,Coal CCS
 ReEDS_coalolduns_coal-ccs_max,Coal CCS
 ReEDS_coaloldscr_coal-ccs_max,Coal CCS
+coalolduns_coal-ccs_max,Coal CCS
+coaloldscr_coal-ccs_max,Coal CCS
+coaloldscr_coal-ccs_mod,Coal CCS
 ReEDS_coal-new_coal-ccs_max,Coal CCS
+coal-new_coal-ccs_max,Coal CCS
 ReEDS_gas-cc_gas-cc-ccs_max,Gas-CC CCS
+gas-cc-ccs_max,Gas-CC CCS
 ReEDS_beccs_max,BECCS
+beccs_max,BECCS
 ReEDS_re-ct,RE-CT
 ReEDS_gas-ct_re-ct,RE-CT
 ReEDS_gas-cc_re-cc,RE-CC
 ReEDS_re-cc,RE-CC
+gas-cc-ccs,Gas-CC CCS
+h2-ct,H2-CT
+h2-cc,H2-CC
+distpv,dPV
+upv,PV
+hydud,Hydro
