@@ -1,0 +1,15 @@
+Original,New
+LUNA_NGCCgas-cc-ccs-f1,CCS on
+LUNA_pumpgas-cc-ccs-f1,CCS off
+CSU_NGCCgas-cc-ccs-f2,Neutral
+CSU_hot_pumpgas-cc-ccs-f2,Charging
+CSU_cost_boostgas-cc-ccs-f2,Boosting
+CSU_cold_boostgas-cc-ccs-f2,Boosting
+Georgia_Tech_NGCCgas-cc-ccs-f3,Gas-CC CCS-flex-DAC off
+Georgia_Tech_pumpgas-cc-ccs-f3,Gas-CC CCS-flex-DAC on
+MIT_NGCCgas-cc-ccs-f1,DAC&CCS-off
+MIT_pumpgas-cc-ccs-f1,DAC&CCS-on
+Envergex_NGCCgas-cc-ccs-f2,Gas-CC CCS-flex-storage off
+Envergex_pumpgas-cc-ccs-f2,Gas-CC CCS-flex-storage on
+GE_NGCCgas-cc-ccs-f2,Gas-CC CCS-flex-storage off
+GE_pumpgas-cc-ccs-f2,Gas-CC CCS-flex-storage on

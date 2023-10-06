@@ -1,0 +1,144 @@
+Figure Output Name,Plot Graph,Plot Property,Y-Axis Max,Day Before,Day After,Timezone,Start date,End date,Timeseries Plot Resolution,Group by Scenario or Year-Scenario,Custom Data File,Marmot Module,Method
+Avg_Out_Committed,FALSE,,,,,EST,,,,Scenario,,capacity_factor,avg_output_when_committed
+Avg_Out_Committed_By_Year,FALSE,,,,,EST,2024,2043,,Year-Scenario,,capacity_factor,avg_output_when_committed
+Capacity_Factor,FALSE,,,,,EST,,,,Scenario,,capacity_factor,cf
+Capacity_Factor_By_Year,FALSE,,,,,EST,2024,2043,,Year-Scenario,,capacity_factor,cf
+FLECCS_NGCC_Capacity_Factor,FALSE,,,,,,,,,,,capacity_factor,cf_singletech
+Time_at_Min_Gen,FALSE,,,,,,,,,Scenario,,capacity_factor,time_at_min_gen
+Capacity_Out_Stacked_annual,FALSE,,,,,EST,,,Annual ,,,capacity_out,capacity_out_stack
+Capacity_Out_Stacked,FALSE,,,,,EST,1/2/40,1/15/40,Interval,,,capacity_out,capacity_out_stack
+Capacity_Out_Stacked_PASA,FALSE,,,,,EST,,,,,,capacity_out,capacity_out_stack_PASA
+PV_Curtailment_Duration_Curve,FALSE,PV,,,,,,,,,,curtailment,curt_duration_curve
+RE_Curtailment_Duration_Curve,FALSE,PV+Wind,,,,,,,,,,curtailment,curt_duration_curve
+Total_Curtailment_Individual,FALSE,,,,,,,,,,,curtailment,curt_ind
+PV_Curtailment_vs_Penetration,FALSE,,,,,,,,,,,curtailment,curt_pen
+RE_Curtailment_vs_Penetration,FALSE,,,,,,,,,,,curtailment,curt_pen
+Total_Curtailment,FALSE,,,,,,,,,Scenario,,curtailment,curt_total
+Total_Curtailment_by_year_scenario,TRUE,,,,,,,,,Year-Scenario,,curtailment,curt_total
+Total_Curtailment_diff,FALSE,,,,,,,,,,,curtailment,curt_total_diff
+Average_Diurnal_Curtailment,FALSE,,,,,EST,2024,2043,,Scenario,,curtailment,average_diurnal_curt
+Average_Diurnal_Curtailment_by_year,FALSE,,,,,EST,2024,2043,,Year-Scenario,,curtailment,average_diurnal_curt
+Total_Emissions_By_Gen_Type_CO2,FALSE,CO2,,,,,,,,Scenario,,emissions,total_emissions_by_type
+Total_Emissions_By_Gen_Type_CO2_and_year,TRUE,CO2,,,,,,,,Year-Scenario,,emissions,total_emissions_by_type
+Total_Emissions_By_Gen_Type_SO2,FALSE,SO2,,,,,,,,Scenario,,emissions,total_emissions_by_type
+Georgia_Tech_operation,FALSE,Georgia_Tech_p58_12,,,,,6/28/50,6/29/50,,,,fleccs_operation,FLECCS_timeseries_singleplant
+Committed_Capacity_Stack_annual,FALSE,,,,,,,,Annual ,,,generation_stack,committed_stack
+Committed_Capacity_Stack,FALSE,,,,,EST,1/10/40,1/20/40,Interval,,,generation_stack,committed_stack
+Generation_Timeseries_Diff_annual,FALSE,,,,,EST,,,Annual ,,,generation_stack,gen_diff
+Generation_Timeseries_Diff,FALSE,Date Range,,,,EST,1/10/40,1/20/40,Interval,,,generation_stack,gen_diff
+Stacked_Gen,FALSE,,,,,EST,,,Interval,,,generation_stack,gen_stack
+Stacked_Gen_annual,FALSE,,,,,EST,,,Annual,,,generation_stack,gen_stack
+Stacked_Gen_Min_Net_Load,FALSE,Min Net Load,,3,3,EST,1/2/40,2040,Interval,,,generation_stack,gen_stack
+Stacked_Gen_Peak_Demand,FALSE,Peak Demand,,3,3,EST,1/2/40,2040,Interval,,,generation_stack,gen_stack
+Stacked_Gen_Peak_RE,FALSE,Peak RE,,3,3,EST,1/2/40,2040,Interval,,,generation_stack,gen_stack
+Stacked_Gen_Peak_Unserved_Energy,FALSE,Peak Unserved Energy,,3,3,EST,1/2/40,2040,Interval,,,generation_stack,gen_stack
+Stacked_Gen_Peak_Curtailment,FALSE,Peak Curtailment,,3,3,EST,1/2/40,2040,Interval,,,generation_stack,gen_stack
+Stacked_Gen_Min_Net_Load_annual,FALSE,Min Net Load,,3,3,EST,2010,2040,Annual,,,generation_stack,gen_stack
+Stacked_Gen_Peak_Demand_annual,FALSE,Peak Demand,,3,3,EST,2010,2040,Annual,,,generation_stack,gen_stack
+Stacked_Gen_Peak_RE_annual,FALSE,Peak RE,,3,3,EST,2010,2040,Annual,,,generation_stack,gen_stack
+Stacked_Gen_Peak_Unserved_Energy_annual,FALSE,Peak Unserved Energy,,3,3,EST,2010,2040,Annual,,,generation_stack,gen_stack
+Stacked_Gen_Peak_Curtailment_annual,FALSE,Peak Curtailment,,3,3,EST,2010,2040,Annual,,,generation_stack,gen_stack
+Unstacked_Gen_Min_Net_Load,FALSE,Min Net Load,,3,3,EST,,,Interval,,,generation_unstack,gen_unstack
+Unstacked_Gen_Peak_Demand,FALSE,Peak Demand,,3,3,EST,,,Interval,,,generation_unstack,gen_unstack
+Unstacked_Gen,FALSE,,,,,EST,7/1/20,7/14/20,Interval,,,generation_unstack,gen_unstack
+Unstacked_Gen_annual,FALSE,,,,,EST,,,Annual,,,generation_unstack,gen_unstack
+Unstacked_Gen_Facet_Grid_Peak_Demand,FALSE,Peak Demand,,3,3,EST,1/2/40,2040,Interval,,,generation_unstack,gen_unstack
+Unstacked_Gen_Facet_Grid_Min_Net_load,FALSE,Min Net Load,,3,3,EST,1/2/40,2040,Interval,,,generation_unstack,gen_unstack
+Unstacked_Gen_Facet_Grid_Peak_RE,FALSE,Peak RE,,3,3,EST,1/2/40,2040,Interval,,,generation_unstack,gen_unstack
+Unstacked_Gen_Facet_Grid_Peak_Curtailment,FALSE,Peak Curtailment,,3,3,EST,1/2/40,2040,Interval,,,generation_unstack,gen_unstack
+Unstacked_Gen_Facet_Grid,FALSE,,,,,EST,,,Interval,,,generation_unstack,gen_unstack
+Hydro_Versus_Continent_Net_Load,FALSE,,,,,,1/10/24,1/20/24,,,,hydro,hydro_continent_net_load
+Hydro_Versus_Net_Load,FALSE,,,,7,EST,,,,,,hydro,hydro_net_load
+Hydro_comparision_hourly,FALSE,,,,,,,,,,,hydro,hydro_timeseries
+All_Regions_Price_Duration_Curve,FALSE,,150,,,,,,,,,prices,pdc_all_regions
+Region_Price_Duration,FALSE,,,,,,,,,,,prices,region_pdc
+Region_Price_Duration_Threshold,FALSE,,150,,,,1/10/24,1/20/24,,,,prices,region_pdc
+Region_Price_Timeseries,FALSE,,,,,,1/10/24,1/20/24,,,,prices,region_timeseries_price
+Region_Price_Timeseries_Threshold,FALSE,,150,,,,1/10/24,1/20/24,,,,prices,region_timeseries_price
+All_Regions_Price_Timeseries,FALSE,,,,,,1/10/24,1/20/24,,,,prices,timeseries_price_all_regions
+Node_Price_Duration_Curve,FALSE,"101,202",,,,,,,,,,prices,node_pdc
+Node_Price_Timeseries,FALSE,"101,202",,,,EST,1/10/24,1/20/24,,,,prices,node_timeseries_price
+Node_Price_Histogram,FALSE,"101,202",,,,,1/10/24,1/20/24,,,,prices,node_price_hist
+Node_Price_Histogram_Difference,FALSE,"101,202",,,,,,,,,,prices,node_price_hist_diff
+National Load-Weighted Average Price,FALSE,,150,,,,,,,,,prices,national_lwavg_price
+Detailed_Total_Generation_Cost,FALSE,,,,,,,,,Scenario,,production_cost,detailed_gen_cost
+Detailed_Total_Generation_Cost_by_year,TRUE,,,,,,2024,2043,,Year-Scenario,,production_cost,detailed_gen_cost
+Detailed_Total_Generation_Cost_Diff,FALSE,,,,,,2024,2043,,Scenario,,production_cost,detailed_gen_cost_diff
+Detailed_Total_Generation_Cost_Diff_by_year,TRUE,,,,,,,,,Year-Scenario,,production_cost,detailed_gen_cost_diff
+Production_Cost,FALSE,,,,,,,,,,,production_cost,prod_cost
+Total_System_Cost,FALSE,,,,,,,,,Scenario,,production_cost,sys_cost
+Total_System_Cost_by_year,TRUE,,,,,,,,,Year-Scenario,,production_cost,sys_cost
+Total_System_Cost_Diff,FALSE,,,,,,,,,Scenario,,production_cost,sys_cost_diff
+Total_System_Cost_Diff_by_year,FALSE,,,,,,,,,Year-Scenario,,production_cost,sys_cost_diff
+Total_System_Cost_Type,FALSE,,,,,,,,,Scenario,,production_cost,sys_cost_type
+Total_System_Cost_Type_by_year,FALSE,,,,,,,,,Year-Scenario,,production_cost,sys_cost_type
+Total_System_Cost_Type_Diff,FALSE,,,,,,,,,Scenario,,production_cost,sys_cost_type_diff
+Total_System_Cost_Type_Diff_by_year,FALSE,,,,,,,,,Year-Scenario,,production_cost,sys_cost_type_diff
+Capacity_Started,FALSE,,,,,EST,,,,Scenario,,ramping,capacity_started
+Capacity_Started_by_year,FALSE,,,,,EST,2024,2043,,Year-Scenario,,ramping,capacity_started
+Count_Ramps,FALSE,,,,,EST,,,,,,ramping,count_ramps
+Count_Starts_Single_Gen,FALSE,NPCC full plant,,,,,,,,,,ramping,count_starts_single_gen
+Reserve_Provision_Region,FALSE,,,,,,,,,Scenario,,reserves,reg_reserve_provision
+Reserve_Shortage_Region,FALSE,,,,,,,,,Scenario,,reserves,reg_reserve_shortage
+Reserve_Shortage_Hours,FALSE,,,,,,,,,Scenario,,reserves,reg_reserve_shortage_hrs
+Reserve_Provision_Region_by_year,TRUE,,,,,,,,,Year-Scenario,,reserves,reg_reserve_provision
+Reserve_Shortage_Region_by_year,TRUE,,,,,,,,,Year-Scenario,,reserves,reg_reserve_shortage
+Reserve_Shortage_Hours_by_year,TRUE,,,,,,,,,Year-Scenario,,reserves,reg_reserve_shortage_hrs
+Reserve_Shortage_Timeseries_annual,FALSE,,,,,EST,,,Annual,,,reserves,reg_reserve_shortage_timeseries
+Reserve_Shortage_Timeseries_Date_Range,FALSE,,,,,EST,1/10/24,1/20/24,Interval,,,reserves,reg_reserve_shortage_timeseries
+Reserve_Shortage_Timeseries_Facet_Grid_Date_Range,FALSE,,,,,EST,1/10/24,1/20/24,Interval,,,reserves,reg_reserve_shortage_timeseries
+Reserve_Gen_Timeseries,FALSE,,,,,EST,,,Interval,,,reserves,reserve_gen_timeseries
+Reserve_Gen_Timeseries_annual,FALSE,Peak Reserve Provision,,,,EST,,,Annual,,,reserves,reserve_gen_timeseries
+Reserve_Gen_Timeseries_Peak_Reserve,FALSE,Peak Reserve Provision,,3,3,EST,1/2/40,2040,Interval,,,reserves,reserve_gen_timeseries
+Reserve_Gen_Timeseries_Facet_Grid_Peak_Demand,FALSE,Peak Reserve Provision,,3,3,EST,1/2/40,2040,Interval,,,reserves,reserve_gen_timeseries
+Reserve_Gen_Timeseries_Facet_Grid_Date_Range,FALSE,,,,,EST,1/10/24,1/20/24,Interval,,,reserves,reserve_gen_timeseries
+Total_Reserve_Provision_by_Generator,FALSE,,,,,,,,,Scenario,,reserves,total_reserves_by_gen
+Total_Reserve_Provision_by_Generator_by_year,FALSE,,,,,,,,,Year-Scenario,,reserves,total_reserves_by_gen
+Sensitivities_Difference_Hydro,FALSE,Hydro,,,,EST,,,,,,sensitivities,sensitivities_gas
+Sensitivities_Difference_Wind,FALSE,Wind,,,,EST,,,,,,sensitivities,sensitivities_gas
+Individual_Battery_Generation_duration_curve,FALSE,GVEA BESS,,,,,,,,,,storage,ind_bat
+Individual_Battery_Load_duration_curve,FALSE,GVEA BESS,,,,,,,,,,storage,ind_bat
+Thermal_Capacity_Reserves,FALSE,,,,,EST,,,Interval,,,thermal_cap_reserve,thermal_cap_reserves
+Thermal_Capacity_Reserves_by_year,FALSE,,,,,EST,,,Annual,,,thermal_cap_reserve,thermal_cap_reserves
+Total_Generation,FALSE,,,,,,,,,Scenario,,total_generation,total_gen
+Total_Generation_by_year,TRUE,,,,,,2024,2043,,Year-Scenario,,total_generation,total_gen
+Total_Generation_Monthly,FALSE,,,,,EST,1/2/40,2040,,,,total_generation,total_gen_monthly
+Monthly_Wind_Solar,FALSE,,,,,EST,2048,2050,,,,total_generation,monthly_vre_generation
+Monthly_Wind_Solar_Percentage,FALSE,,,,,EST,2048,2050,,,,total_generation,monthly_vre_generation_percentage
+Total_Generation_Pie,FALSE,,,,,EST,2020,2030,,,,total_generation,total_gen_pie
+Total_Generation_Diff,FALSE,,,,,,,,,Scenario,,total_generation,total_gen_diff
+Total_Generation_Diff_by_year,TRUE,,,,,,,,,Year-Scenario,,total_generation,total_gen_diff
+Total_Installed_Capacity,FALSE,,,,,,,,,Scenario,,total_installed_capacity,total_cap
+Total_Installed_Capacity_by_year,TRUE,,,,,,,,,Year-Scenario,,total_installed_capacity,total_cap
+Total_Installed_Capacity_facet,FALSE,,,,,,,,,Year-Scenario,,total_installed_capacity,total_cap_facet
+Total_Installed_Capacity_Diff,FALSE,,,,,,,,,Scenario,,total_installed_capacity,total_cap_diff
+Total_Installed_Capacity_and_Generation_Facet,FALSE,,,,,,,,,Scenario,,total_installed_capacity,total_cap_and_gen_facet
+Total_Installed_Capacity_and_Generation_Facet_by_year,FALSE,,,,,,2020,2040,,Year-Scenario,,total_installed_capacity,total_cap_and_gen_facet
+Individual_Interface_Flow,FALSE,"Interface-1-2,Interface-3-2",,,,EST,,,,,,transmission,interface_flow_ind
+Individual_Line_Flow_duration_curve,FALSE,AK Intertie,,,,,,,,,,transmission,line_flow_ind
+Individual_Line_flow_duration_curve_seasonal,FALSE,113_316_1,,,,EST,1/10/24,1/20/24,,,,transmission,line_flow_ind_seasonal
+Individual_flow_diff_duration_curve,FALSE,113_316_1,,,,EST,1/10/24,1/20/24,,,,transmission,line_flow_ind_diff
+Line_Utilization_Histogram,FALSE,,,,,,,,,,,transmission,line_hist
+Line_Utilization_Histogram_Category,FALSE,ReEDS_Expansion,,,,,,,,,,transmission,line_hist
+Line_Utilization_Duration,FALSE,,,,,,,,,,,transmission,line_util
+Line_Utilization_Duration_Category,FALSE,ReEDS_Expansion,,,,,,,,,,transmission,line_util
+Line_Violations_Time_Series,FALSE,,,,,EST,,,,,,transmission,line_violations_timeseries
+Line_Violations_Totals,FALSE,,,,,,,,,,,transmission,line_violations_totals
+Net_Export_Date_Range,FALSE,Date Range,,,,EST,1/10/24,1/20/24,,,,transmission,net_export
+Net_Export,FALSE,,,,,EST,,,,,,transmission,net_export
+Region-Region_Net_Interchange_Checkerboard,FALSE,,,,,,,,,,,transmission,region_region_checkerboard
+All_Region-Region_Net_Interchange,FALSE,,,,,EST,,,,,,transmission,region_region_interchange_all_regions
+Region-Region_Net_Interchange,FALSE,,,,,EST,,,,,,transmission,region_region_interchange_all_scenarios
+total_interface_flow_individual,FALSE,"Interface-1-2,Interface-3-2",,,,,,,,,,transmission,total_int_flow_ind
+Zonal_Interchange,FALSE,,,,,,,,,,,transmission,zonal_interchange
+Zonal_Interchange_Total,FALSE,,,,,,,,,,,transmission,zonal_interchange_total
+Total_Unserved_Energy,FALSE,,,,,,,,,Scenario,,unserved_energy,tot_unserved_energy
+Total_Unserved_Energy_by_year,TRUE,,,,,,2024,2043,,Year-Scenario,,unserved_energy,tot_unserved_energy
+Unserved_Energy_Timeseries,FALSE,,,,,EST,,,Interval,,,unserved_energy,unserved_energy_timeseries
+Unserved_Energy_Timeseries_annual,FALSE,,,,,EST,,,Annual,,,unserved_energy,unserved_energy_timeseries
+Average_Diurnal_Unserved_Energy,FALSE,,,,,EST,,,,Scenario,,unserved_energy,average_diurnal_ue
+Average_Diurnal_Unserved_Energy_by_year,TRUE,,,,,EST,2024,2043,,Year-Scenario,,unserved_energy,average_diurnal_ue
+Utilization_GW_Fleet,FALSE,,,,,,,,,,,utilization_factor,GW_fleet
+Utilization_Factor_Fleet,FALSE,,,,,EST,,,,,,utilization_factor,uf_fleet
+Utilization_Factor_Fleet_Type,FALSE,,,,,,,,,,,utilization_factor,uf_fleet_by_type
+Utilization_Factor_Generators,FALSE,,,,,EST,,,,,,utilization_factor,uf_gen

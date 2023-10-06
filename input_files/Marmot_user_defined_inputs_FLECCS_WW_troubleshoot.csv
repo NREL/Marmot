@@ -1,0 +1,20 @@
+Input,Input_type,Importance,User_defined_value
+Simulation_model,str,required,PLEXOS
+PLEXOS_data_blocks,list,optional,ST
+Model_Solutions_folder,folder,required,/Users/mschwarz/CCS_local
+Marmot_Solutions_folder,folder,optional,
+Scenario_process_list,List,required,
+process_subset_years,List,optional,2050
+Region_Mapping.csv_name,string,optional(default),Region_mapping_ReEDS.csv
+gen_names.csv_name,string,required(default),gen_names.csv
+ordered_gen_categories_file,string,required(default),ordered_gen_categories.csv
+emit_names.csv_name,string,required(default),emit_names.csv
+color_dictionary_file,string,required(default),colour_dictionary.csv
+Scenarios,string or List,required,"Linde_Ref150, Pitt_Ref150"
+Scenario_Diff_plot,List,optional,
+AGG_BY,string,required,region
+zone_region_sublist,List,optional,p10
+TECH_SUBSET,string,optional,
+Facet_ylabels,List,optional,
+Facet_xlabels,List,optional,
+Tick_labels,List,optional,

@@ -1,0 +1,20 @@
+Input,Input_type,Importance,User_defined_value
+Simulation_model,str,required,ReEDS
+PLEXOS_data_blocks,list,optional,ST
+Model_Solutions_folder,folder,required,/Volumes/ReEDS/FY22-NTP/Candidates/ReEDSrunsV20221201/
+Marmot_Solutions_folder,folder,optional,/Users/mschwarz/NTPS_local/
+Scenario_process_list,List,required,"AC_DemHi_90by2035EarlyPhaseout__core, Lim_DemHi_90by2035EarlyPhaseout__core, LCC_DemHi_90by2035EarlyPhaseout__core, VSC_DemHi_90by2035EarlyPhaseout__core"
+process_subset_years,List,optional,2035
+Region_Mapping.csv_name,string,optional(default),Region_mapping_ReEDS.csv
+gen_names.csv_name,string,required(default),gen_names.csv
+ordered_gen_categories_file,string,required(default),ordered_gen_categories_CCS.csv
+emit_names.csv_name,string,required(default),emit_names.csv
+color_dictionary_file,string,required(default),colour_dictionary.csv
+Scenarios,string or List,required,"ACDH90by35_2035_PLEXOS, ACDH90by35_2035_REEDS, LimDH90by35_2035_PLEXOS, LimDH90by35_2035_REEDS, LCCDH90by35_2035_PLEXOS, LCCDH90by35_2035_REEDS, VSCDH90by35_2035_PLEXOS, VSCDH90by35_2035_REEDS"
+Scenario_Diff_plot,List,optional,
+AGG_BY,string,required,Country
+zone_region_sublist,List,optional,
+TECH_SUBSET,string,optional,
+Facet_ylabels,List,optional,
+Facet_xlabels,List,optional,"AC_PLEXOS, AC_ReEDS, Lim_PLEXOS, Lim_ReEDS, LCC_PLEXOS, LCC_ReEDS, VSC_PLEXOS, VSC_ReEDS"
+Tick_labels,List,optional,"AC_PLEXOS, AC_ReEDS, Lim_PLEXOS, Lim_ReEDS, LCC_PLEXOS, LCC_ReEDS, VSC_PLEXOS, VSC_ReEDS"
