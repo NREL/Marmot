@@ -841,11 +841,6 @@ class SystemCosts(PlotDataStoreAndProcessor):
                 detailed_gen_cost_out / 1000000
             )  # Convert cost to millions
 
-            # Deletes columns that are all 0
-            detailed_gen_cost_out = detailed_gen_cost_out.loc[
-                :, (detailed_gen_cost_out != 0).any(axis=0)
-            ]
-
             # Checks if detailed_gen_cost_out contains data, if not skips zone and does not return a plot
             if detailed_gen_cost_out.empty:
                 outputs[zone_input] = MissingZoneData()
@@ -858,6 +853,11 @@ class SystemCosts(PlotDataStoreAndProcessor):
             detailed_gen_cost_out["Non-Renewable Capacity"] = detailed_gen_cost_out["Non-Renewable Capacity"] + detailed_gen_cost_out["Annualized Storage Build"]
             detailed_gen_cost_out["Renewable Purchases"] = detailed_gen_cost_out["Renewable Purchases"] + detailed_gen_cost_out["Production Tax Credit"]
             detailed_gen_cost_out.drop(["Annualized Storage Build", "Production Tax Credit"], axis= "columns", inplace = True)
+        
+            # Deletes columns that are all 0
+            detailed_gen_cost_out = detailed_gen_cost_out.loc[
+                :, (detailed_gen_cost_out != 0).any(axis=0)
+            ]
 
             #if 'FO&M Cost' in detailed_gen_cost_out.columns: detailed_gen_cost_out.drop(columns =['FO&M Cost'],inplace = True)
             # Data table of values to return to main program
