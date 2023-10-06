@@ -1,0 +1,16 @@
+Input,Input_type,Importance,User_defined_value
+PLEXOS_Solutions_folder,folder,required,/Volumes/PLEXOS/Projects/NTP
+Marmot_Solutions_folder,folder,optional,/Volumes/PLEXOS/Projects/NTP
+Scenario_process_list,List,required,NARIS_RT1
+VoLL,int,required,10000
+Region_Mapping.csv_name,string,optional(default),Regions_Zones_Mapping_Full.csv
+gen_names.csv_name,string,required(default),gen_names.csv
+emit_names.csv_name,string,required(default),emit_names.csv
+Scenarios,string or List,required,NARIS_RT1
+Scenario_Diff_plot,List,optional,
+AGG_BY,string,required,region
+zone_region_sublist,List,optional,region
+TECH_SUBSET,string,optional,
+Facet_ylabels,List,optional,ylabel1
+Facet_xlabels,List,optional,"xlabel1,xlabel2,xlabel3"
+Tick_labels,List,optional,

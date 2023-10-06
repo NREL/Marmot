@@ -1,0 +1,7 @@
+﻿Figure Output Name,Plot Graph,Plot Property,Y-Axis Max,Day Before,Day After,Timezone,Start date,End date,Timeseries Plot Resolution,Group by Scenario or Year-Scenario,Custom Data File,Marmot Module,Method
+Capacity_Factor,FALSE,,,,,EST,,,,Scenario,,capacity_factor,cf
+Total_Emissions_By_Gen_Type_CO2,FALSE,co2,,,,,,,,Scenario,,emissions,total_emissions_by_type
+Stacked_Gen,TRUE,,,,,EST,,,Interval,,,generation_stack,gen_stack
+Detailed_Total_Generation_Cost,TRUE,,,,,,,,,Scenario,,production_cost,detailed_gen_cost
+Total_Generation,TRUE,,,,,,,,,Scenario,,total_generation,total_gen
+Total_Installed_Capacity,TRUE,,,,,,,,,Scenario,,total_installed_capacity,total_cap

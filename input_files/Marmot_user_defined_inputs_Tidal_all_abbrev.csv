@@ -1,0 +1,20 @@
+Input,Input_type,Importance,User_defined_value
+Simulation_model,str,required,PLEXOS
+PLEXOS_data_blocks,list,optional,ST
+Model_Solutions_folder,folder,required,/Users/mschwarz/AK Tidal local/Analysis tidal
+Marmot_Solutions_folder,folder,optional,
+Scenario_process_list,List,required,Tx-BESS_250
+process_subset_years,List,optional,
+Region_Mapping.csv_name,string,optional(default),Railbelt_regions.csv
+gen_names.csv_name,string,required(default),gen_names_oilgascombined.csv
+ordered_gen_categories_file,string,required(default),ordered_gen_categories.csv
+emit_names.csv_name,string,required(default),emit_names.csv
+color_dictionary_file,string,required(default),colour_dictionary.csv
+Scenarios,string or List,required,"Basecase_notidal, Basecase_100, Basecase_150, Basecase_175, Basecase_200, Basecase_300, Basecase_400, Basecase_500, Tx_100, Tx_150, Tx_175, Tx_200, Tx_300, Tx_400, Tx_500, BESS_100, BESS_150, BESS_175, BESS_200, BESS_300, BESS_400, BESS_500, Tx-BESS_100, Tx-BESS_150, Tx-BESS_175, Tx-BESS_200, Tx-BESS_300, Tx-BESS_400, Tx-BESS_500, Copperplate_100, Copperplate_150, Copperplate_175, Copperplate_200, Copperplate_300, Copperplate_400, Copperplate_500"
+Scenario_Diff_plot,List,optional,
+AGG_BY,string,required,Railbelt-wide
+zone_region_sublist,List,optional,
+TECH_SUBSET,string,optional,
+Facet_ylabels,List,optional,"Basecase, Tx"
+Facet_xlabels,List,optional,"100 MW tidal, 500 MW tidal"
+Tick_labels,List,optional,

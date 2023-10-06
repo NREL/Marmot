@@ -1,0 +1,272 @@
+Original,New
+2024_dpv,dPV
+2024_DUPV,dPV
+2024_UPV,PV
+2024_Wind,Wind
+battery,Storage
+Battery,Battery
+BATTERY_1,Storage
+BATTERY_2,Storage
+BATTERY_4,Storage
+Bio_CC,Biopower
+Bio_CC_Whole,Biopower
+Bio_CT,Biopower
+Bio_ICE,Biopower
+Bio_ST,Biopower
+Biogas CT,Biopower
+Biogas_CT_ERCOT,Biopower
+Biomass,Biopower
+Biomass,Biomass
+Biomass_EI,Biopower
+Biomass_MX,Biopower
+Biomass_WI,Biopower
+biopower,Biopower
+Biopower,Biopower
+caes,Storage
+caes_gas,Storage
+CAN,Net Imports
+CC,Gas-CC
+CC_AB_Cogen,Gas-CC
+CC_Whole_NG_Aero,Gas-CC
+CC_Whole_NG_Ind,Gas-CC
+CC_Whole_NG_SS,Gas-CC
+CC_WI,Gas-CC
+CCGT-GAS,Oil/Gas
+CCGT-LNG,Gas-CC
+CCGT-NAPTHA,Gas-CC
+CCPP_BD,Gas-CC
+CCS,Storage discharge
+Coal,Coal
+Coal ST,Coal
+Coal_ST,Coal
+Coal_ST_EI,Coal
+Coal_ST_ERCOT,Coal
+Coal_ST_MX,Coal
+Coal_ST_WI,Coal
+coal-ccs,Coal
+coal-igcc,Coal
+coal-new,Coal
+Coal/Steam,Coal
+coaloldscr,Coal
+coalolduns,Coal
+cofirenew,Coal
+Cogen_MX,Gas-CT
+COGENERATION-BAGASSE,Oil/Gas
+CrossCompoundWhole_Coal,Coal
+CSP,CSP
+CSP_MX,CSP
+CSP_noTES,CSP
+CSP-noTES_WI,CSP
+CSP-TES,CSP
+CSP-TES_WI,CSP
+CT,Gas-CT
+CT_AB_Cogen,Gas-CC
+CT_BD,Gas-CT
+CT_NG_Aero,Gas-CC
+CT_NG_Ind,Gas-CC
+CT_Oil,Oil/Gas
+CT_WI,Gas-CT
+CT-GAS,Oil/Gas
+Curtailment,Curtailment
+Curtailment,Curtailment
+DC-Intertie,Other
+Dfuel_gen,Other
+DG-BTM_2028,dPV
+DIESEL,Other
+DIESEL_BD,Other
+DIESEL_NP,Other
+distPV,dPV
+dpv,dPV
+dPV,dPV
+DR,Other
+Dual_Fuel_NE,Dual Fuel
+Dual_Fuel_NY,Dual Fuel
+Dummy_WI,Other
+DUPV,dPV
+EE_WI,Other
+ERCOT_penalty,Other
+FUEL-OIL_BD,Oil/Gas
+FUEL-OIL_NP,Oil/Gas
+Gas CC,Oil/Gas
+Gas CC_ERCOT,Oil/Gas
+Gas CT,Oil/Gas
+Gas ST,Oil/Gas
+Gas Steam,Oil/Gas
+Gas_CT_ERCOT,Oil/Gas
+Gas_ST_ERCOT,Oil/Gas
+gas-cc,Oil/Gas
+Gas-CC,Oil/Gas
+gas-ct,Oil/Gas
+Gas-CT,Oil/Gas
+Gas-IC,Oil/Gas
+GasCC_ERCOT,Oil/Gas
+Generic Storage,Storage
+Geo_BinaryCycle,Geothermal
+Geo_DoubleFlash,Geothermal
+geothermal,Geothermal
+Geothermal,Geothermal
+Geothermal_MX,Geothermal
+Geothermal_WI,Geothermal
+hyded,Hydro
+hydend,Hydro
+Hydro,Hydro
+Hydro_dam,Hydropower
+Hydro_EI,Hydro
+Hydro_ERCOT,Hydro
+Hydro_FixedDispatch,Hydro
+Hydro_MonthlyEnergy,Hydro
+Hydro_MX,Hydro
+Hydro_runofriver,Hydropower
+Hydro_WI,Hydro
+HYDRO-PEAK_GANDAKI_NP,Hydro
+HYDRO-PEAK_KARNALI_NP,Hydro
+HYDRO-PEAK_KOSHI_NP,Hydro
+HYDRO-PONDAGE,Hydro
+HYDRO-PONDAGE-BT,Hydro
+HYDRO-PUMPED,Storage
+HYDRO-ROR,Hydro
+HYDRO-ROR_GANDAKI_NP,Hydro
+HYDRO-ROR_KARNALI_NP,Hydro
+HYDRO-ROR_KOSHI_NP,Hydro
+HYDRO-ROR-BT,Hydro
+HYDRO-STORAGE,Storage
+HYDRO-STORAGE_BD,Storage
+HYDRO-STORAGE_GANDAKI_NP,Storage
+HYDRO-STORAGE_KOSHI_NP,Storage
+HydroRPS,Hydro
+IC_WI,Oil-Gas-Steam
+ICE_NG,Oil-Gas-Steam
+ICE_Oil,Oil/Gas
+Landfill gas,Landfill gas
+lfill-gas,Biopower
+Liquid Fuel,Oil-Gas-Steam
+MotorLoad,Other
+MotorLoad_WI,Other
+Natural Gas,Oil/Gas
+NG_CC_EI,Gas-CC
+NG_CT_EI,Gas-CT
+NG_IC_MX,Oil-Gas-Steam
+NG_ST_EI,Oil-Gas-Steam
+NG_ST_MX,Oil-Gas-Steam
+NG_ST_WI,Oil-Gas-Steam
+NG/CC,Gas-CC
+NG/CT,Gas-CT
+NGCC_MX,Gas-CC
+NGCT_MX,Gas-CT
+nuclear,Nuclear
+Nuclear,Nuclear
+Nuclear ST,Nuclear
+NUCLEAR_BD,Nuclear
+Nuclear_EI,Nuclear
+Nuclear_ERCOT,Nuclear
+Nuclear_MX,Nuclear
+Nuclear_WI,Nuclear
+o-g-s,Oil-Gas-Steam
+Oil,Oil/Gas
+Oil CT,Oil/Gas
+Oil_CT_EI,Oil/Gas
+Oil_CT_ERCOT,Oil/Gas
+Oil_CT_MX,Oil/Gas
+Oil_IC_MX,Oil/Gas
+Oil_ST_EI,Oil/Gas
+Oil_ST_MX,Oil/Gas
+Oil-Gas-Steam,Oil/Gas
+Oil/CT,Oil/Gas
+Oil/Steam,Oil/Gas
+OSW,Offshore Wind
+OSW_BESS,OSW-Battery
+Other_Hourly_resource,Other
+Other_MX,Other
+Other_ST,Oil-Gas-Steam
+Other_ST_WI,Oil-Gas-Steam
+PHES,Storage
+PS_EI,Storage
+PS_WI,Storage
+PS-Hydro,Storage
+PS-HydroRPS,Storage
+pumped-hydro,Storage
+pv,PV
+PV,PV
+PV_Hrly-Res_2028,PV
+ReEDS_battery,Storage
+ReEDS_biopower,Biopower
+ReEDS_caes,Storage
+ReEDS_caes_gas,Storage
+ReEDS_canada,Net Imports
+ReEDS_coal-ccs,Coal
+ReEDS_coal-igcc,Coal
+ReEDS_coal-new,Coal
+ReEDS_coaloldscr,Coal
+ReEDS_cofirenew,Coal
+ReEDS_cofireold,Coal
+ReEDS_csp,CSP
+ReEDS_csp-ns,CSP
+ReEDS_distpv,dPV
+ReEDS_dupv,dPV
+ReEDS_gas-cc,Oil/Gas
+ReEDS_gas-cc-ccs,Oil/Gas
+ReEDS_gas-cc-nsp,Oil/Gas
+ReEDS_gas-ct,Oil/Gas
+ReEDS_gas-ct-nsp,Oil/Gas
+ReEDS_geothermal,Geothermal
+ReEDS_hydnd,Hydro
+ReEDS_hydnpnd,Hydro
+ReEDS_hydsnd,Hydro
+ReEDS_hydud,Hydro
+ReEDS_hydund,Hydro
+ReEDS_lfill-gas,Biopower
+ReEDS_nuclear,Nuclear
+ReEDS_nuclear-nsp,Nuclear
+ReEDS_o-g-s,Oil-Gas-Steam
+ReEDS_pumped-hydro,Storage
+ReEDS_upv,PV
+ReEDS_wind-ofs,Wind
+ReEDS_wind-ons,Wind
+Renewable_Thermal,Geothermal
+RPM PV Batt c0 DUPV,PV-Battery
+RPM PV Batt c1 PV,PV-Battery
+RPM Shed DR new generation,Other
+RPM Storage c0,Storage
+RPM Storage c1,Storage
+RPM VG DUPV Battery,PV-Battery
+RPM VG PV Battery,PV-Battery
+RPM VG PV Fixed,PV
+RPM VG PV Rooftop,dPV
+RPM VG PV Tracking,PV
+RPM VG Wind,Wind
+RTPV,PV
+Solar,PV
+Solar PV,PV
+SolarPV_NonTracking_2028,PV
+SolarPV_Tracking_2028,PV
+Solid Biofuel ST,Biopower
+Solid_Biofuel_ST_ERCOT,Biopower
+ST_NG,Oil-Gas-Steam
+ST-Nuclear,Nuclear
+Steam,Oil-Gas-Steam
+Storage,Storage
+Storage_WI,Storage
+SUBCRITICAL-COAL,Coal
+SUBCRITICAL-COAL_BD,Coal
+SUBCRITICAL-LIGNITE,Coal
+SUBCRITICAL-OIL,Oil/Gas
+SUPERCRITICAL-COAL,Coal
+SUPERCRITICAL-COAL_BD,Coal
+SynchCond,Storage
+SynchCond,Other
+Thermal,Oil-Gas-Steam
+Tidal,Tidal
+UPV,PV
+VAR-Device,Other
+WasteHeat_ST,Biopower
+WHR,Dual Fuel
+Wind,Wind
+Wind_2028,Wind
+wind-ons,Wind
+XcelBattery,Storage
+XcelNG,Gas-CC
+XcelPV,PV
+XcelWind,Wind
+Fixed_GVEA_imports,GVEA imports
+Wind-offshore,Offshore Wind
+Wind-onshore,Wind
