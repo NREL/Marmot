@@ -191,8 +191,7 @@ class Emissions(PlotDataStoreAndProcessor):
                 emitPlot = emitOut.xs(prop, level="pollutant")
             except KeyError:
                 logger.warning(f"{prop} emissions not found")
-                outputs = InputSheetError()
-                return outputs
+                continue
 
             emitPlot = emitPlot.reset_index()
             emitPlot = emitPlot.pivot(index="Scenario", columns="tech", values=0)
