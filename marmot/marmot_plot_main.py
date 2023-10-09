@@ -666,6 +666,8 @@ class MarmotPlot(SetupLogger):
 
                 if row["Group by Scenario or Year-Scenario"] == "Year-Scenario":
                     scenario_groupby: str = "Year-Scenario"
+                elif row["Group by Scenario or Year-Scenario"] == "Interval-Scenario":
+                    scenario_groupby: str = "Interval-Scenario"
                 else:
                     scenario_groupby: str = "Scenario"
 

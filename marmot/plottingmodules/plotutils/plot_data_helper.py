@@ -611,6 +611,23 @@ class PlotDataStoreAndProcessor(dict):
                     "'df.index' must be of type pd.DatetimeIndex or "
                     "type pd.MultiIndex with level 'timestamp'"
                 )
+        elif groupby == "Interval-Scenario":
+            if isinstance(df.index, pd.MultiIndex):
+                grouper = [
+                    (
+                        df.index.get_level_values("timestamp").astype(str)
+                        + f": {scenario}"
+                    ).rename("Scenario")
+                ]
+            elif isinstance(df.index, pd.DatetimeIndex):
+                grouper = [
+                    (df.index.astype(str) + f": {scenario}").rename("Scenario")
+                ]
+            else:
+                raise ValueError(
+                    "'df.index' must be of type pd.DatetimeIndex or "
+                    "type pd.MultiIndex with level 'timestamp'"
+                )
         elif groupby == "Scenario":
             grouper = [pd.Index([scenario] * len(df.index), name="Scenario")]
         else:
