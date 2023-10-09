@@ -1132,11 +1132,11 @@ class TotalGeneration(PlotDataStoreAndProcessor):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
-            scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+            scenario_groupby (str, optional): Specifies whether to group data by Scenario, 
+                Year-Scenario, or Interval-Scenario. If grouping by Year-Sceanrio the year will be identified
                 from the timestamp and appeneded to the sceanrio name. This is useful when
-                plotting data which covers multiple years such as ReEDS.
-                Defaults to Scenario.
+                plotting data which covers multiple years such as ReEDS. If grouping by Interval-Scenario,
+                the interval will be identified from the timestamp and appended to the scenario name.  
 
                 .. versionadded:: 0.10.0
 
@@ -1149,11 +1149,14 @@ class TotalGeneration(PlotDataStoreAndProcessor):
         # scenarios must be a list.
         properties = [(True, "generator_Generation", self.Scenarios),
                       (False, "batterie_Generation", self.Scenarios),
+                      # edit this if we want something other than total generation in the denominator (e.g., Load? Customer load?)
                       ]
 
         # Runs get_data to populate mplot_data_dict with all required properties,
         # returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
+
+        include_batteries = False # just for now
 
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -1211,8 +1214,8 @@ class TotalGeneration(PlotDataStoreAndProcessor):
 
                 generation_grouped[scenario] = generation_grouped[list(generation_grouped.columns)].sum(axis=1)
                 generation_grouped = generation_grouped[[scenario]]
-                generation_grouped.index = generation_grouped.index.str.split(":").str[0]
-                generation_grouped.index.names = ["Year"]
+                generation_grouped.index = generation_grouped.index.str.split(": ").str[0]
+                generation_grouped.index.names = ["Date"]
 
                 scen_tables.append(generation_grouped)
 
@@ -1226,7 +1229,10 @@ class TotalGeneration(PlotDataStoreAndProcessor):
             if self.custom_xticklabels:
                 tick_labels = self.custom_xticklabels
             else:
-                tick_labels = generation_grouped.index
+                if scenario_groupby == "Interval-Scenario":
+                    tick_labels = list(pd.date_range(start_date_range, end_date_range, periods = 10))
+                else:
+                    tick_labels = generation_grouped.index
         
             mplt.multilineplot(
                 generation_grouped,
@@ -1241,7 +1247,7 @@ class TotalGeneration(PlotDataStoreAndProcessor):
             # Ylabel should change if there are facet labels, leave at 40 for now,
             # works for all values in spacing
             ax.set_ylabel(
-                f"Contribution of Renewables\n to Annual Generation (%)",
+                f"Fraction of Generation Produced \n by Renewables (%)",
                 color="black",
                 rotation="vertical",
             )

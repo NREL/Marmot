@@ -964,7 +964,7 @@ class PlotLibrary(SetupSubplot):
             color_list = None
 
         df.plot.line(
-            color=color_list,
+            #color=color_list,
             ax=ax,
             legend=legend,
             **kwargs,
@@ -980,8 +980,14 @@ class PlotLibrary(SetupSubplot):
             tick_labels = custom_tick_labels
         else:
             tick_labels = df.index
-        ax.set(xticks = list(range(len(tick_labels))))
-        self.set_barplot_xticklabels(tick_labels, sub_pos=sub_pos)
+        if len(tick_labels) == len(df.index):
+            ax.set(xticks = list(range(len(tick_labels))))
+        else: 
+            xticks = []
+            for l in tick_labels: xticks.append(list(df.index).index(str(l)))
+            for i in range(len(tick_labels)): tick_labels[i] = f"{tick_labels[i].month}-{tick_labels[i].day}"
+            ax.set(xticks = xticks)
+        self.set_barplot_xticklabels(tick_labels, sub_pos=sub_pos, )
 
     def histogram(
         self,
