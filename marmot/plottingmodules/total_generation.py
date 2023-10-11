@@ -1149,14 +1149,11 @@ class TotalGeneration(PlotDataStoreAndProcessor):
         # scenarios must be a list.
         properties = [(True, "generator_Generation", self.Scenarios),
                       (False, "batterie_Generation", self.Scenarios),
-                      # edit this if we want something other than total generation in the denominator (e.g., Load? Customer load?)
                       ]
 
         # Runs get_data to populate mplot_data_dict with all required properties,
         # returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
-
-        include_batteries = False # just for now
 
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -1215,7 +1212,7 @@ class TotalGeneration(PlotDataStoreAndProcessor):
                 generation_grouped[scenario] = generation_grouped[list(generation_grouped.columns)].sum(axis=1)
                 generation_grouped = generation_grouped[[scenario]]
                 generation_grouped.index = generation_grouped.index.str.split(": ").str[0]
-                generation_grouped.index.names = ["Date"]
+                generation_grouped.index.names = ["Year"]
 
                 scen_tables.append(generation_grouped)
 
@@ -1229,10 +1226,7 @@ class TotalGeneration(PlotDataStoreAndProcessor):
             if self.custom_xticklabels:
                 tick_labels = self.custom_xticklabels
             else:
-                if scenario_groupby == "Interval-Scenario":
-                    tick_labels = list(pd.date_range(start_date_range, end_date_range, periods = 10))
-                else:
-                    tick_labels = generation_grouped.index
+                tick_labels = generation_grouped.index
         
             mplt.multilineplot(
                 generation_grouped,
@@ -1247,7 +1241,7 @@ class TotalGeneration(PlotDataStoreAndProcessor):
             # Ylabel should change if there are facet labels, leave at 40 for now,
             # works for all values in spacing
             ax.set_ylabel(
-                f"Fraction of Generation Produced \n by Renewables (%)",
+                f"Contribution of Renewables \n to Annual Generation (%)",
                 color="black",
                 rotation="vertical",
             )
