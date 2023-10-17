@@ -126,7 +126,7 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
         # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, "generator_Installed_Capacity", self.Scenarios),
-                      (False, "batterie_Installed_Capacity", self.Scenarios),
+                      (False, "batterie_Generation_Capacity", self.Scenarios),
                       ]
 
         # Runs get_data to populate mplot_data_dict with all required properties,
@@ -177,7 +177,7 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
                 if include_batteries:
                     Total_Installed_Capacity = self.add_battery_gen_to_df(
                         Total_Installed_Capacity, scenario, zone_input,
-                        battery_prop="Installed_Capacity"
+                        battery_prop="Generation_Capacity"
                     )
 
                 if pd.notna(start_date_range):
@@ -640,7 +640,7 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
         # scenarios must be a list.
         properties = [(True, "generator_Installed_Capacity", self.Scenarios),
                       #(False, "batterie_Installed_Capacity", self.Scenarios),
-                      (False, "batterie_Generation_Capacity_Built", self.Scenarios)]
+                      (False, "batterie_Generation_Capacity", self.Scenarios)]
 
         # Runs get_data to populate mplot_data_dict with all required properties,
         # returns a 1 if required data is missing
@@ -702,9 +702,8 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
                 if include_batteries:
                     installed_capacity = self.add_battery_gen_to_df(
                         installed_capacity, scenario, zone_input,
-                        battery_prop="Generation_Capacity_Built"
+                        battery_prop="Generation_Capacity"
                     )
-                    installed_capacity["Storage"] = installed_capacity.Storage.cumsum()
 
                 if pd.notna(start_date_range):
                     installed_capacity = set_timestamp_date_range(
