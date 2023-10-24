@@ -1,9 +1,9 @@
 Input,Input_type,Importance,User_defined_value
 Simulation_model,str,required,PLEXOS
 PLEXOS_data_blocks,list,optional,ST
-Model_Solutions_folder,folder,required,/Users/mschwarz/BVRE_local
+Model_Solutions_folder,folder,required,/projects/decarbsagen/mschwarz
 Marmot_Solutions_folder,folder,optional,
-Scenario_process_list,List,required,Cap100
+Scenario_process_list,List,required,"output_Ref_solutions, output_Cap100_solutions, output_Cap100_NoNegCO2_solutions"
 process_subset_years,List,optional,
 Region_Mapping.csv_name,string,optional(default),Region_mapping_ReEDS.csv
 gen_names.csv_name,string,required(default),gen_names_CCS.csv

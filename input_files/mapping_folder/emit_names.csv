@@ -10,3 +10,7 @@ System Emission_SO2_WI,SO2
 System Emission_SO2_EI,SO2
 CH4,CH4
 N2O,N2O
+co2,CO2
+nox,NOx
+so2,SO2
+ch4,CH4
