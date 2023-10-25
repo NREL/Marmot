@@ -155,21 +155,37 @@ def main():
 
 
         # Now make additional edits to separate fossil build costs from renewable build costs
-        build = pd.read_hdf(scenario_formatted_path,"generator_Annualized_Build_Cost");
-        build_NPV = pd.read_hdf(scenario_formatted_path,"generator_Annualized_Build_Cost_NPV");
+        # break every cost into renewable and non-renewable,
+        # all renewable costs get lumped into renewable puchase cost (all non-re get broken out as before)
+        costs_to_split = ["generator_Fuel_Cost","generator_FOM_Cost","generator_VOM_Cost",
+                 "generator_Start_and_Shutdown_Cost", "generator_Annualized_Build_Cost"]
+                # "generator_Reserves_VOM_Cost" and "generator_Emissions_Cost" not included in model
+                 # "generator_UoS_Cost", "generator_Annualized_One_Time_Cost","batterie_Annualized_Build_Cost" do not need to be split
+        
+        re_costs = []
+        re_npv_costs = []
+        
+        for cost in costs_to_split:
+            print(cost)
+            c1 = pd.read_hdf(scenario_formatted_path, cost);
+            c2 = pd.read_hdf(scenario_formatted_path, cost + "_NPV");
+            re_c1 = c1[c1.index.isin(gen_cats.re, level=1)].rename(columns={"values":cost})
+            re_c2 = c2[c2.index.isin(gen_cats.re, level=1)].rename(columns={"values":cost+"_NPV"})
+            fos_c1 = c1[~c1.index.isin(gen_cats.re, level=1)]
+            fos_c2 = c2[~c2.index.isin(gen_cats.re, level=1)]
 
-        re_build = build[build.index.isin(gen_cats.re,level=1)]
-        re_build_NPV = build_NPV[build_NPV.index.isin(gen_cats.re,level=1)]
+            re_costs.append(re_c1)
+            re_npv_costs.append(re_c2)
+            # Export fossil costs back to h5
+            dataio.save_to_h5(fos_c1, scenario_formatted_path, key = cost + "_Fossil",)
+            dataio.save_to_h5(fos_c2, scenario_formatted_path, key = cost + "_Fossil_NPV",)
 
-        fossil_build = build[~build.index.isin(gen_cats.re,level=1)]
-        fossil_build_NPV = build_NPV[~build_NPV.index.isin(gen_cats.re,level=1)]
+        re_costs = pd.concat(re_costs, axis=1).fillna(0).sum(axis=1).to_frame(name = "values")
+        re_npv_costs = pd.concat(re_npv_costs, axis=1).fillna(0).sum(axis=1).to_frame(name = "values")
 
-        # Export back to h5
-        dataio.save_to_h5(re_build, scenario_formatted_path, key = "generator_RE_Annualized_Build_Cost",)
-        dataio.save_to_h5(re_build_NPV, scenario_formatted_path, key = "generator_RE_Annualized_Build_Cost_NPV",)
-        dataio.save_to_h5(fossil_build, scenario_formatted_path, key = "generator_Fossil_Annualized_Build_Cost",)
-        dataio.save_to_h5(fossil_build_NPV, scenario_formatted_path, key = "generator_Fossil_Annualized_Build_Cost_NPV",)
-
+        # Export re costs back to h5
+        dataio.save_to_h5(re_costs, scenario_formatted_path, key = "generator_Renewable_Purchases",)
+        dataio.save_to_h5(re_npv_costs, scenario_formatted_path, key = "generator_Renewable_Purchases_NPV",)
 
 
 if __name__ == "__main__":
