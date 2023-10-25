@@ -41,6 +41,9 @@ class GenCategories:
     thermal: List[str] = field(default_factory=list)
     """thermal (List[str]): List of thermal technologies.
     """
+    storage: List[str] = field(default_factory=list)
+    """storage (List[str]): List of storage technologies.
+    """
 
     @classmethod
     def set_categories(cls, df: pd.DataFrame) -> "GenCategories":
@@ -52,6 +55,7 @@ class GenCategories:
         - pv
         - re
         - thermal
+        - storage
 
         Args:
             df (pd.DataFrame): Dataframe containing an 'Ordered_Gen'
@@ -64,7 +68,7 @@ class GenCategories:
         Returns:
             GenCategories: returns instance of class.
         """
-        gen_cats = ["vre", "pv", "re", "thermal"]
+        gen_cats = ["vre", "pv", "re", "thermal", "storage"]
         gen_cat_dict = {}
         for category in gen_cats:
             if category in df.columns:

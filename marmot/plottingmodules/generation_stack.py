@@ -514,6 +514,7 @@ class GenerationStack(PlotDataStoreAndProcessor):
                         energy_unit=unitconversion["units"],
                         re_gen_cat=self.gen_categories.re,
                         gen_cols=stacked_gen_df.columns,
+                        ibr_gen_cat = self.gen_categories.vre + self.gen_categories.storage,
                     )
 
                     if x_time_value is not None and len(stacked_gen_df) > 1:

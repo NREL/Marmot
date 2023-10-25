@@ -289,6 +289,7 @@ class SetupSubplot:
         energy_unit: str = "MW",
         re_gen_cat: list = None,
         gen_cols: list = None,
+        ibr_gen_cat: list = None,
     ) -> pd.Timestamp:
         """Adds a property annotation to the subplot.
 
@@ -301,6 +302,7 @@ class SetupSubplot:
         - Peak RE
         - Peak Unserved Energy
         - Peak Curtailment
+        - Peak IBR
 
         Based on the property selected this method will locate the timestamp
         and corresponding value of the property. The value and an arrow pointing
@@ -323,6 +325,9 @@ class SetupSubplot:
             gen_cols (list, optional): list of gen columns, needed for
                 'Peak RE' and 'Peak Curtailmnet' property.
                 Defaults to None.
+            ibr_gen_cat (list, optional): list of ibr techs, needed for
+                'Peak IBR' property.
+                Defaults to None.
 
         Returns:
             pd.Timestamp: timstamp of property
@@ -334,6 +339,8 @@ class SetupSubplot:
             re_gen_cat = list(re_gen_cat)
         if isinstance(gen_cols, pd.Index):
             gen_cols = list(gen_cols)
+        if isinstance(ibr_gen_cat, pd.Index):
+            ibr_gen_cat = list(ibr_gen_cat)
 
         if prop == "Peak Demand":
             x_time_value = df["Total Demand"].idxmax()
@@ -369,6 +376,32 @@ class SetupSubplot:
                 gen_df = gen_df.drop(curtailment_name, axis=1)
             x_time_value = re_total.idxmax()
             y_mw_value = re_total[x_time_value]
+            y_point_value = gen_df.loc[x_time_value].sum()
+        
+        elif prop == "Peak IBR":
+            if not ibr_gen_cat:
+                logger.warning(
+                    f"To plot a {prop} annotation a "
+                    "list of ibr gen names is required. "
+                    "Pass a list to the add_property_annotation "
+                    "ibr_gen_cat argument."
+                )
+                return None
+            if not gen_cols:
+                logger.warning(
+                    f"To plot a {prop} annotation a "
+                    "list of all generator names is required. "
+                    "Pass a list to the add_property_annotation "
+                    "gen_cols argument."
+                )
+                return None
+            ibr_df = df[df.columns.intersection(ibr_gen_cat)]
+            ibr_total = ibr_df.sum(axis=1)
+            gen_df = df[df.columns.intersection(gen_cols)]
+            if curtailment_name in gen_df.columns:
+                gen_df = gen_df.drop(curtailment_name, axis=1)
+            x_time_value = ibr_total.idxmax()
+            y_mw_value = ibr_total[x_time_value]
             y_point_value = gen_df.loc[x_time_value].sum()
 
         elif prop == "Peak Unserved Energy":
