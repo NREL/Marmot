@@ -38,7 +38,7 @@ tech_map_simple = {
     "ST_RESIDUAL_FUEL_OIL":"o-g-s",
     "ST_WASTE_COAL":"Coal",
     "ST_WASTE_OIL":"o-g-s",
-    "WS":"Offshore-Wind",
+    "WS":"Offshore Wind",
     "WT":"Onshore Wind"
 }
 
