@@ -223,6 +223,7 @@ def createConfig(configfile_path: Path):
         formatter_settings=dict(
             VoLL=10000,
             discount_rate=0.0, #set to 0 if not being used
+            inflation_adder=1, #default value to multiply costs in production_cost.py by 1
             skip_existing_properties=True,
             append_plexos_block_name=False,
             exclude_pumping_from_reeds_storage_gen=True,

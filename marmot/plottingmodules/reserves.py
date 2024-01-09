@@ -34,6 +34,7 @@ from marmot.plottingmodules.plotutils.timeseries_modifiers import (
 
 logger = logging.getLogger("plotter." + __name__)
 plot_data_settings: dict = mconfig.parser("plot_data")
+include_batteries: bool = mconfig.parser("plot_data","include_explicit_battery_objects")
 
 
 class Reserves(PlotDataStoreAndProcessor):
@@ -318,7 +319,9 @@ class Reserves(PlotDataStoreAndProcessor):
         # List of properties needed by the plot, properties are a set of tuples and
         # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
-        properties = [(True, "reserves_generators_Provision", self.Scenarios)]
+        properties = [(True, "reserves_generators_Provision", self.Scenarios),
+                      (False, "reserves_batteries_Provision", self.Scenarios),
+                      (False, "reserve_Risk", self.Scenarios)]
 
         # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
@@ -331,16 +334,47 @@ class Reserves(PlotDataStoreAndProcessor):
         for region in self.Zones:
             logger.info(f"Zone = {region}")
 
+            # sets up x, y dimensions of plot
+            ncols, nrows = set_facet_col_row_dimensions(
+                self.xlabels, self.ylabels, multi_scenario=self.Scenarios
+            )
+            grid_size = ncols * nrows
+            # Used to calculate any excess axis to delete
+            plot_number = len(self.Scenarios)
+            excess_axs = grid_size - plot_number
+
+            mplt = PlotLibrary(nrows, ncols, sharey=True, squeeze=False, ravel_axs=True)
+            fig, axs = mplt.get_figure()
+
+            plt.subplots_adjust(wspace=0.05, hspace=0.5)
+
+            # If creating a facet plot the font is scaled by 9% for each added x dimesion fact plot
+            if ncols > 1:
+                font_scaling_ratio = 1 + ((ncols - 1) * 0.09)
+                plt.rcParams["xtick.labelsize"] *= font_scaling_ratio
+                plt.rcParams["ytick.labelsize"] *= font_scaling_ratio
+                plt.rcParams["legend.fontsize"] *= font_scaling_ratio
+                plt.rcParams["axes.labelsize"] *= font_scaling_ratio
+                plt.rcParams["axes.titlesize"] *= font_scaling_ratio
+
             reserve_chunks = []
-            for scenario in self.Scenarios:
+            risk_chunks = []
+            for i, scenario in enumerate(self.Scenarios):
                 logger.info(f"Scenario = {scenario}")
 
                 reserve_provision_timeseries = self[
                     "reserves_generators_Provision"
                 ].get(scenario)
+
+                reserve_risk_timeseries = self[
+                    "reserve_Risk"
+                ].get(scenario)
                 # Check if zone has reserves, if not skips
                 try:
                     reserve_provision_timeseries = reserve_provision_timeseries.xs(
+                        region, level=self.AGG_BY
+                    )
+                    reserve_risk_timeseries = reserve_risk_timeseries.xs(
                         region, level=self.AGG_BY
                     )
                 except KeyError:
@@ -349,15 +383,27 @@ class Reserves(PlotDataStoreAndProcessor):
                 reserve_provision_timeseries = self.df_process_gen_inputs(
                     reserve_provision_timeseries
                 )
+                reserve_risk_timeseries = reserve_risk_timeseries.reset_index(["timestamp", "Type", "parent"], drop=False)
+                reserve_risk_timeseries.drop_duplicates(inplace = True)
+                reserve_risk_timeseries = reserve_risk_timeseries.groupby(["timestamp"]).sum()
+                # Insert battery reserves.
+                if include_batteries:
+                    reserve_provision_timeseries = self.add_battery_gen_to_df(
+                        reserve_provision_timeseries, scenario, region,
+                        battery_prop="reserves_batteries_Provision"
+                    )
 
                 if pd.notna(start_date_range):
                     reserve_provision_timeseries = set_timestamp_date_range(
                         reserve_provision_timeseries, start_date_range, end_date_range
                     )
+                    reserve_risk_timeseries = set_timestamp_date_range(
+                        reserve_risk_timeseries, start_date_range, end_date_range
+                    )
                     if reserve_provision_timeseries.empty is True:
                         logger.warning("No data in selected Date Range")
                         continue
-
+                
                 # Calculates interval step to correct for MWh of generation
                 interval_count = get_sub_hour_interval_count(
                     reserve_provision_timeseries
@@ -365,57 +411,96 @@ class Reserves(PlotDataStoreAndProcessor):
                 reserve_provision_timeseries = (
                     reserve_provision_timeseries / interval_count
                 )
-
+                reserve_risk_timeseries = (
+                    reserve_risk_timeseries / interval_count
+                )
                 reserve_provision = self.year_scenario_grouper(
                     reserve_provision_timeseries, scenario, groupby=scenario_groupby
                 ).sum()
+                reserve_risk = self.year_scenario_grouper(
+                    reserve_risk_timeseries, scenario, groupby=scenario_groupby
+                ).sum()
+                # Delete any columns of all zeroes
+                reserve_provision = reserve_provision.loc[
+                    :, (reserve_provision != 0).any(axis=0)
+                ]
+                # Convert units
+                unitconversion = self.capacity_energy_unitconversion(
+                    reserve_provision, self.Scenarios, sum_values=True
+                )
+
+                # override auto unitconversion to get GW-h
+                unitconversion = {"divisor": 1000, "units":"GW"}
+                
+                reserve_provision = reserve_provision / unitconversion["divisor"]
+                reserve_risk = reserve_risk / unitconversion["divisor"]
+                # Sum reserve risk to show as lines on plots
+                reserve_risk = reserve_risk.rename(columns = {"values":"Requirement"})
 
                 reserve_chunks.append(reserve_provision)
+                risk_chunks.append(reserve_risk)
+
+                # Set x-tick labels
+                if self.custom_xticklabels:
+                    tick_labels = self.custom_xticklabels
+                elif scenario_groupby == "Year-Scenario":
+                    tick_labels = [x.split(":")[0] for x in reserve_provision.index]
+                else:
+                    tick_labels = reserve_provision.index
+
+                mplt.barplot(
+                    reserve_provision,
+                    color=self.marmot_color_dict,
+                    stacked=True,
+                    custom_tick_labels=tick_labels,
+                    sub_pos=i,
+                )
+
+                # Add risk line
+                for n, idx in enumerate(reserve_risk.index.unique()):
+                    x = [
+                        axs[i].patches[n].get_x(),
+                        axs[i].patches[n].get_x() + axs[i].patches[n].get_width(),
+                    ]
+                    y_net = [reserve_risk.loc[idx]] * 2
+                    axs[i].plot(x, y_net, c="black", linewidth = 1.5, label = "Requirement")
+
+                if scenario_groupby == "Year-Scenario":
+                    axs[i].set_xlabel(scenario)
+                else:
+                    axs[i].set_xlabel("")
 
             total_reserves_out = pd.concat(reserve_chunks, axis=0, sort=False).fillna(0)
-
-            total_reserves_out = total_reserves_out.loc[
-                :, (total_reserves_out != 0).any(axis=0)
-            ]
-
+            total_risk_out = pd.concat(risk_chunks, axis=0, sort=False).fillna(0)
+            total_reserves_out = pd.concat([total_reserves_out, total_risk_out], axis=1)
             if total_reserves_out.empty:
                 out = MissingZoneData()
                 outputs[region] = out
                 continue
-
-            # Convert units
-            unitconversion = self.capacity_energy_unitconversion(
-                total_reserves_out, self.Scenarios, sum_values=True
-            )
-            total_reserves_out = total_reserves_out / unitconversion["divisor"]
             data_table_out = total_reserves_out.add_suffix(
-                f" ({unitconversion['units']}h)"
+                f" ({unitconversion['units']}-h)"
             )
 
-            mplt = PlotLibrary()
-            fig, ax = mplt.get_figure()
-            # Set x-tick labels
-            if self.custom_xticklabels:
-                tick_labels = self.custom_xticklabels
-            else:
-                tick_labels = total_reserves_out.index
-
-            mplt.barplot(
-                total_reserves_out,
-                color=self.marmot_color_dict,
-                stacked=True,
-                custom_tick_labels=tick_labels,
-            )
-
-            ax.set_ylabel(
-                f"Total Reserve Provision ({unitconversion['units']}h)",
-                color="black",
-                rotation="vertical",
-            )
+            # Add facet labels
+            if self.xlabels or self.ylabels:
+                mplt.add_facet_labels(xlabels=self.xlabels, ylabels=self.ylabels)
             # Add legend
             mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
+            # Remove extra axes
+            mplt.remove_excess_axs(excess_axs, grid_size)
+            # Add title
             if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(region)
+
+            # Ylabel should change if there are facet labels, leave at 40 for now,
+            # works for all values in spacing
+            labelpad = 40
+            plt.ylabel(
+                f"Total Reserve Provision ({unitconversion['units']}-h)",
+                color="black",
+                rotation="vertical",
+                labelpad=labelpad,
+            )
 
             outputs[region] = {"fig": fig, "data_table": data_table_out}
         return outputs

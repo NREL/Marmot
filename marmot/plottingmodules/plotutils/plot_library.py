@@ -290,6 +290,7 @@ class SetupSubplot:
         re_gen_cat: list = None,
         gen_cols: list = None,
         ibr_gen_cat: list = None,
+        thermal_gen_cat: list = None,
     ) -> pd.Timestamp:
         """Adds a property annotation to the subplot.
 
@@ -303,6 +304,8 @@ class SetupSubplot:
         - Peak Unserved Energy
         - Peak Curtailment
         - Peak IBR
+        - Min RE
+        - Peak Thermal
 
         Based on the property selected this method will locate the timestamp
         and corresponding value of the property. The value and an arrow pointing
@@ -320,13 +323,16 @@ class SetupSubplot:
             energy_unit (str, optional): units to add to prop annotation.
                 Defaults to 'MW'.
             re_gen_cat (list, optional): list of re techs, needed to for
-                'Peak RE' property.
+                'Peak RE' and 'Min RE' property.
                 Defaults to None.
             gen_cols (list, optional): list of gen columns, needed for
                 'Peak RE' and 'Peak Curtailmnet' property.
                 Defaults to None.
             ibr_gen_cat (list, optional): list of ibr techs, needed for
                 'Peak IBR' property.
+                Defaults to None.
+            thermal_gen_cat (list, optional): list of thermal techs, needed for
+                'Peak Thermal' property.
                 Defaults to None.
 
         Returns:
@@ -352,7 +358,7 @@ class SetupSubplot:
             y_mw_value = df.loc[x_time_value, "Net Load"]
             y_point_value = y_mw_value
 
-        elif prop == "Peak RE":
+        elif (prop == "Peak RE" or prop == "Min RE"):
             if not re_gen_cat:
                 logger.warning(
                     f"To plot a {prop} annotation a "
@@ -374,9 +380,14 @@ class SetupSubplot:
             gen_df = df[df.columns.intersection(gen_cols)]
             if curtailment_name in gen_df.columns:
                 gen_df = gen_df.drop(curtailment_name, axis=1)
-            x_time_value = re_total.idxmax()
-            y_mw_value = re_total[x_time_value]
-            y_point_value = gen_df.loc[x_time_value].sum()
+            if prop == "Peak RE":
+                x_time_value = re_total.idxmax()
+                y_mw_value = re_total[x_time_value]
+                y_point_value = gen_df.loc[x_time_value].sum()
+            elif prop == "Min RE":
+                x_time_value = re_total.idxmin()
+                y_mw_value = re_total[x_time_value]
+                y_point_value = gen_df.loc[x_time_value].sum()
         
         elif prop == "Peak IBR":
             if not ibr_gen_cat:
@@ -402,6 +413,32 @@ class SetupSubplot:
                 gen_df = gen_df.drop(curtailment_name, axis=1)
             x_time_value = ibr_total.idxmax()
             y_mw_value = ibr_total[x_time_value]
+            y_point_value = gen_df.loc[x_time_value].sum()
+        
+        elif prop == "Peak Thermal":
+            if not thermal_gen_cat:
+                logger.warning(
+                    f"To plot a {prop} annotation a "
+                    "list of thermal gen names is required. "
+                    "Pass a list to the add_property_annotation "
+                    "thermal_gen_cat argument."
+                )
+                return None
+            if not gen_cols:
+                logger.warning(
+                    f"To plot a {prop} annotation a "
+                    "list of all generator names is required. "
+                    "Pass a list to the add_property_annotation "
+                    "gen_cols argument."
+                )
+                return None
+            therm_df = df[df.columns.intersection(thermal_gen_cat)]
+            therm_total = therm_df.sum(axis=1)
+            gen_df = df[df.columns.intersection(gen_cols)]
+            if curtailment_name in gen_df.columns:
+                gen_df = gen_df.drop(curtailment_name, axis=1)
+            x_time_value = therm_total.idxmax()
+            y_mw_value = therm_total[x_time_value]
             y_point_value = gen_df.loc[x_time_value].sum()
 
         elif prop == "Peak Unserved Energy":

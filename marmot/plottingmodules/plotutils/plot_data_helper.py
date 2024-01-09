@@ -514,7 +514,7 @@ class PlotDataStoreAndProcessor(dict):
         scenario: str,
         zone_input: str,
         data_resolution: str = "",
-        battery_prop: str = "Generation",
+        battery_prop: str = "batterie_Generation",
         battery_discharge_name: str = "",
     ) -> pd.DataFrame:
         """Adds Battery generation (or a different property if specified) to the passed dataframe.
@@ -533,7 +533,7 @@ class PlotDataStoreAndProcessor(dict):
         Returns:
             pd.DataFrame: DataFrame with added battery gen column.
         """
-        battery_gen: pd.DataFrame = self[f"batterie_{battery_prop}{data_resolution}"].get(
+        battery_gen: pd.DataFrame = self[f"{battery_prop}{data_resolution}"].get(
             scenario
         )
         if battery_discharge_name == "":

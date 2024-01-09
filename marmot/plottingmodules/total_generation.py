@@ -335,6 +335,7 @@ class TotalGeneration(PlotDataStoreAndProcessor):
         properties = [
             (True, "generator_Generation", self.Scenarios),
             (False, f"generator_{curtailment_prop}", self.Scenarios),
+            (False, "batterie_Generation", self.Scenarios),
         ]
 
         # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
@@ -367,6 +368,12 @@ class TotalGeneration(PlotDataStoreAndProcessor):
 
                 Total_Gen_Stack = self.df_process_gen_inputs(Total_Gen_Stack)
 
+                # Insert battery generation.
+                if include_batteries:
+                    Total_Gen_Stack = self.add_battery_gen_to_df(
+                        Total_Gen_Stack, scenario, zone_input,
+                        battery_prop="batterie_Generation")
+
                 # Calculates interval step to correct for MWh of generation
                 interval_count = get_sub_hour_interval_count(Total_Gen_Stack)
 
@@ -392,26 +399,22 @@ class TotalGeneration(PlotDataStoreAndProcessor):
                 outputs[zone_input] = MissingZoneData()
                 continue
 
-            total_generation_stack_out = pd.concat(
-                gen_chunks, axis=0, sort=False
-            ).fillna(0)
+            try:               
+                # Change to a diff on first scenario
+                scen_base = gen_chunks[0]
+                diff_gen_chunks = []
+                for scen in gen_chunks[1:]:
+                    diff_scen = scen.sub(scen_base.values, axis="columns")
+                    diff_gen_chunks.append(diff_scen)
+                total_generation_stack_out = pd.concat(diff_gen_chunks, axis=0, sort=False)
+            except KeyError:
+                out = MissingZoneData()
+                outputs[zone_input] = out
+                continue
+
             total_generation_stack_out = total_generation_stack_out.loc[
                 :, (total_generation_stack_out != 0).any(axis=0)
             ]
-
-            # Ensures region has generation, else skips
-            try:
-                # Change to a diff on first scenario
-                scen_base = total_generation_stack_out.index[0]
-                total_generation_stack_out = (
-                    total_generation_stack_out
-                    - total_generation_stack_out.xs(scen_base)
-                )
-            except KeyError:
-                outputs[zone_input] = MissingZoneData()
-                continue
-
-            total_generation_stack_out.drop(scen_base, inplace=True)  # Drop base entry
 
             if total_generation_stack_out.empty:
                 outputs[zone_input] = MissingZoneData()
@@ -431,43 +434,70 @@ class TotalGeneration(PlotDataStoreAndProcessor):
 
             curtailment_name = self.gen_names_dict.get("Curtailment", "Curtailment")
 
-            net_diff = total_generation_stack_out
-            try:
-                net_diff.drop(columns=curtailment_name, inplace=True)
-            except KeyError:
-                pass
-            net_diff = net_diff.sum(axis=1)
 
-            mplt = PlotLibrary()
+            if scenario_groupby == "Scenario":
+                try:
+                    net_diff = [total_generation_stack_out.drop(columns = curtailment_name).copy().sum(axis=1)]
+                except KeyError:
+                    net_diff = [total_generation_stack_out.copy().sum(axis=1)]
+                total_generation_stack_out = [total_generation_stack_out.copy()]
+                mplt = PlotLibrary(squeeze=False, ravel_axs=True)
+            else:
+                mplt = PlotLibrary(ncols = len(self.Scenarios)-1, sharey=True, squeeze = False, ravel_axs=True)
+                temp = total_generation_stack_out.copy()
+                total_generation_stack_out = []
+                net_diff = []
+                for scen in self.Scenarios[1:]:
+                    sub_df = temp[temp.index.str.endswith(scen)]
+                    sub_df.index = sub_df.index.str.split(":").str[0]
+                    total_generation_stack_out.append(sub_df)
+                    try:
+                        net_diff.append(sub_df.drop(columns=curtailment_name).sum(axis=1))
+                    except KeyError:
+                        net_diff.append(sub_df.sum(axis=1))
+
             fig, ax = mplt.get_figure()
 
-            mplt.barplot(
-                total_generation_stack_out, stacked=True, color=self.marmot_color_dict
-            )
+            n = 0
+            while n < len(self.Scenarios) - 1:
+                mplt.barplot(
+                    total_generation_stack_out[n], sub_pos = n, stacked=True, color=self.marmot_color_dict
+                )
+                ax[n].axhline(y=0, linewidth=0.5, linestyle="--", color="grey")
+                ax[n].margins(x=0.01)
 
-            # Set x-tick labels
-            tick_labels = total_generation_stack_out.index
-            mplt.set_barplot_xticklabels(tick_labels)
+                # Add net diff line.
+                for i, scenario in enumerate(total_generation_stack_out[n].index.unique()):
+                    x = [
+                        ax[n].patches[i].get_x(),
+                        ax[n].patches[i].get_x() + ax[n].patches[i].get_width(),
+                    ]
+                    y_net = [net_diff[n].loc[scenario]] * 2
+                    ax[n].plot(x, y_net, c="black", linewidth = 1.5, label = "Net Gen Change")
+                
+                if scenario_groupby == "Scenario":
+                    ax[n].set_ylabel(
+                    (
+                        f"Generation Change ({format(unitconversion['units'])}h) \n "
+                        f"relative to {self.Scenarios[0]}"
+                    ),
+                    color="black",
+                    rotation="vertical",
+                    )
+                    n = len(self.Scenarios)
+                else:
+                    ax[n].set_xlabel(self.Scenarios[n+1])
+                    ax[n].set_ylabel(
+                    (
+                        f"Generation Change ({format(unitconversion['units'])}h) \n "
+                        f"relative to {self.Scenarios[0]}"
+                    ),
+                    color="black",
+                    rotation="vertical",
 
-            # Add net gen difference line.
-            for n, scenario in enumerate(total_generation_stack_out.index.unique()):
-                x = [
-                    ax.patches[n].get_x(),
-                    ax.patches[n].get_x() + ax.patches[n].get_width(),
-                ]
-                y_net = [net_diff.loc[scenario]] * 2
-                ax.plot(x, y_net, c="black", linewidth=1.5, label="Net Gen Change")
+                    )
+                    n += 1
 
-            ax.set_ylabel(
-                (
-                    f"Generation Change ({format(unitconversion['units'])}h) \n "
-                    f"relative to {scen_base}"
-                ),
-                color="black",
-                rotation="vertical",
-            )
-
-            ax.axhline(linewidth=0.5, linestyle="--", color="grey")
             # Add legend
             mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
 
@@ -1057,6 +1087,7 @@ class TotalGeneration(PlotDataStoreAndProcessor):
                     unitconversion = self.capacity_energy_unitconversion(
                         generation_grouped, self.Scenarios, sum_values=True
                     )
+                unitconversion = {"divisor": 1000, "units":"GW"}
                 generation_grouped = generation_grouped / unitconversion["divisor"]
 
                 # Delete columns of all zeros
@@ -1106,7 +1137,7 @@ class TotalGeneration(PlotDataStoreAndProcessor):
             # works for all values in spacing
             labelpad = 40
             plt.ylabel(
-                f"Total Generation ({unitconversion['units']}h)",
+                f"Total Annual Generation ({unitconversion['units']}h)",
                 color="black",
                 rotation="vertical",
                 labelpad=labelpad,
@@ -1148,7 +1179,6 @@ class TotalGeneration(PlotDataStoreAndProcessor):
         # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, "generator_Generation", self.Scenarios),
-                      (False, "batterie_Generation", self.Scenarios),
                       ]
 
         # Runs get_data to populate mplot_data_dict with all required properties,
@@ -1182,13 +1212,6 @@ class TotalGeneration(PlotDataStoreAndProcessor):
                     continue
 
                 generation = self.df_process_gen_inputs(generation)
-
-
-                # Insert battery generation.
-                if include_batteries:
-                    generation = self.add_battery_gen_to_df(
-                        generation, scenario, zone_input
-                    )
 
                 if pd.notna(start_date_range):
                     generation = set_timestamp_date_range(
@@ -1233,7 +1256,7 @@ class TotalGeneration(PlotDataStoreAndProcessor):
                 custom_tick_labels=tick_labels,
             )
             # Add legend
-            mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
+            mplt.add_legend(reverse_legend=False, sort_by=self.ordered_gen)
             # Add title
             if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)

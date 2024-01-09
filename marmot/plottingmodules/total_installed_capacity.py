@@ -177,7 +177,7 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
                 if include_batteries:
                     Total_Installed_Capacity = self.add_battery_gen_to_df(
                         Total_Installed_Capacity, scenario, zone_input,
-                        battery_prop="Generation_Capacity"
+                        battery_prop="batterie_Generation_Capacity"
                     )
 
                 if pd.notna(start_date_range):
@@ -284,7 +284,8 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
         # List of properties needed by the plot, properties are a set of tuples and
         # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
-        properties = [(True, "generator_Installed_Capacity", self.Scenarios)]
+        properties = [(True, "generator_Installed_Capacity", self.Scenarios),
+                      (False, "batterie_Generation_Capacity_Built", self.Scenarios)]
 
         # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
@@ -339,6 +340,13 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
                     Total_Installed_Capacity
                 )
 
+                # Insert battery capacity
+                if include_batteries:
+                    Total_Installed_Capacity = self.add_battery_gen_to_df(
+                        Total_Installed_Capacity, scenario, zone_input,
+                        battery_prop="batterie_Generation_Capacity_Built")
+                    Total_Installed_Capacity["Storage"] = Total_Installed_Capacity["Storage"].cumsum()
+
                 if pd.notna(start_date_range):
                     Total_Installed_Capacity = set_timestamp_date_range(
                         Total_Installed_Capacity, start_date_range, end_date_range
@@ -353,29 +361,25 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
                     ).sum()
                 )
 
-            if capacity_chunks:
-                Total_Installed_Capacity_Out = pd.concat(
-                    capacity_chunks, axis=0, sort=False
-                ).fillna(0)
-            else:
+            if not capacity_chunks:
                 out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
             try:
                 # Change to a diff on first scenario
-                scen_base = Total_Installed_Capacity_Out.index[0]
-                Total_Installed_Capacity_Out = (
-                    Total_Installed_Capacity_Out
-                    - Total_Installed_Capacity_Out.xs(scen_base)
-                )
+                # scen_base = Total_Installed_Capacity_Out.index[0]
+                scen_base = capacity_chunks[0]
+                diff_cap_chunks = []
+                for scen in capacity_chunks[1:]:
+                    diff_scen = scen.sub(scen_base.values, axis="columns")
+                    diff_cap_chunks.append(diff_scen)
+                Total_Installed_Capacity_Out = pd.concat(diff_cap_chunks, axis=0, sort=False)
             except KeyError:
                 out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
-            Total_Installed_Capacity_Out.drop(
-                scen_base, inplace=True
-            )  # Drop base entry
-
+            
+            # Deletes columns that are all zero
             Total_Installed_Capacity_Out = Total_Installed_Capacity_Out.loc[
                 :, (Total_Installed_Capacity_Out != 0).any(axis=0)
             ]
@@ -397,21 +401,39 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
             Data_Table_Out = Total_Installed_Capacity_Out
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
 
-            mplt = PlotLibrary()
+
+            if scenario_groupby == "Scenario":
+                Total_Installed_Capacity_Out = [Total_Installed_Capacity_Out.copy()]
+                mplt = PlotLibrary(squeeze = False, ravel_axs=True)
+            else: #scenario_groupby == "Year-Scenario"
+                mplt = PlotLibrary(ncols=len(self.Scenarios) - 1, sharey = True, squeeze=False, ravel_axs=True)
+                temp = Total_Installed_Capacity_Out.copy()
+                Total_Installed_Capacity_Out = []
+                for scen in self.Scenarios[1:]:
+                    sub_df = temp[temp.index.str.endswith(scen)]
+                    sub_df.index = sub_df.index.str.split(":").str[0]
+                    Total_Installed_Capacity_Out.append(sub_df)
             fig, ax = mplt.get_figure()
 
-            mplt.barplot(
-                Total_Installed_Capacity_Out, color=self.marmot_color_dict, stacked=True
-            )
+            n = 0
+            while n < len(self.Scenarios) - 1:
 
-            ax.set_ylabel(
-                (
-                    f"Capacity Change ({unitconversion['units']}) \n "
-                    f"relative to {scen_base}"
-                ),
-                color="black",
-                rotation="vertical",
-            )
+                mplt.barplot(
+                    Total_Installed_Capacity_Out[n], sub_pos = n, color=self.marmot_color_dict, stacked=True
+                )
+
+                ax[n].axhline(y=0, linewidth=0.5, linestyle="--", color="grey")
+                ax[n].margins(x=0.01)
+
+                if scenario_groupby == "Scenario":
+                    ax[n].set_ylabel(f"Capacity Change ({unitconversion['units']}) \n "
+                                    f"relative to {self.Scenarios[0]}", color = "black", rotation = "vertical")
+                    n = len(self.Scenarios)
+                else:
+                    ax[n].set_xlabel(self.Scenarios[n+1])
+                    ax[n].set_ylabel(f"Capacity Change ({unitconversion['units']}) \n "
+                                    f"relative to {self.Scenarios[0]}", color = "black", rotation="vertical")
+                    n += 1
 
             mplt.add_legend(reverse_legend=True)
             if plot_data_settings["plot_title_as_region"]:
@@ -702,7 +724,7 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
                 if include_batteries:
                     installed_capacity = self.add_battery_gen_to_df(
                         installed_capacity, scenario, zone_input,
-                        battery_prop="Generation_Capacity"
+                        battery_prop="batterie_Generation_Capacity"
                     )
 
                 if pd.notna(start_date_range):

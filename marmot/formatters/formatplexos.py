@@ -509,7 +509,6 @@ class ProcessPLEXOS(Process):
         df = df.merge(
             self.metadata.generator_category(model_name), how="left", on="gen_name"
         )
-
         # merging in generator region/zones first prevents double
         # counting in cases where multiple model regions are within a reserve region
         if self.metadata.region_generators(model_name).empty is False:
@@ -522,7 +521,6 @@ class ProcessPLEXOS(Process):
             df = df.merge(
                 self.metadata.zone_generators(model_name), how="left", on="gen_name"
             )
-
         # now merge in reserve regions/zones
         if self.metadata.reserves_regions(model_name).empty is False:
             # Merges in regions where reserves are located
@@ -538,7 +536,44 @@ class ProcessPLEXOS(Process):
                 how="left",
                 on=["parent", "zone"],
             )
+        df_col = list(df.columns)
+        df_col.remove(0)
+        df_col.insert(0, df_col.pop(df_col.index("timestamp")))
+        df.set_index(df_col, inplace=True)
+        df[0] = pd.to_numeric(df[0], downcast="float")
+        return df
+    
+    def df_process_reserves_batteries(
+        self, df: pd.DataFrame, model_name: str
+    ) -> pd.DataFrame:
+        """Format PLEXOS Reserve_Batteries Relational Class data.
 
+        Args:
+            df (pd.DataFrame): h5plexos dataframe to process
+            model_name (str): name of h5plexos h5 file being processed
+
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
+        """
+        df = df.droplevel(level=["band", "property"])
+        df.index.rename(["battery_name"], level=["child"], inplace=True)
+        df = df.reset_index()  # unzip the levels in index
+
+        # merging in battery region/zones first prevents double
+        # counting in cases where multiple model regions are within a reserve region
+        df = df.merge(
+                self.metadata.region_batteries(model_name),
+                how="left",
+                on="battery_name",
+        )
+        # now merge in reserve regions/zones
+        if self.metadata.reserves_regions(model_name).empty is False:
+            # Merges in regions where reserves are located
+            df = df.merge(
+                self.metadata.reserves_regions(model_name),
+                how="left",
+                # on=["parent", "region"],
+            )
         df_col = list(df.columns)
         df_col.remove(0)
         df_col.insert(0, df_col.pop(df_col.index("timestamp")))

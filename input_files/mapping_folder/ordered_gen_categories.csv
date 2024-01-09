@@ -5,7 +5,7 @@ Gas-CC,,,,TRUE,
 Gas-CC CCS,,,,TRUE,
 Gas-CT,,,,TRUE,
 Gas,,,,TRUE,
-Landfill gas,,,,TRUE,
+Landfill gas,,TRUE,,TRUE,
 Gas-Steam,,,,TRUE,
 Dual Fuel,,,,TRUE,
 DualFuel,,,,TRUE,
@@ -14,13 +14,18 @@ Oil/Gas,,,,TRUE,
 Oil,,,,TRUE,
 Hydro,,TRUE,,,
 Hydropower,,TRUE,,,
+Hydro_dam,,TRUE,,,
+Hydro_runofriver,,TRUE,,,
 Ocean,,TRUE,,,
-Geothermal,,TRUE,,,
-Biomass,,TRUE,,,
-Biopower,,TRUE,,,
+Geothermal,,TRUE,,TRUE,
+Biomass,,TRUE,,TRUE,
+Biopower,,TRUE,,TRUE,
 Other,,,,,
 VRE,TRUE,TRUE,,,
 Wind,TRUE,TRUE,,,
+Wind-offshore,TRUE,TRUE,,,
+Land-based wind,TRUE,TRUE,,,
+Wind-onshore,TRUE,TRUE,,,
 Offshore Wind,TRUE,TRUE,,,
 OffshoreWind,TRUE,TRUE,,,
 Solar,TRUE,TRUE,TRUE,,
@@ -28,11 +33,11 @@ PV,TRUE,TRUE,TRUE,,
 dPV,TRUE,TRUE,TRUE,,
 CSP,,TRUE,,,
 PV-Battery,,TRUE,TRUE,,TRUE
-Battery,,,,,TRUE
+Battery,,TRUE,,,TRUE
 OSW-Battery,,,,,TRUE
 PHS,,,,,TRUE
 Tidal,,TRUE,,,
-Storage,,,,,TRUE
+Storage,,TRUE,,,TRUE
 Storage discharge,,,,,TRUE
 Battery discharge,,,,,TRUE
 Net Imports,,,,,

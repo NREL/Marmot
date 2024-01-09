@@ -153,6 +153,7 @@ Gas CC_ERCOT,Gas-CC
 2024_dpv,dPV
 Hydro,Hydro
 SynchCond,Other
+Land-based wind,Wind
 Wind,Wind
 ReEDS_canada,Net Imports
 ReEDS_wind-ofs,Wind

@@ -332,6 +332,8 @@ class GenerationStack(PlotDataStoreAndProcessor):
                 - Peak RE
                 - Peak Unserved Energy
                 - Peak Curtailment
+                - Min RE
+                - Peak Thermal
 
                 Defaults to None.
             start (float, optional): Used in conjunction with the prop argument.
@@ -401,6 +403,7 @@ class GenerationStack(PlotDataStoreAndProcessor):
 
             mplt = PlotLibrary(nrows, ncols, sharey=True, squeeze=False, ravel_axs=True)
             fig, axs = mplt.get_figure()
+            mplt.add_facet_labels(xlabels = self.Scenarios)
 
             plt.subplots_adjust(wspace=0.05, hspace=0.5)
 
@@ -515,6 +518,7 @@ class GenerationStack(PlotDataStoreAndProcessor):
                         re_gen_cat=self.gen_categories.re,
                         gen_cols=stacked_gen_df.columns,
                         ibr_gen_cat = self.gen_categories.vre + self.gen_categories.storage,
+                        thermal_gen_cat = self.gen_categories.thermal,
                     )
 
                     if x_time_value is not None and len(stacked_gen_df) > 1:
