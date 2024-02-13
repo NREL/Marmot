@@ -36,9 +36,6 @@ plot_data_settings: dict = mconfig.parser("plot_data")
 xdimension: int = mconfig.parser("figure_size", "xdimension")
 ydimension: int = mconfig.parser("figure_size", "ydimension")
 
-gen_names_dict = pd.read_csv('/Users/mschwarz/Marmot_local/Marmot/input_files/mapping_folder/gen_names_Standard.csv')
-gen_names_dict = gen_names_dict.set_index(gen_names_dict.columns[0]).squeeze().to_dict()
-
 # self = CapacityFactor(
 #     Zones = ['USA'],
 #     AGG_BY = 'Country',
