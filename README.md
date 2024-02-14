@@ -27,11 +27,11 @@ For detailed Installation Instruction see the docs at: https://nrel.github.io/Ma
 
 - To install the latest version 
 ``` 
-git clone --recurse-submodules https://github.com/NREL/Marmot.git --branch v0.9.0
+git clone --recurse-submodules https://github.com/NREL/Marmot.git
 ```
 (Make sure to include `--recurse-submodules` else h5plexos will not be included correctly)
 
-- Marmot includes a [conda environment](marmot-env10.yml) and [requirements.txt](requirements.txt) file to ensure all dependencies are available.
+- Marmot includes a [conda environment for linux users](marmot-linux.yml) and [requirements.txt](requirements.txt) file to ensure all dependencies are available. Users are advised to begin by trying the requirements.txt as current best practice.
 
 
 ## Documentation
