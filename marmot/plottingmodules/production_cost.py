@@ -33,6 +33,51 @@ plot_data_settings: dict = mconfig.parser("plot_data")
 logger = logging.getLogger("plotter." + __name__)
 include_batteries: bool = mconfig.parser("plot_data","include_explicit_battery_objects")
 inflation_adder = mconfig.parser("formatter_settings", "inflation_adder")
+discount_rate = mconfig.parser("formatter_settings", "discount_rate")
+
+cost_color_dict = {
+    "Fuel":"#1F77B4",
+    "FO&M":"#FF7F0E",
+    "VO&M":"#2CA02C",
+    "Running Cost":"#D62728",
+    "Start & Shutdown":"#9467BD",
+    "Reserves VO&M":"#FFC000",
+    "Non-Renewable Capacity":"#8C564B",
+    "Renewable Purchases":"#E377C2",
+    "Spur Line":"#7F7F7F",
+    "Fuel Storage":"#BCBD22",
+    "Battery Storage Purchases":"#17BECF",
+    "Scheduling & Communications":"#FC0388"
+}
+
+hardcoded_costs = { # nested list order = storage, spur line, fuel; 2021 dollars
+    "Year-Scenario":{
+        "Reference":[[0,0,0,0,0,0,342000,627000,1045000,1083000,1577000,1805000,1824000,1824000,1843000,2071000,2603000],
+                     [0,0,27500,82500,102300,102300,102300,102300,102300,102300,102300,225500,247500,283800,306900,432300,597300],
+                     [0,0,69399,157601,210045,408058,546080,597807,429342,507843,344717,374854,406772,392594,399595,420658,436982]],
+        "RPS":[
+                [0,0,0,0,0,0,361000,665000,1083000,1102000,1615000,1824000,1843000,1862000,1900000,1938000,2356000],
+                [0,0,27500,82500,123200,123200,123200,123200,123200,123200,123200,225500,250800,284900,314600,479600,644600],
+                [0,0,69399,157601,210045,408058,546080,597807,429342,516916,350818,374801,398615,390494,395424,410097,425138]
+        ],
+        "Reference_highREcost":[
+                [0,0,0,0,0,0,209000,494000,912000,950000,1444000,1596000,1653000,1653000,1653000,1919000,2432000],
+                [0,0,0,0,0,0,0,0,0,0,0,165000,240900,282700,298100,336600,399300],
+                [0,0,69260,157049,207832,400398,530713,585103,416990,493312,333828,362805,393127,377492,384283,403903,419450],
+        ],
+        "Reference_lowREcost":[
+                [0,0,0,0,0,0,418000,779000,1121000,1197000,1672000,1900000,1957000,1957000,1957000,2014000,2413000],
+                [0,0,27500,82500,85800,85800,85800,85800,85800,85800,85800,119900,127600,161700,250800,415800,580800],
+                [0,0,69399,159177,211726,412546,549684,603546,432334,513871,357366,391200,422473,401176,407350,416117,430948],
+        ],
+    },
+    "Scenario":{#skipping NPV version for now since NPV charts now calculated separately
+        #"Reference":[],
+        #"RPS":[],
+        #"Reference_highREcost":[],
+        #"Reference_lowREcost":[],
+    },
+}
 
 
 # gen_names_dict = pd.read_csv('/Users/mschwarz/Marmot_local/Marmot/input_files/mapping_folder/gen_names.csv')
@@ -624,6 +669,8 @@ class SystemCosts(PlotDataStoreAndProcessor):
                     if detailed_gen_cost.empty is True:
                         logger.warning("No Generation in selected Date Range")
                         continue
+                start_year = min(detailed_gen_cost.index.get_level_values("timestamp").year)
+                end_year = max(detailed_gen_cost.index.get_level_values("timestamp").year)
                 detailed_gen_cost = self.year_scenario_grouper(
                         detailed_gen_cost, scenario, groupby=scenario_groupby
                 ).sum()
@@ -638,6 +685,20 @@ class SystemCosts(PlotDataStoreAndProcessor):
                 except:
                     print("dPV Fuel Storage missing")
                 detailed_gen_cost.drop(["Production Tax Credit"], axis= "columns", inplace = True)
+
+                extra_cost = 1.5 #1.5 million/year $2023
+                comms_start_year = 2026 #adder introduced 2026 onwards
+                df = pd.DataFrame(list(range(start_year, end_year+1)), columns = ["Year"])
+                df["values"] = extra_cost
+                df.loc[df["Year"] < comms_start_year, "values"] = 0
+                if "NoNewRE" in scenario:
+                    df["values"] = 0
+                if scenario_groupby == "Scenario": #convert to NPV
+                    df["values"] = df["values"] / (1 + discount_rate)**(df["Year"] - start_year) 
+                    extra_cost = df["values"].sum()
+                    detailed_gen_cost["Scheduling & Communications"] = extra_cost
+                else:
+                    detailed_gen_cost["Scheduling & Communications"] = list(df["values"])                        
 
                 # Delete columns that are all 0
                 detailed_gen_cost = detailed_gen_cost.loc[
@@ -661,7 +722,8 @@ class SystemCosts(PlotDataStoreAndProcessor):
                     detailed_gen_cost,
                     stacked = True,
                     custom_tick_labels=tick_labels, 
-                    sub_pos=i
+                    sub_pos=i,
+                    color = cost_color_dict,
                 )
                 axs[i].axhline(y=0, color = "grey", linewidth = 0.5, linestyle = "--")
 
@@ -764,6 +826,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
             (False, "generator_Renewable_Purchases", self.Scenarios),
             (False, "generator_UoS_Cost", self.Scenarios),
             (False, "generator_Annualized_One_Time_Cost", self.Scenarios),
+            (False, "generator_Substation_Upgrade_Cost", self.Scenarios),
             (False, "generator_Annualized_Fuel_Storage_Cost", self.Scenarios),
             (False, "generator_dPV_Fuel_Storage_Cost", self.Scenarios),
             (False, "batterie_Annualized_Build_Cost", self.Scenarios),
@@ -781,6 +844,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
                         "generator_Renewable_Purchases":"Renewable Purchases",
                         "generator_UoS_Cost":"Production Tax Credit",
                         "generator_Annualized_One_Time_Cost":"Spur Line",
+                        "generator_Substation_Upgrade_Cost":"Substation Upgrade",
                         "generator_Annualized_Fuel_Storage_Cost":"Fuel Storage",
                         "generator_dPV_Fuel_Storage_Cost":"dPV Fuel Storage",
                         "batterie_Annualized_Build_Cost":"Battery Storage Purchases",
@@ -841,11 +905,25 @@ class SystemCosts(PlotDataStoreAndProcessor):
                     if detailed_gen_cost.empty is True:
                         logger.warning("No Generation in selected Date Range")
                         continue
+                start_year = min(detailed_gen_cost.index.get_level_values("timestamp").year)
+                end_year = max(detailed_gen_cost.index.get_level_values("timestamp").year)
 
-                gen_cost_out_chunks.append(
-                    self.year_scenario_grouper(
+                detailed_gen_cost = self.year_scenario_grouper(
                         detailed_gen_cost, scenario, groupby=scenario_groupby
                     ).sum()
+
+                # ADD HARD CODED DATA IN HERE FOR THAT SCENARIO IF AVAILABLE
+                if scenario in hardcoded_costs[scenario_groupby].keys():
+                    print("IN LOOP: ", scenario, " SCENARIO")
+                    print(detailed_gen_cost[["Battery Storage Purchases", "Spur Line", "Fuel"]])
+                    detailed_gen_cost["Battery Storage Purchases"] += hardcoded_costs[scenario_groupby][scenario][0]
+                    detailed_gen_cost["Spur Line"] += hardcoded_costs[scenario_groupby][scenario][1]
+                    detailed_gen_cost["Fuel"] += hardcoded_costs[scenario_groupby][scenario][2]
+                    print("AFTER: ")
+                    print(detailed_gen_cost[["Battery Storage Purchases", "Spur Line", "Fuel"]])
+                
+                gen_cost_out_chunks.append(
+                    detailed_gen_cost
                 )
 
             # Checks if gen_cost_out_chunks contains data,
@@ -875,7 +953,25 @@ class SystemCosts(PlotDataStoreAndProcessor):
                 detailed_gen_cost_out.drop(["dPV Fuel Storage"], axis= "columns", inplace = True)
             except:
                 print("dPV Fuel Storage missing")
+            try:
+                detailed_gen_cost_out["Spur Line"] = detailed_gen_cost_out["Spur Line"] + detailed_gen_cost_out["Substation Upgrade"]
+                detailed_gen_cost_out.drop(["Substation Upgrade"], axis= "columns", inplace = True)
+            except:
+                print("Substation Upgrade cost missing")
             detailed_gen_cost_out.drop(["Production Tax Credit"], axis= "columns", inplace = True)
+
+            extra_cost = 1.5 #1.5 million/year $2023
+            comms_start_year = 2026 #adder introduced 2026 onwards
+            df = pd.DataFrame(list(range(start_year, end_year+1)), columns = ["Year"])
+            df["values"] = extra_cost
+            df.loc[df["Year"] < comms_start_year, "values"] = 0
+            if scenario_groupby == "Scenario": #convert to NPV
+                df["values"] = df["values"] / (1 + discount_rate)**(df["Year"] - start_year) 
+                extra_cost = df["values"].sum()
+                detailed_gen_cost_out["Scheduling & Communications"] = extra_cost
+            else:
+                detailed_gen_cost_out["Scheduling & Communications"] = list(df["values"]) * len(self.Scenarios)
+            detailed_gen_cost_out.loc[detailed_gen_cost_out.index.str.contains("NoNewRE"),"Scheduling & Communications"] = 0
         
             # Deletes columns that are all 0
             detailed_gen_cost_out = detailed_gen_cost_out.loc[
@@ -921,7 +1017,8 @@ class SystemCosts(PlotDataStoreAndProcessor):
                     tick_labels = detailed_gen_cost_out[n].index
 
                 mplt.barplot(
-                    detailed_gen_cost_out[n], sub_pos = n, stacked=True, custom_tick_labels=tick_labels
+                    detailed_gen_cost_out[n], sub_pos = n, stacked=True, custom_tick_labels=tick_labels,
+                    color = cost_color_dict,
                 )
                 ax[n].axhline(y=0, color = "grey", linewidth = 0.5, linestyle = "--")
 
@@ -1475,6 +1572,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
             (False, "generator_Renewable_Purchases", self.Scenarios),
             (False, "generator_UoS_Cost", self.Scenarios),
             (False, "generator_Annualized_One_Time_Cost", self.Scenarios),
+            (False, "generator_Substation_Upgrade_Cost", self.Scenarios),
             (False, "generator_Annualized_Fuel_Storage_Cost", self.Scenarios),
             (False, "generator_dPV_Fuel_Storage_Cost", self.Scenarios),
             (False, "batterie_Annualized_Build_Cost", self.Scenarios),
@@ -1492,6 +1590,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
                         "generator_Renewable_Purchases":"Renewable Purchases",
                         "generator_UoS_Cost":"Production Tax Credit",
                         "generator_Annualized_One_Time_Cost":"Spur Line",
+                        "generator_Substation_Upgrade_Cost":"Substation Upgrade",
                         "generator_Annualized_Fuel_Storage_Cost":"Fuel Storage",
                         "generator_dPV_Fuel_Storage_Cost":"dPV Fuel Storage",
                         "batterie_Annualized_Build_Cost":"Battery Storage Purchases",
@@ -1552,11 +1651,41 @@ class SystemCosts(PlotDataStoreAndProcessor):
                     if detailed_gen_cost.empty is True:
                         logger.warning("No Generation in selected Date Range")
                         continue
+                
+                start_year = min(detailed_gen_cost.index.get_level_values("timestamp").year)
+                end_year = max(detailed_gen_cost.index.get_level_values("timestamp").year)
+
+                gen_cost_out = self.year_scenario_grouper(
+                                    detailed_gen_cost, scenario, groupby=scenario_groupby
+                                ).sum()
+                
+                # ADD HARDCODED DATA IN HERE - PRINT WARNING MESSAGE 
+                if scenario in hardcoded_costs[scenario_groupby].keys():
+                    print("IN LOOP: ", scenario, " SCENARIO")
+                    print(gen_cost_out[["Battery Storage Purchases", "Spur Line", "Fuel"]])
+                    gen_cost_out["Battery Storage Purchases"] += hardcoded_costs[scenario_groupby][scenario][0]
+                    gen_cost_out["Spur Line"] += hardcoded_costs[scenario_groupby][scenario][1]
+                    gen_cost_out["Fuel"] += hardcoded_costs[scenario_groupby][scenario][2]
+                    print("AFTER: ")
+                    print(gen_cost_out[["Battery Storage Purchases", "Spur Line", "Fuel"]])
+                gen_cost_out = gen_cost_out / 1000000 * inflation_adder
+
+                extra_cost = 1.5 #1.5 million/year $2023
+                comms_start_year = 2026 #adder introduced 2026 onwards
+                df = pd.DataFrame(list(range(start_year, end_year+1)), columns = ["Year"])
+                df["values"] = extra_cost
+                df.loc[df["Year"] < comms_start_year, "values"] = 0
+                if "NoNewRE" in scenario:
+                    df["values"] = 0
+                if scenario_groupby == "Scenario": #convert to NPV
+                    df["values"] = df["values"] / (1 + discount_rate)**(df["Year"] - start_year) 
+                    extra_cost = df["values"].sum()
+                    gen_cost_out["Scheduling & Communications"] = extra_cost
+                else:
+                    gen_cost_out["Scheduling & Communications"] = list(df["values"]) 
 
                 gen_cost_out_chunks.append(
-                    self.year_scenario_grouper(
-                        detailed_gen_cost, scenario, groupby=scenario_groupby
-                    ).sum()
+                    gen_cost_out
                 )
 
             # Checks if gen_cost_out_chunks contains data, if not skips zone and does
@@ -1569,10 +1698,10 @@ class SystemCosts(PlotDataStoreAndProcessor):
                 # Change to a diff on first scenario
                 # Convert cost to millions and account for inflation
                 #scen_base = total_systems_cost_out.index[0]
-                scen_base = gen_cost_out_chunks[0] / 1000000 * inflation_adder
+                scen_base = gen_cost_out_chunks[0] #/ 1000000 * inflation_adder
                 diff_gen_cost_out_chunks = []
                 for scen in gen_cost_out_chunks[1:]:
-                    scen = scen/1000000 * inflation_adder
+                    #scen = scen/1000000 * inflation_adder
                     diff_scen = scen.sub(scen_base.values, axis='columns')
                     diff_scen = -1*diff_scen
                     diff_gen_cost_out_chunks.append(diff_scen)
@@ -1603,6 +1732,11 @@ class SystemCosts(PlotDataStoreAndProcessor):
                 detailed_gen_cost_out.drop(["dPV Fuel Storage"], axis= "columns", inplace = True)
             except:
                 print("dPV Fuel Storage missing")
+            try:
+                detailed_gen_cost_out["Spur Line"] = detailed_gen_cost_out["Spur Line"] + detailed_gen_cost_out["Substation Upgrade"]
+                detailed_gen_cost_out.drop(["Substation Upgrade"], axis= "columns", inplace = True)
+            except:
+                print("Substation Upgrade missing")
             detailed_gen_cost_out.drop(["Production Tax Credit"], axis= "columns", inplace = True)
 
             # Deletes columns that are all 0
@@ -1637,7 +1771,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
             n = 0
             while n < len(self.Scenarios)-1:
 
-                mplt.barplot(detailed_gen_cost_out[n], sub_pos = n, stacked=True)
+                mplt.barplot(detailed_gen_cost_out[n], sub_pos = n, stacked=True,color = cost_color_dict,)
 
                 ax[n].axhline(y=0, linewidth=0.5, linestyle="--", color="grey")
 
@@ -1700,7 +1834,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
             dict: Dictionary containing the created plot and its data table.
         """
         outputs: dict = {}
-
+        print("UPDATE THIS PLOT WITH SCHEDULING AND COMMUNICATIONS COST")
         # List of properties needed by the plot, properties are a set of tuples and
         # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
@@ -1863,7 +1997,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
         Returns:
             dict: Dictionary containing the created plot and its data table.
         """
-
+        print("UPDATE THIS PLOT WITH SCHEDULING AND COMMUNICATIONS COST")
         # Define conversion factor (e.g., convert $/MWh savings to customer annual bill savings or to cents/kWh generation)
         #conversion_factor = 6.562273 # $/MWh -> $/year residential bill savings
         #units = "$"

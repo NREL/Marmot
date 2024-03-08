@@ -365,10 +365,14 @@ class Reserves(PlotDataStoreAndProcessor):
                 reserve_provision_timeseries = self[
                     "reserves_generators_Provision"
                 ].get(scenario)
-
+                
                 reserve_risk_timeseries = self[
                     "reserve_Risk"
                 ].get(scenario)
+                # Remove down reserves
+                reserve_provision_timeseries = reserve_provision_timeseries[~reserve_provision_timeseries.index.get_level_values("parent").str.lower().str.contains("down")]
+                reserve_risk_timeseries = reserve_risk_timeseries[~reserve_risk_timeseries.index.get_level_values("parent").str.lower().str.contains("down")]
+                
                 # Check if zone has reserves, if not skips
                 try:
                     reserve_provision_timeseries = reserve_provision_timeseries.xs(

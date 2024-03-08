@@ -541,6 +541,9 @@ class PlotDataStoreAndProcessor(dict):
         if battery_gen.empty is True:
             logger.info(f"No Battery {battery_prop} in selected Date Range")
         else:
+            if "reserves" in battery_prop: # remove down reserves
+                battery_gen = battery_gen[~battery_gen.index.get_level_values("parent").str.lower().str.contains("down")]
+
             if shift_leapday:
                 battery_gen = adjust_for_leapday(battery_gen)
 

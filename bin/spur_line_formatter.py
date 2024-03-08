@@ -9,6 +9,7 @@ wind_itc_multiplier = 100000 #$/MW in fuel storage costs
 wind_ptc_multiplier = 60000 #$/MW in fuel storage costs
 
 spur_line_cost_factor = 9.821 #$/kW/km
+substation_upgrade_factor = 2300 #$2021/MW of solar and wind
 
 from pathlib import Path
 
@@ -89,9 +90,10 @@ def main():
         except:
             print("generator_Build_Cost not found in formatted solutions file: ", scenario_formatted_path)
 
-        #open capacity build data
+        #open capacity build and installed capacity data
         try:
             cap_built = pd.read_hdf(scenario_formatted_path,"generator_Capacity_Built");
+            cap_installed = pd.read_hdf(scenario_formatted_path, "generator_Installed_Capacity");
         except:
             print("generator_Capacity_Built not found in formatted solutions file: ",scenario_formatted_path)
 
@@ -162,6 +164,13 @@ def main():
         otc.rename({"One_Time_Cost":"values"},axis=1, inplace = True)
         fuel_storage.rename(columns = {"Fuel Storage Cost":"values"}, inplace=True)
 
+        # ADD EXTRA SPUR (SUBSTATION) COSTS
+        existing_gens = list(set(cap_installed.loc[(cap_installed.index.get_level_values(level=0).year == 2024) & (cap_installed["values"] > 0)].index.get_level_values(level=2)))
+        cap_installed.loc[cap_installed.index.get_level_values(level=2).isin(existing_gens)] *= 0
+        cap_installed.loc[cap_installed.index.get_level_values(level=1).isin(["Land-based wind","PV"])] *= substation_upgrade_factor
+        cap_installed.loc[~cap_installed.index.get_level_values(level=1).isin(["Land-based wind","PV"])] *= 0
+        cap_installed.index = cap_installed.index.set_levels(cap_installed.index.levels[6].str.replace("MW","$"), level=6)
+        dataio.save_to_h5(cap_installed, scenario_formatted_path, key="generator_Substation_Upgrade_Cost",)
         #EXPORT BACK TO H5 FILE
         dataio.save_to_h5(cap_cost_new, scenario_formatted_path, key="generator_Build_Cost",)
         dataio.save_to_h5(otc, scenario_formatted_path, key="generator_One_Time_Cost",)
@@ -212,9 +221,10 @@ def main():
         # all renewable costs get lumped into renewable puchase cost (all non-re get broken out as before)
         costs_to_split = ["generator_Fuel_Cost","generator_FOM_Cost","generator_VOM_Cost",
                  "generator_Start_and_Shutdown_Cost", "generator_Annualized_Build_Cost",
-                 "generator_Total_Generation_Cost",]
-                # "generator_Reserves_VOM_Cost" and "generator_Emissions_Cost" not included in model
-                 # "generator_UoS_Cost", "generator_Annualized_One_Time_Cost","batterie_Annualized_Build_Cost" do not need to be split
+                 "generator_Total_Generation_Cost", ]
+                # "generator_Emissions_Cost" not included in model
+                # "generator_Reserves_VOM_Cost" not to be split
+                # "generator_UoS_Cost", "generator_Annualized_One_Time_Cost","batterie_Annualized_Build_Cost" do not need to be split
         
         re_costs = []
         re_npv_costs = []

@@ -475,7 +475,7 @@ class SetupSubplot:
             return None
 
         ax.annotate(
-            f"{prop}: \n{str(format(y_mw_value, '.2f'))} {energy_unit}",
+            f"{prop}: \n{str(format(y_mw_value, '.0f'))} {energy_unit}",
             xy=(x_time_value, y_point_value),
             xytext=(0.05, 1.0),
             textcoords="axes fraction",
