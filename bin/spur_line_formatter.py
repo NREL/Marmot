@@ -8,7 +8,7 @@ PV_ptc_multiplier = 39000 #$/MW in fuel storage costs
 wind_itc_multiplier = 100000 #$/MW in fuel storage costs
 wind_ptc_multiplier = 60000 #$/MW in fuel storage costs
 
-spur_line_cost_factor = 9.821 #$/kW/km
+spur_line_cost_factor = 9.821 #$2021/kW/km
 substation_upgrade_factor = 2300 #$2021/MW of solar and wind
 
 from pathlib import Path

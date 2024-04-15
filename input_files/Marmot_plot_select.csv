@@ -60,7 +60,7 @@ Node_Price_Histogram_Difference,FALSE,"101,202",,,,,,,,,,prices,node_price_hist_
 Detailed_Total_Generation_Cost,FALSE,,,,,,2020,2040,,Scenario,,production_cost,detailed_gen_cost
 Detailed_Total_Generation_Cost_by_year,TRUE,,,,,,2020,2040,,Year-Scenario,,production_cost,detailed_gen_cost
 Detailed_Total_Generation_Cost_Diff,FALSE,,,,,,2020,2040,,Scenario,,production_cost,detailed_gen_cost_diff
-Detailed_Total_Generation_Cost_Diff_by_year,TRUE,,,,,,2020,2040,,Year-Scenario,,production_cost,detailed_gen_cost_diff
+Detailed_Total_Generation_Cost_Diff_by_year,FALSE,,,,,,2020,2040,,Year-Scenario,,production_cost,detailed_gen_cost_diff
 Production_Cost,FALSE,,,,,,,,,,,production_cost,prod_cost
 Total_System_Cost,FALSE,,,,,,,,,Scenario,,production_cost,sys_cost
 Total_System_Cost_by_year,FALSE,,,,,,,,,Year-Scenario,,production_cost,sys_cost
