@@ -35,13 +35,13 @@ loggers:
   formatter:
     level: INFO
     handlers: [console,warning_handler,info_handler]
-    propagate: yes
+    propagate: no
 
   plotter:
     level: INFO
     handlers: [console,warning_handler,info_handler]
-    propagate: yes
+    propagate: no
 
   root:
     level: DEBUG
-    handlers: [console]
+    handlers: []

@@ -1,12 +1,15 @@
 Original,New
 ReEDS_battery_2,battery_2
 ReEDS_battery_4,battery_4
+New Capacity - Extra 4 hr Batteries,battery_4
+battery_4,battery_4
 ReEDS_battery_6,battery_6
 ReEDS_battery_8,battery_8
 ReEDS_battery_10,battery_10
 ReEDS_battery,battery
 ReEDS_storage-h2,storage-h2
 ReEDS_can-imports,Canada
+can-imports,Canada
 ReEDS_distpv,distpv
 ReEDS_dupv,dupv
 ReEDS_geothermal,geothermal
@@ -33,6 +36,7 @@ coalolduns,coal
 cofirenew,coal
 gas-cc,gas-cc
 gas-ct,gas-ct
+New Capacity - Extra Gas CTs,gas-ct
 lfill-gas,biopower
 nuclear,nuclear
 o-g-s,o-g-s
@@ -51,9 +55,21 @@ distpv,distpv
 dupv,dupv
 geothermal,geothermal
 hydro,hydro
+hydud,hydro
+hydend,hydro
+hyded,hydro
+Cascading Hydro,hydro
+Cascading Hydro Tailwater Effects,hydro
+Cascading Hydro Scenario Generators,hydro
+hydnpnd,hydro
+hydund,hydro
+hydnd,hydro
+wind-ons,onswind
+wind-ofs,ofswind
 ofswind,ofswind
 onswind,onswind
 phs,phs
+pumped-hydro,phs
 pvb,pvb
 csp-ns,csp-ns
 pvb-storage,pvb-storage

@@ -70,14 +70,14 @@ class SetupLogger:
             "formatter": {
                 "level": "INFO",
                 "handlers": ["console", "warning_handler", "info_handler"],
-                "propagate": True,
+                "propagate": False,
             },
             "plotter": {
                 "level": "INFO",
                 "handlers": ["console", "warning_handler", "info_handler"],
-                "propagate": True,
+                "propagate": False,
             },
-            "root": {"level": "DEBUG", "handlers": ["console"]},
+            "root": {"level": "DEBUG", "handlers": []},
         },
     }
     """Default log config if LOG_CONFIG_FILE cannot be found"""
