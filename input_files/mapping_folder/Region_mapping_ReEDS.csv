@@ -1,6 +1,7 @@
 region,State,country,Country,BA
 p01,WA,USA,USA,NorthernGrid
 p1,WA,USA,USA,NorthernGrid
+p01,WA,USA,USA,NorthernGrid
 p10,CA,USA,USA,CAISO
 p100,VA,USA,USA,PJM
 p101,FL,USA,USA,FRCC
@@ -48,6 +49,7 @@ p18,MT,USA,USA,NorthernGrid
 p19,MT,USA,USA,NorthernGrid
 p02,WA,USA,USA,NorthernGrid
 p2,WA,USA,USA,NorthernGrid
+p02,WA,USA,USA,NorthernGrid
 p20,MT,USA,USA,NorthernGrid
 p21,WY,USA,USA,NorthernGrid
 p22,WY,USA,USA,NorthernGrid
@@ -72,6 +74,7 @@ p38,SD,USA,USA,SPP
 p39,NE,USA,USA,SPP
 p04,WA,USA,USA,NorthernGrid
 p4,WA,USA,USA,NorthernGrid
+p04,WA,USA,USA,NorthernGrid
 p40,NE,USA,USA,SPP
 p41,NE,USA,USA,SPP
 p42,MN,USA,USA,MISO
@@ -84,6 +87,7 @@ p48,TX,USA,USA,SPP
 p49,OK,USA,USA,SPP
 p05,OR,USA,USA,NorthernGrid
 p5,OR,USA,USA,NorthernGrid
+p05,OR,USA,USA,NorthernGrid
 p50,OK,USA,USA,SPP
 p51,OK,USA,USA,SPP
 p52,KS,USA,USA,SPP
@@ -96,6 +100,7 @@ p58,LA,USA,USA,MISO
 p59,TX,USA,USA,WestConnect
 p06,OR,USA,USA,NorthernGrid
 p6,OR,USA,USA,NorthernGrid
+p06,OR,USA,USA,NorthernGrid
 p60,TX,USA,USA,ERCOT
 p61,TX,USA,USA,ERCOT
 p62,TX,USA,USA,ERCOT
@@ -120,6 +125,7 @@ p78,WI,USA,USA,MISO
 p79,WI,USA,USA,MISO
 p08,CA,USA,USA,NorthernGrid
 p8,CA,USA,USA,NorthernGrid
+p08,CA,USA,USA,NorthernGrid
 p80,IL,USA,USA,PJM
 p81,IL,USA,USA,MISO
 p82,IL,USA,USA,MISO
