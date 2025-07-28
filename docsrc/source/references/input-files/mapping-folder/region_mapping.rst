@@ -24,6 +24,9 @@ and create plots for *USA* and *Canada*
 
 The custom aggregations are merged into the data during formatting.
 
+WARNING: Ensure your region mapping csv has no duplicate rows. This will cause an error in the formatter similar to 
+``ValueError: Unequal code lengths: [753672, 753672, 753672, 753672, 753672, 842208, 842208, 842208, 842208]``
+
 Input Example
 --------------
 

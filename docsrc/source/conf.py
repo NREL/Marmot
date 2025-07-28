@@ -53,8 +53,7 @@ extensions = [
     "sphinx.ext.napoleon",
     'sphinx_click.ext',
     "sphinx.ext.autosectionlabel",
-    "sphinx_panels",
-    ]
+    "sphinx_design"]
 
 intersphinx_mapping = {
     "dateutil": ("https://dateutil.readthedocs.io/en/latest/", None),
@@ -98,7 +97,7 @@ html_css_files = [
     'css/custom.css',
 ]
 
-html4_writer=True
+#html4_writer=True
 
 html_theme_options = {
     'collapse_navigation': False,
