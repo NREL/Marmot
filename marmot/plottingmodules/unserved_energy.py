@@ -437,7 +437,7 @@ class UnservedEnergy(PlotDataStoreAndProcessor):
                         )
                     # reset index to datetime
                     unserved_energy_scen.index = pd.date_range(
-                        "2024-01-01", periods=24, freq="H"
+                        "2012-01-01", periods=24, freq="h"
                     )
                     unserved_energy_scen.rename(columns={"values": scen}, inplace=True)
                     chunks.append(unserved_energy_scen)

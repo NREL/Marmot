@@ -302,7 +302,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
         # scenarios must be a list.
         properties = [
             (True, "generator_Total_Generation_Cost", self.Scenarios),
-            (True, "generator_Build_Cost", self.Scenarios),
+            (False, "generator_Build_Cost", self.Scenarios),
             (False, f"{agg}_Cost_Unserved_Energy", self.Scenarios),
         ]
 
