@@ -609,10 +609,23 @@ class SetupSubplot:
         else:
             skip_ylabels = False
 
-        for ax in all_axes:
+        for i, ax in enumerate(all_axes):
             if not skip_xlabels:
+                # Check if method exists, otherwise use index-based logic
+                if hasattr(ax, 'is_last_row'):
+                    is_last_row = ax.is_last_row()
+                else:
+                    # Fallback: assume single row or check geometry
+                    is_last_row = True
+                    
+                if hasattr(ax, 'is_first_row'):
+                    is_first_row = ax.is_first_row()
+                else:
+                    # Fallback: assume single row or check geometry
+                    is_first_row = True
+                    
                 if xlabels_bottom:
-                    if ax.is_last_row():
+                    if is_last_row:
                         try:
                             ax.set_xlabel(
                                 xlabel=(xlabels[j]),
@@ -625,7 +638,7 @@ class SetupSubplot:
                             pass
                         j = j + 1
                 else:
-                    if ax.is_first_row():
+                    if is_first_row:
                         try:
                             ax.set_xlabel(
                                 xlabel=(xlabels[j]),
@@ -640,7 +653,14 @@ class SetupSubplot:
                         j = j + 1
 
             if not skip_ylabels:
-                if ax.is_first_col():
+                # Check if method exists, otherwise use index-based logic
+                if hasattr(ax, 'is_first_col'):
+                    is_first_col = ax.is_first_col()
+                else:
+                    # Fallback: assume single column or check geometry
+                    is_first_col = True
+                    
+                if is_first_col:
                     try:
                         ax.set_ylabel(
                             ylabel=(ylabels[k]),

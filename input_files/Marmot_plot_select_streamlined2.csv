@@ -1,7 +1,7 @@
 ﻿Figure Output Name,Plot Graph,Plot Property,Y-Axis Max,Day Before,Day After,Timezone,Start date,End date,Timeseries Plot Resolution,Group by Scenario or Year-Scenario,Custom Data File,Marmot Module,Method
-Capacity_Factor,FALSE,,,,,EST,,,,Scenario,,capacity_factor,cf
-Total_Emissions_By_Gen_Type_CO2,FALSE,co2,,,,,,,,Scenario,,emissions,total_emissions_by_type
-Stacked_Gen,TRUE,,,,,EST,,,Interval,,,generation_stack,gen_stack
-Detailed_Total_Generation_Cost,TRUE,,,,,,,,,Scenario,,production_cost,detailed_gen_cost
-Total_Generation,TRUE,,,,,,,,,Scenario,,total_generation,total_gen
-Total_Installed_Capacity,TRUE,,,,,,,,,Scenario,,total_installed_capacity,total_cap
+Stacked_Gen,TRUE,,,,,EST,8/11/2012,8/16/2012,Interval,,,generation_stack,gen_stack
+Stacked_Gen_Peak_Demand,FALSE,Peak Demand,,3,3,EST,,,Interval,,,generation_stack,gen_stack
+Detailed_Total_Generation_Cost,FALSE,,,,,,,,,Scenario,,production_cost,detailed_gen_cost
+Detailed_Total_Generation_Cost_Diff,FALSE,,,,,,,,,Scenario,,production_cost,detailed_gen_cost_diff
+Total_Generation,FALSE,,,,,,,,,Scenario,,total_generation,total_gen
+Total_Generation_Diff,FALSE,,,,,,,,,Scenario,,total_generation,total_gen_diff
