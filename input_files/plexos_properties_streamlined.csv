@@ -14,7 +14,7 @@ interval,generator,Pump Price Paid,FALSE,The price a storage generator pays to c
 interval,generator,Ramp Down Price,FALSE,The marginal price the system would pay for addition down-ramping capability.
 interval,generator,Ramp Up Price,FALSE,The marginal price the system would pay for addition up-ramping capability.
 interval,generator,Reserves Revenue,FALSE,Revenue from providing reserves by generator and timestep.
-interval,generator,SRMC,FALSE,The marginal cost for a generator to provide an additional MW of power.
+interval,generator,SRMC,TRUE,The marginal cost for a generator to provide an additional MW of power.
 interval,generator,Units Started,TRUE,The number of units in a specified plant started during the time period.
 interval,generator,Units Shutdown,TRUE,The number of units in a specified plant shutdown during the time period.
 interval,generator,Start & Shutdown Cost,TRUE,The amount spent starting and stopping generators by timestep.

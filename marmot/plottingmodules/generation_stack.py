@@ -616,11 +616,12 @@ class GenerationStack(PlotDataStoreAndProcessor):
             mplt.remove_excess_axs(excess_axs, grid_size)
             # Add title
             if plot_data_settings["plot_title_as_region"]:
-                mplt.add_main_title(zone_input)
+                mplt.add_main_title("Washington State")
+                #mplt.add_main_title(zone_input)
 
             # Ylabel should change if there are facet labels, leave at 40 for now,
             # works for all values in spacing
-            labelpad = 40
+            labelpad = 10
             if data_resolution == "_Annual":
                 plt.ylabel(
                     f"Annual Generation ({unitconversion['units']}h)",

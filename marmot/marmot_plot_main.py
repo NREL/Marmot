@@ -615,8 +615,8 @@ class MarmotPlot(SetupLogger):
 
             # Import plot module from plottingmodules package
             plot_module = importlib.import_module("marmot.plottingmodules." + module)
+            
             # Instantiate the module class
-
             class_name = getattr(plot_module, Module_CLASS_MAPPING[module])
             instantiate_mplot = class_name(*argument_list, **argument_dict)
             # Create output folder for each plotting module

@@ -73,3 +73,17 @@ pumped-hydro,phs
 pvb,pvb
 csp-ns,csp-ns
 pvb-storage,pvb-storage
+dupv,dPV
+onswind,Onshore Wind
+caes,Compressed Air Storage
+battery_10,Battery Storage
+battery_8,Battery Storage
+distpv,dPV
+csp,CSP
+coal,Coal
+gas-ct,Gas-CT
+gas-cc-ccs,Gas-CC CCS
+,
+,
+,
+,

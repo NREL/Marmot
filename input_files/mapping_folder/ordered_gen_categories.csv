@@ -3,6 +3,7 @@ Nuclear,,,,TRUE,
 Coal,,,,TRUE,
 Gas-CC,,,,TRUE,
 Gas-CC CCS,,,,TRUE,
+Gas-CC CCS-flex,,,,TRUE,
 Gas-CT,,,,TRUE,
 Gas,,,,TRUE,
 Landfill gas,,,,TRUE,
@@ -13,30 +14,33 @@ Oil-Gas-Steam,,,,TRUE,
 Oil/Gas,,,,TRUE,
 Oil,,,,TRUE,
 Hydro,,TRUE,,,
-Hydropower,,TRUE,,,
+MidC Hydro,,TRUE,,,
 Ocean,,TRUE,,,
 Geothermal,,TRUE,,,
 Biomass,,TRUE,,,
 Biopower,,TRUE,,,
 Other,,,,,
 VRE,TRUE,TRUE,,,
-Wind,TRUE,TRUE,,,
+Onshore Wind,TRUE,TRUE,,,
 Offshore Wind,TRUE,TRUE,,,
 OffshoreWind,TRUE,TRUE,,,
 Solar,TRUE,TRUE,TRUE,,
 PV,TRUE,TRUE,TRUE,,
 dPV,TRUE,TRUE,TRUE,,
 CSP,,TRUE,,,
-PV-Battery,,TRUE,TRUE,,TRUE
-Battery,,,,,TRUE
-OSW-Battery,,,,,TRUE
-PHS,,,,,TRUE
 Tidal,,TRUE,,,
+PV-Battery,,TRUE,TRUE,,TRUE
+Battery Storage,,,,,TRUE
+Battery,,,,,TRUE
+Pumped Hydro,,,,,TRUE
+Compressed Air Storage,,,,,TRUE
 Storage,,,,,TRUE
+OSW-Battery,,,,,TRUE
 Storage discharge,,,,,TRUE
 Battery discharge,,,,,TRUE
 Net Imports,,,,,
+Canadian Imports,,,,,
 Curtailment,,,,,
 curtailment,,,,,
 Demand,,,,,
-Deamand + Storage Charging,,,,,
+Demand + Storage Charging,,,,,

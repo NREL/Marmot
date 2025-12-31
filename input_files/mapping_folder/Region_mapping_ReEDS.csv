@@ -1,144 +1,146 @@
-region,State,country,Country,BA
-p1,WA,USA,USA,NorthernGrid
-p01,WA,USA,USA,NorthernGrid
-p10,CA,USA,USA,CAISO
-p100,VA,USA,USA,PJM
-p101,FL,USA,USA,FRCC
-p102,FL,USA,USA,FRCC
-p103,MI,USA,USA,MISO
-p104,MI,USA,USA,PJM
-p105,IN,USA,USA,MISO
-p106,IN,USA,USA,MISO
-p107,IN,USA,USA,MISO
-p108,KY,USA,USA,MISO
-p109,KY,USA,USA,PJM
-p11,CA,USA,USA,CAISO
-p110,KY,USA,USA,PJM
-p111,OH,USA,USA,PJM
-p112,OH,USA,USA,PJM
-p113,OH,USA,USA,PJM
-p114,OH,USA,USA,PJM
-p115,PA,USA,USA,PJM
-p116,WV,USA,USA,PJM
-p117,WV,USA,USA,PJM
-p118,VA,USA,USA,PJM
-p119,PA,USA,USA,PJM
-p12,NV,USA,USA,NorthernGrid
-p120,PA,USA,USA,PJM
-p121,MD,USA,USA,PJM
-p122,PA,USA,USA,PJM
-p123,MD,USA,USA,PJM
-p124,VA,USA,USA,PJM
-p125,DE,USA,USA,PJM
-p126,NJ,USA,USA,PJM
-p127,NY,USA,USA,NYISO
-p128,NY,USA,USA,NYISO
-p129,VT,USA,USA,ISONE
-p13,NV,USA,USA,NorthernGrid
-p130,NH,USA,USA,ISONE
-p131,MA,USA,USA,ISONE
-p132,CT,USA,USA,ISONE
-p133,RI,USA,USA,ISONE
-p134,ME,USA,USA,ISONE
-p14,ID,USA,USA,NorthernGrid
-p15,ID,USA,USA,NorthernGrid
-p16,ID,USA,USA,NorthernGrid
-p17,MT,USA,USA,NorthernGrid
-p18,MT,USA,USA,NorthernGrid
-p19,MT,USA,USA,NorthernGrid
-p2,WA,USA,USA,NorthernGrid
-p02,WA,USA,USA,NorthernGrid
-p20,MT,USA,USA,NorthernGrid
-p21,WY,USA,USA,NorthernGrid
-p22,WY,USA,USA,NorthernGrid
-p23,WY,USA,USA,WestConnect
-p24,WY,USA,USA,WestConnect
-p25,UT,USA,USA,NorthernGrid
-p26,UT,USA,USA,NorthernGrid
-p27,AZ,USA,USA,WestConnect
-p28,AZ,USA,USA,WestConnect
-p29,AZ,USA,USA,WestConnect
-p03,WA,USA,USA,NorthernGrid
-p3,WA,USA,USA,NorthernGrid
-p30,AZ,USA,USA,WestConnect
-p31,NM,USA,USA,WestConnect
-p32,SD,USA,USA,WestConnect
-p33,CO,USA,USA,WestConnect
-p34,CO,USA,USA,WestConnect
-p35,MT,USA,USA,SPP
-p36,ND,USA,USA,SPP
-p37,ND,USA,USA,MISO
-p38,SD,USA,USA,SPP
-p39,NE,USA,USA,SPP
-p4,WA,USA,USA,NorthernGrid
-p04,WA,USA,USA,NorthernGrid
-p40,NE,USA,USA,SPP
-p41,NE,USA,USA,SPP
-p42,MN,USA,USA,MISO
-p43,MN,USA,USA,MISO
-p44,MN,USA,USA,MISO
-p45,IA,USA,USA,MISO
-p46,WI,USA,USA,MISO
-p47,NM,USA,USA,SPP
-p48,TX,USA,USA,SPP
-p49,OK,USA,USA,SPP
-p5,OR,USA,USA,NorthernGrid
-p05,OR,USA,USA,NorthernGrid
-p50,OK,USA,USA,SPP
-p51,OK,USA,USA,SPP
-p52,KS,USA,USA,SPP
-p53,KS,USA,USA,SPP
-p54,MO,USA,USA,SPP
-p55,MO,USA,USA,SPP
-p56,AR,USA,USA,SPP
-p57,TX,USA,USA,SPP
-p58,LA,USA,USA,MISO
-p59,TX,USA,USA,WestConnect
-p6,OR,USA,USA,NorthernGrid
-p06,OR,USA,USA,NorthernGrid
-p60,TX,USA,USA,ERCOT
-p61,TX,USA,USA,ERCOT
-p62,TX,USA,USA,ERCOT
-p63,TX,USA,USA,ERCOT
-p64,TX,USA,USA,ERCOT
-p65,TX,USA,USA,ERCOT
-p66,TX,USA,USA,MISO
-p67,TX,USA,USA,ERCOT
-p68,MN,USA,USA,MISO
-p69,IA,USA,USA,MISO
-p07,OR,USA,USA,NorthernGrid
-p7,OR,USA,USA,NorthernGrid
-p70,IA,USA,USA,MISO
-p71,MO,USA,USA,MISO
-p72,MO,USA,USA,MISO
-p73,MO,USA,USA,MISO
-p74,MI,USA,USA,MISO
-p75,WI,USA,USA,MISO
-p76,WI,USA,USA,MISO
-p77,WI,USA,USA,MISO
-p78,WI,USA,USA,MISO
-p79,WI,USA,USA,MISO
-p8,CA,USA,USA,NorthernGrid
-p08,CA,USA,USA,NorthernGrid
-p80,IL,USA,USA,PJM
-p81,IL,USA,USA,MISO
-p82,IL,USA,USA,MISO
-p83,IL,USA,USA,MISO
-p84,MO,USA,USA,MISO
-p85,AR,USA,USA,MISO
-p86,LA,USA,USA,MISO
-p87,MS,USA,USA,MISO
-p88,MS,USA,USA,SERTP
-p89,AL,USA,USA,SERTP
-p09,CA,USA,USA,CAISO
-p9,CA,USA,USA,CAISO
-p90,AL,USA,USA,SERTP
-p91,FL,USA,USA,SERTP
-p92,TN,USA,USA,SERTP
-p93,KY,USA,USA,SERTP
-p94,GA,USA,USA,SERTP
-p95,SC,USA,USA,SERTP
-p96,SC,USA,USA,SERTP
-p97,NC,USA,USA,SERTP
-p98,NC,USA,USA,SERTP
-p99,VA,USA,USA,PJM
+region,State,country,Country,BA,Interconnection real,Interconnection
+p99,VA,USA,USA,PJM,Eastern Interconnection,Western Interconnection
+p98,NC,USA,USA,SERTP,Eastern Interconnection,Western Interconnection
+p97,NC,USA,USA,SERTP,Eastern Interconnection,Western Interconnection
+p96,SC,USA,USA,SERTP,Eastern Interconnection,Western Interconnection
+p95,SC,USA,USA,SERTP,Eastern Interconnection,Western Interconnection
+p94,GA,USA,USA,SERTP,Eastern Interconnection,Western Interconnection
+p93,KY,USA,USA,SERTP,Eastern Interconnection,Western Interconnection
+p92,TN,USA,USA,SERTP,Eastern Interconnection,Western Interconnection
+p91,FL,USA,USA,SERTP,Eastern Interconnection,Western Interconnection
+p90,AL,USA,USA,SERTP,Eastern Interconnection,Western Interconnection
+p9,CA,USA,USA,CAISO,Western Interconnection,Western Interconnection
+p89,AL,USA,USA,SERTP,Eastern Interconnection,Western Interconnection
+p88,MS,USA,USA,SERTP,Eastern Interconnection,Western Interconnection
+p87,MS,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p86,LA,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p85,AR,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p84,MO,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p83,IL,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p82,IL,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p81,IL,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p80,IL,USA,USA,PJM,Eastern Interconnection,Western Interconnection
+p8,CA,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p79,WI,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p78,WI,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p77,WI,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p76,WI,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p75,WI,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p74,MI,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p73,MO,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p72,MO,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p71,MO,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p70,IA,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p7,OR,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p69,IA,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p68,MN,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p67,TX,USA,USA,ERCOT,Texas Interconnection,Western Interconnection
+p66,TX,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p65,TX,USA,USA,ERCOT,Texas Interconnection,Western Interconnection
+p64,TX,USA,USA,ERCOT,Texas Interconnection,Western Interconnection
+p63,TX,USA,USA,ERCOT,Texas Interconnection,Western Interconnection
+p62,TX,USA,USA,ERCOT,Texas Interconnection,Western Interconnection
+p61,TX,USA,USA,ERCOT,Texas Interconnection,Western Interconnection
+p60,TX,USA,USA,ERCOT,Texas Interconnection,Western Interconnection
+p6,OR,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p59,TX,USA,USA,WestConnect,Texas Interconnection,Western Interconnection
+p58,LA,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p57,TX,USA,USA,SPP,Eastern Interconnection,Western Interconnection
+p56,AR,USA,USA,SPP,Eastern Interconnection,Western Interconnection
+p55,MO,USA,USA,SPP,Eastern Interconnection,Western Interconnection
+p54,MO,USA,USA,SPP,Eastern Interconnection,Western Interconnection
+p53,KS,USA,USA,SPP,Eastern Interconnection,Western Interconnection
+p52,KS,USA,USA,SPP,Eastern Interconnection,Western Interconnection
+p51,OK,USA,USA,SPP,Eastern Interconnection,Western Interconnection
+p50,OK,USA,USA,SPP,Eastern Interconnection,Western Interconnection
+p5,OR,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p49,OK,USA,USA,SPP,Eastern Interconnection,Western Interconnection
+p48,TX,USA,USA,SPP,Eastern Interconnection,Western Interconnection
+p47,NM,USA,USA,SPP,Western Interconnection,Western Interconnection
+p46,WI,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p45,IA,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p44,MN,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p43,MN,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p42,MN,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p41,NE,USA,USA,SPP,Eastern Interconnection,Western Interconnection
+p40,NE,USA,USA,SPP,Eastern Interconnection,Western Interconnection
+p4,WA,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p39,NE,USA,USA,SPP,Eastern Interconnection,Western Interconnection
+p38,SD,USA,USA,SPP,Eastern Interconnection,Western Interconnection
+p37,ND,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p36,ND,USA,USA,SPP,Eastern Interconnection,Western Interconnection
+p35,MT,USA,USA,SPP,Western Interconnection,Western Interconnection
+p34,CO,USA,USA,WestConnect,Western Interconnection,Western Interconnection
+p33,CO,USA,USA,WestConnect,Western Interconnection,Western Interconnection
+p32,SD,USA,USA,WestConnect,Eastern Interconnection,Western Interconnection
+p31,NM,USA,USA,WestConnect,Western Interconnection,Western Interconnection
+p30,AZ,USA,USA,WestConnect,Western Interconnection,Western Interconnection
+p3,WA,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p29,AZ,USA,USA,WestConnect,Western Interconnection,Western Interconnection
+p28,AZ,USA,USA,WestConnect,Western Interconnection,Western Interconnection
+p27,AZ,USA,USA,WestConnect,Western Interconnection,Western Interconnection
+p26,UT,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p25,UT,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p24,WY,USA,USA,WestConnect,Western Interconnection,Western Interconnection
+p23,WY,USA,USA,WestConnect,Western Interconnection,Western Interconnection
+p22,WY,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p21,WY,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p20,MT,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p2,WA,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p19,MT,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p18,MT,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p17,MT,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p16,ID,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p15,ID,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p14,ID,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p134,ME,USA,USA,ISONE,Eastern Interconnection,Western Interconnection
+p133,RI,USA,USA,ISONE,Eastern Interconnection,Western Interconnection
+p132,CT,USA,USA,ISONE,Eastern Interconnection,Western Interconnection
+p131,MA,USA,USA,ISONE,Eastern Interconnection,Western Interconnection
+p130,NH,USA,USA,ISONE,Eastern Interconnection,Western Interconnection
+p13,NV,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p129,VT,USA,USA,ISONE,Eastern Interconnection,Western Interconnection
+p128,NY,USA,USA,NYISO,Eastern Interconnection,Western Interconnection
+p127,NY,USA,USA,NYISO,Eastern Interconnection,Western Interconnection
+p126,NJ,USA,USA,PJM,Eastern Interconnection,Western Interconnection
+p125,DE,USA,USA,PJM,Eastern Interconnection,Western Interconnection
+p124,VA,USA,USA,PJM,Eastern Interconnection,Western Interconnection
+p123,MD,USA,USA,PJM,Eastern Interconnection,Western Interconnection
+p122,PA,USA,USA,PJM,Eastern Interconnection,Western Interconnection
+p121,MD,USA,USA,PJM,Eastern Interconnection,Western Interconnection
+p120,PA,USA,USA,PJM,Eastern Interconnection,Western Interconnection
+p12,NV,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p119,PA,USA,USA,PJM,Eastern Interconnection,Western Interconnection
+p118,VA,USA,USA,PJM,Eastern Interconnection,Western Interconnection
+p117,WV,USA,USA,PJM,Eastern Interconnection,Western Interconnection
+p116,WV,USA,USA,PJM,Eastern Interconnection,Western Interconnection
+p115,PA,USA,USA,PJM,Eastern Interconnection,Western Interconnection
+p114,OH,USA,USA,PJM,Eastern Interconnection,Western Interconnection
+p113,OH,USA,USA,PJM,Eastern Interconnection,Western Interconnection
+p112,OH,USA,USA,PJM,Eastern Interconnection,Western Interconnection
+p111,OH,USA,USA,PJM,Eastern Interconnection,Western Interconnection
+p110,KY,USA,USA,PJM,Eastern Interconnection,Western Interconnection
+p11,CA,USA,USA,CAISO,Western Interconnection,Western Interconnection
+p109,KY,USA,USA,PJM,Eastern Interconnection,Western Interconnection
+p108,KY,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p107,IN,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p106,IN,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p105,IN,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p104,MI,USA,USA,PJM,Eastern Interconnection,Western Interconnection
+p103,MI,USA,USA,MISO,Eastern Interconnection,Western Interconnection
+p102,FL,USA,USA,FRCC,Eastern Interconnection,Western Interconnection
+p101,FL,USA,USA,FRCC,Eastern Interconnection,Western Interconnection
+p100,VA,USA,USA,PJM,Eastern Interconnection,Western Interconnection
+p10,CA,USA,USA,CAISO,Western Interconnection,Western Interconnection
+p1,WA,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p09,CA,USA,USA,CAISO,Western Interconnection,Western Interconnection
+p08,CA,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p07,OR,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p06,OR,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p05,OR,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p04,WA,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p03,WA,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p02,WA,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+p01,WA,USA,USA,NorthernGrid,Western Interconnection,Western Interconnection
+,,,,,,
+,,,,,,

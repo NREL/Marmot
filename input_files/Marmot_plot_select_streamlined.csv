@@ -20,7 +20,7 @@ Detailed_Total_Generation_Cost_Diff_by_year,FALSE,,,,,,,,,Year-Scenario,,product
 Total_Generation,FALSE,,,,,,,,,Scenario,,total_generation,total_gen
 Total_Generation_by_year,FALSE,,,,,,,,,Year-Scenario,,total_generation,total_gen
 Total_Generation_Monthly,FALSE,,,,,EST,1/2/40,2040,,,,total_generation,total_gen_monthly
-Total_Generation_Diff,TRUE,,,,,,,,,Scenario,,total_generation,total_gen_diff
+Total_Generation_Diff,FALSE,,,,,,,,,Scenario,,total_generation,total_gen_diff
 Total_Generation_Diff_by_year,FALSE,,,,,,,,,Year-Scenario,,total_generation,total_gen_diff
 Total_Installed_Capacity,FALSE,,,,,,2035,2035,,Scenario,,total_installed_capacity,total_cap
 Total_Installed_Capacity_Diff,FALSE,,,,,,,,,Scenario,,total_installed_capacity,total_cap_diff
@@ -35,3 +35,5 @@ Zonal_Interchange,FALSE,,,,,,,,,,,transmission,zonal_interchange
 Zonal_Interchange_duration_curve,FALSE,,,,,,,,,,,transmission,zonal_interchange
 Zonal_Interchange_Total,FALSE,,,,,,,,,,,transmission,zonal_interchange_total
 Total_Unserved_Energy,FALSE,,,,,,,,,Scenario,,unserved_energy,tot_unserved_energy
+Short_Run_Marginal_Cost,TRUE,,,,,,,,,,,SRMC,SRMC
+,,,,,,,,,,,,,
