@@ -60,7 +60,7 @@ Module_CLASS_MAPPING = {
     "transmission": "Transmission",
     "unserved_energy": "UnservedEnergy",
     "utilization_factor": "UtilizationFactor",
-    "SRMC": "SRMC",
+    "quick_view": "QuickView",
 }
 
 INCORRECT_ENTRY_POINT = (

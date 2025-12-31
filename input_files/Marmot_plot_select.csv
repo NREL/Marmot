@@ -132,7 +132,7 @@ Region-Region_Net_Interchange,FALSE,,,,,EST,,,,,,transmission,region_region_inte
 total_interface_flow_individual,FALSE,"Interface-1-2,Interface-3-2",,,,,,,,,,transmission,total_int_flow_ind
 Zonal_Interchange,FALSE,,,,,,,,,,,transmission,zonal_interchange
 Zonal_Interchange_Total,FALSE,,,,,,,,,,,transmission,zonal_interchange_total
-Total_Unserved_Energy,TRUE,,,,,,,,,Scenario,,unserved_energy,tot_unserved_energy
+Total_Unserved_Energy,FALSE,,,,,,,,,Scenario,,unserved_energy,tot_unserved_energy
 Total_Unserved_Energy_by_year,FALSE,,,,,,,,,Year-Scenario,,unserved_energy,tot_unserved_energy
 Unserved_Energy_Timeseries,FALSE,,,,,EST,,,Interval,,,unserved_energy,unserved_energy_timeseries
 Unserved_Energy_Timeseries_annual,FALSE,,,,,EST,,,Annual,,,unserved_energy,unserved_energy_timeseries
@@ -142,5 +142,5 @@ Utilization_GW_Fleet,FALSE,,,,,,,,,,,utilization_factor,GW_fleet
 Utilization_Factor_Fleet,FALSE,,,,,EST,,,,,,utilization_factor,uf_fleet
 Utilization_Factor_Fleet_Type,FALSE,,,,,,,,,,,utilization_factor,uf_fleet_by_type
 Utilization_Factor_Generators,FALSE,,,,,EST,,,,,,utilization_factor,uf_gen
-,,,,,,,,,,,,,
+Pull Individual Table,TRUE,,,,,,,,,,,quick_view,quick_view
 ,,,,,,,,,,,,,

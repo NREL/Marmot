@@ -31,7 +31,7 @@ logger = logging.getLogger("plotter." + __name__)
 plot_data_settings: dict = mconfig.parser("plot_data")
 
 
-class SRMC(PlotDataStoreAndProcessor):
+class QuickView(PlotDataStoreAndProcessor):
 
     def __init__(
         self,
@@ -66,7 +66,7 @@ class SRMC(PlotDataStoreAndProcessor):
         self.custom_xticklabels = custom_xticklabels
         self.color_list = color_list
 
-    def SRMC(
+    def quick_view(
         self,
         start_date_range: str = None,
         end_date_range: str = None,
@@ -102,4 +102,5 @@ class SRMC(PlotDataStoreAndProcessor):
                     'generator_SRMC'
                 ].get(scenario)
                 SRMC = SRMC.xs(zone_input, level=self.AGG_BY)
-                SRMC.to_csv(f"/projects/midc/Grant/analysis/{scenario}_SRMC.csv")
+                print(SRMC.sort_values('values',ascending=False).head(20))
+                #SRMC.to_csv(f"/projects/midc/Grant/analysis/{scenario}_SRMC.csv")
