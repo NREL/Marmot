@@ -18,9 +18,9 @@ Oil-Gas-Steam,#52216B
 o-g-s,#52216B
 Hydro,#187F94
 hydro,#187F94
-MidC Hydro,Pink
+Mid Columbia Hydro,Pink
 Hydropower,#187F94
-Non MidC Hydro,#187F94
+Other Hydro,#187F94
 Tidal,#7FC340
 Ocean,#7FC340
 Geothermal,#A96235
@@ -32,10 +32,12 @@ VRE,#7FC340
 Wind,#00B6EF
 CSP,#FC761A
 PV,#FFC903
+Utility PV,#FFC903
 upv,#FFC903
 PV-Battery,#D1C202
 OSW-Battery,#9B014F
 dPV,#FFAB02
+Distributed PV,#FFAB02
 distpv,#FFAB02
 Battery,#FF4A88
 Storage,#FF4A88
